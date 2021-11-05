@@ -7,13 +7,14 @@ namespace SeeShark.Example
     {
         private static void Main(string[] args)
         {
-            if (args.Length < 1)
+            if (args.Length < 2)
             {
-                Console.WriteLine("Usage: dotnet run <camera-device>");
+                Console.WriteLine("Usage: dotnet run <camera-device> <output-file>");
                 return;
             }
 
             var cameraDevice = args[0];
+            var outputFilename = args[1];
 
             Console.WriteLine("Current directory: " + Environment.CurrentDirectory);
             Console.WriteLine("Running in {0}-bit mode.", Environment.Is64BitProcess ? "64" : "32");
@@ -27,7 +28,7 @@ namespace SeeShark.Example
             ConfigureHWDecoder(out var deviceType);
 
             Console.WriteLine("Decoding...");
-            DecodeAllFramesToImages(deviceType, cameraDevice);
+            DecodeAllFramesToImages(deviceType, cameraDevice, outputFilename);
         }
 
         private static void ConfigureHWDecoder(out AVHWDeviceType HWtype)
@@ -89,7 +90,7 @@ namespace SeeShark.Example
             ffmpeg.av_log_set_callback(logCallback);
         }
 
-        private static unsafe void DecodeAllFramesToImages(AVHWDeviceType HWDevice, string url)
+        private static unsafe void DecodeAllFramesToImages(AVHWDeviceType HWDevice, string url, string outputFilename)
         {
             using var decoder = new CameraStreamDecoder("v4l2", url, HWDevice);
 
@@ -109,19 +110,21 @@ namespace SeeShark.Example
                 width, height, dstPixelFormat
             );
 
-
-            byte_ptrArray4 dstData;
-            int_array4 dstLineSizes;
+            var dstData = new byte_ptrArray4();
+            var dstLineSizes = new int_array4();
             int bufferSize = ffmpeg.av_image_alloc(
                 ref dstData, ref dstLineSizes,
                 width, height, dstPixelFormat, 1).ThrowExceptionIfError();
+            
+            var outputStream = File.Create(outputFilename);
 
             var frameNumber = 0;
             while (decoder.TryDecodeNextFrame(out var frame))
             {
                 var cFrame = vfc.Convert(frame);
 
-
+                /*
+                // That may be a buffer overflow right there.
                 var srcData = new byte_ptrArray4();
                 var srcLineSizes = new int_array4();
                 srcData.UpdateFrom(cFrame.data);
@@ -130,23 +133,14 @@ namespace SeeShark.Example
                 ffmpeg.av_image_copy(
                     ref dstData, ref dstLineSizes,
                     ref srcData, srcLineSizes,
-                    srcPixelFormat, decoder.FrameWidth, decoder.FrameHeight);
+                    dstPixelFormat, width, height);
+                */
 
-                var span0 = new ReadOnlySpan<byte>(dstData[0], bufferSize);
+                var span0 = new ReadOnlySpan<byte>(cFrame.data[0], bufferSize);
+                outputStream.Write(span0);
 
                 Console.WriteLine($"frame: {frameNumber}");
                 frameNumber++;
-            }
-        }
-
-        private unsafe static void Write_BytePtrArray8_ToFile(byte_ptrArray8 data, string filename)
-        {
-            var stream = new BufferedStream(File.Create(filename));
-
-            var array = data.ToArray();
-            foreach (var el in array)
-            {
-
             }
         }
 
