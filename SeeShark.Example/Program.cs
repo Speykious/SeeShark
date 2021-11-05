@@ -105,7 +105,7 @@ namespace SeeShark.Example
             var dstPixelFormat = AVPixelFormat.AV_PIX_FMT_RGB24;
             var width = decoder.FrameWidth;
             var height = decoder.FrameHeight;
-            using var vfc = new VideoFrameConverter(
+            using var vfc = new FrameConverter(
                 width, height, srcPixelFormat,
                 width, height, dstPixelFormat
             );

@@ -1,10 +1,9 @@
-using System.Drawing;
 using System.Runtime.InteropServices;
 using FFmpeg.AutoGen;
 
-namespace SeeShark.Example
+namespace SeeShark
 {
-    public sealed unsafe class VideoFrameConverter : IDisposable
+    public sealed unsafe class FrameConverter : IDisposable
     {
         private readonly IntPtr convertedFrameBufferPtr;
         private readonly int dstWidth;
@@ -13,7 +12,7 @@ namespace SeeShark.Example
         private readonly int_array4 dstLinesize;
         private readonly SwsContext* pConvertContext;
 
-        public VideoFrameConverter(int srcWidth, int srcHeight, AVPixelFormat srcPixelFormat,
+        public FrameConverter(int srcWidth, int srcHeight, AVPixelFormat srcPixelFormat,
             int dstWidth, int dstHeight, AVPixelFormat dstPixelFormat)
         {
             this.dstWidth = dstWidth;
