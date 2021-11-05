@@ -3,7 +3,7 @@ using FFmpeg.AutoGen;
 
 namespace SeeShark
 {
-    internal static class FFmpegHelper
+    public static class FFmpegHelper
     {
         public static unsafe string? av_strerror(int error)
         {
