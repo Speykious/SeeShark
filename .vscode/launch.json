@@ -13,7 +13,7 @@
             "program": "${workspaceFolder}/SeeShark.Example/bin/Debug/net6.0/SeeShark.Example.dll",
             // Put your Linux camera device here, then the name of the raw output file.
             "args": ["/dev/video1", "raw_output.rgb24"],
-            "cwd": "${workspaceFolder}/SeeShark.Example",
+            "cwd": "${workspaceFolder}/SeeShark.Example/bin/Debug/net6.0",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "externalTerminal",
             "stopAtEntry": false
