@@ -123,19 +123,6 @@ namespace SeeShark.Example
             {
                 var cFrame = vfc.Convert(frame);
 
-                /*
-                // That may be a buffer overflow right there.
-                var srcData = new byte_ptrArray4();
-                var srcLineSizes = new int_array4();
-                srcData.UpdateFrom(cFrame.data);
-                srcLineSizes.UpdateFrom(cFrame.linesize);
-
-                ffmpeg.av_image_copy(
-                    ref dstData, ref dstLineSizes,
-                    ref srcData, srcLineSizes,
-                    dstPixelFormat, width, height);
-                */
-
                 var span0 = new ReadOnlySpan<byte>(cFrame.data[0], bufferSize);
                 outputStream.Write(span0);
 
