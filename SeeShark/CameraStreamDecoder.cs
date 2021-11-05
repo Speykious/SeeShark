@@ -1,4 +1,3 @@
-using System.Drawing;
 using System.Runtime.InteropServices;
 using FFmpeg.AutoGen;
 
@@ -40,7 +39,8 @@ namespace SeeShark
             ffmpeg.avcodec_open2(pCodecContext, codec, null).ThrowExceptionIfError();
 
             CodecName = ffmpeg.avcodec_get_name(codec->id);
-            FrameSize = new Size(pCodecContext->width, pCodecContext->height);
+            FrameWidth = pCodecContext->width;
+            FrameHeight = pCodecContext->height;
             PixelFormat = pCodecContext->pix_fmt;
 
             pPacket = ffmpeg.av_packet_alloc();
@@ -48,7 +48,8 @@ namespace SeeShark
         }
 
         public string CodecName { get; }
-        public Size FrameSize { get; }
+        public int FrameWidth { get; private set; }
+        public int FrameHeight { get; private set; }
         public AVPixelFormat PixelFormat { get; }
 
         public void Dispose()
