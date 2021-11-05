@@ -7,3 +7,5 @@
 When you SeeShark, you C#!
 
 Currently Work In Progress.
+
+State of the library: the `CameraStreamDecoder` class is now operational! Now a bunch of abstractions and encapsulation needs to be done for the library to be usable at all.
