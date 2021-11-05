@@ -80,7 +80,7 @@ namespace SeeShark.Example
                 var lineBuffer = stackalloc byte[lineSize];
                 var printPrefix = 1;
                 ffmpeg.av_log_format_line(p0, level, format, vl, lineBuffer, lineSize, &printPrefix);
-                var line = Marshal.PtrToStringAnsi((IntPtr) lineBuffer);
+                var line = Marshal.PtrToStringAnsi((IntPtr)lineBuffer);
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.Write(line);
                 Console.ResetColor();
@@ -91,35 +91,62 @@ namespace SeeShark.Example
 
         private static unsafe void DecodeAllFramesToImages(AVHWDeviceType HWDevice, string url)
         {
-            using var vsd = new CameraStreamDecoder("v4l2", url, HWDevice);
+            using var decoder = new CameraStreamDecoder("v4l2", url, HWDevice);
 
-            Console.WriteLine($"codec name: {vsd.CodecName}");
+            Console.WriteLine($"codec name: {decoder.CodecName}");
 
-            var info = vsd.GetContextInfo();
+            var info = decoder.GetContextInfo();
             info.ToList().ForEach(x => Console.WriteLine($"{x.Key} = {x.Value}"));
 
-            var sourcePixelFormat = HWDevice == AVHWDeviceType.AV_HWDEVICE_TYPE_NONE
-                ? vsd.PixelFormat
+            var srcPixelFormat = HWDevice == AVHWDeviceType.AV_HWDEVICE_TYPE_NONE
+                ? decoder.PixelFormat
                 : GetHWPixelFormat(HWDevice);
-            var destinationPixelFormat = AVPixelFormat.AV_PIX_FMT_RGB24;
+            var dstPixelFormat = AVPixelFormat.AV_PIX_FMT_RGB24;
+            var width = decoder.FrameWidth;
+            var height = decoder.FrameHeight;
             using var vfc = new VideoFrameConverter(
-                vsd.FrameWidth, vsd.FrameHeight, sourcePixelFormat,
-                vsd.FrameWidth, vsd.FrameHeight, destinationPixelFormat
+                width, height, srcPixelFormat,
+                width, height, dstPixelFormat
             );
 
+
+            byte_ptrArray4 dstData;
+            int_array4 dstLineSizes;
+            int bufferSize = ffmpeg.av_image_alloc(
+                ref dstData, ref dstLineSizes,
+                width, height, dstPixelFormat, 1).ThrowExceptionIfError();
+
             var frameNumber = 0;
-
-            while (vsd.TryDecodeNextFrame(out var frame))
+            while (decoder.TryDecodeNextFrame(out var frame))
             {
-                var convertedFrame = vfc.Convert(frame);
+                var cFrame = vfc.Convert(frame);
 
-                var a = convertedFrame.data.ToArray().Cast<byte[]>().ToArray();
-                
-                // At this point I do nothing and put a breakpoint to see if it casts.
-                // ... It doesn't :'(
+
+                var srcData = new byte_ptrArray4();
+                var srcLineSizes = new int_array4();
+                srcData.UpdateFrom(cFrame.data);
+                srcLineSizes.UpdateFrom(cFrame.linesize);
+
+                ffmpeg.av_image_copy(
+                    ref dstData, ref dstLineSizes,
+                    ref srcData, srcLineSizes,
+                    srcPixelFormat, decoder.FrameWidth, decoder.FrameHeight);
+
+                var span0 = new ReadOnlySpan<byte>(dstData[0], bufferSize);
 
                 Console.WriteLine($"frame: {frameNumber}");
                 frameNumber++;
+            }
+        }
+
+        private unsafe static void Write_BytePtrArray8_ToFile(byte_ptrArray8 data, string filename)
+        {
+            var stream = new BufferedStream(File.Create(filename));
+
+            var array = data.ToArray();
+            foreach (var el in array)
+            {
+
             }
         }
 
