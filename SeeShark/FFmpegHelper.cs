@@ -9,8 +9,8 @@ namespace SeeShark
         {
             var bufferSize = 1024;
             var buffer = stackalloc byte[bufferSize];
-            ffmpeg.av_strerror(error, buffer, (ulong) bufferSize);
-            var message = Marshal.PtrToStringAnsi((IntPtr) buffer);
+            ffmpeg.av_strerror(error, buffer, (ulong)bufferSize);
+            var message = Marshal.PtrToStringAnsi((IntPtr)buffer);
             return message;
         }
 

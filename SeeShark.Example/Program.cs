@@ -38,16 +38,16 @@ namespace SeeShark.Example
             var dstPixelFormat = AVPixelFormat.AV_PIX_FMT_RGB24;
             var width = decoder.FrameWidth;
             var height = decoder.FrameHeight;
-            
+
             using var vfc = new FrameConverter(width, height, srcPixelFormat, dstPixelFormat);
-            
+
             var outputStream = File.Create(outputFilename);
 
             for (int frameCount = 1; decoder.TryDecodeNextFrame(out var frame); frameCount++)
             {
                 var cFrame = vfc.Convert(frame);
                 var span0 = new ReadOnlySpan<byte>(cFrame.data[0], cFrame.linesize[0] * cFrame.height);
-                
+
                 // Only write one frame in the file.
                 outputStream.Seek(0, SeekOrigin.Begin);
                 outputStream.Write(span0);

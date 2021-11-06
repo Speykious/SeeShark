@@ -49,7 +49,7 @@ namespace SeeShark
 
             ffmpeg.av_image_fill_arrays(ref dstData,
                 ref dstLinesize,
-                (byte*) convertedFrameBufferPtr,
+                (byte*)convertedFrameBufferPtr,
                 dstPixelFormat,
                 dstWidth,
                 dstHeight,

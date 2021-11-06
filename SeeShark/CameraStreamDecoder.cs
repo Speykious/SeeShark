@@ -25,7 +25,7 @@ namespace SeeShark
         public CameraStreamDecoder(string formatShortName, string url, AVHWDeviceType HWDeviceType = AVHWDeviceType.AV_HWDEVICE_TYPE_NONE)
         {
             SetupFFmpeg();
-            
+
             var inputFormat = ffmpeg.av_find_input_format(formatShortName);
             this.formatContext = ffmpeg.avformat_alloc_context();
             var formatContext = this.formatContext;
