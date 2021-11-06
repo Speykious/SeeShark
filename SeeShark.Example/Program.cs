@@ -39,10 +39,7 @@ namespace SeeShark.Example
             var width = decoder.FrameWidth;
             var height = decoder.FrameHeight;
             
-            using var vfc = new FrameConverter(
-                width, height, srcPixelFormat,
-                width, height, dstPixelFormat
-            );
+            using var vfc = new FrameConverter(width, height, srcPixelFormat, dstPixelFormat);
             
             var outputStream = File.Create(outputFilename);
 

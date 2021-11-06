@@ -12,7 +12,14 @@ namespace SeeShark
         private readonly int_array4 dstLinesize;
         private readonly SwsContext* pConvertContext;
 
-        public FrameConverter(int srcWidth, int srcHeight, AVPixelFormat srcPixelFormat,
+        public FrameConverter(int width, int height,
+            AVPixelFormat srcPixelFormat, AVPixelFormat dstPixelFormat)
+        : this(width, height, srcPixelFormat, width, height, dstPixelFormat)
+        {
+        }
+
+        public FrameConverter(
+            int srcWidth, int srcHeight, AVPixelFormat srcPixelFormat,
             int dstWidth, int dstHeight, AVPixelFormat dstPixelFormat)
         {
             this.dstWidth = dstWidth;
