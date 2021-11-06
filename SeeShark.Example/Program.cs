@@ -35,7 +35,7 @@ namespace SeeShark.Example
                 Console.WriteLine($"{field.Key} = {field.Value}");
 
             var srcPixelFormat = decoder.PixelFormat;
-            var dstPixelFormat = AVPixelFormat.AV_PIX_FMT_RGB24;
+            var dstPixelFormat = PixelFormat.Rgb24;
             var width = decoder.FrameWidth;
             var height = decoder.FrameHeight;
 

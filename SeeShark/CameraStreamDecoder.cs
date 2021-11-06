@@ -20,7 +20,7 @@ namespace SeeShark
         public readonly string CodecName;
         public readonly int FrameWidth;
         public readonly int FrameHeight;
-        public readonly AVPixelFormat PixelFormat;
+        public readonly PixelFormat PixelFormat;
 
         public CameraStreamDecoder(string formatShortName, string url, HardwareAccelDevice hwAccelDevice)
         {
@@ -46,7 +46,7 @@ namespace SeeShark
             CodecName = ffmpeg.avcodec_get_name(codec->id);
             FrameWidth = codecContext->width;
             FrameHeight = codecContext->height;
-            PixelFormat = codecContext->pix_fmt;
+            PixelFormat = (PixelFormat)codecContext->pix_fmt;
 
             packet = ffmpeg.av_packet_alloc();
             frame = ffmpeg.av_frame_alloc();

@@ -6,71 +6,66 @@ namespace SeeShark
     public sealed unsafe class FrameConverter : IDisposable
     {
         private readonly IntPtr convertedFrameBufferPtr;
-        private readonly int dstWidth;
-        private readonly int dstHeight;
         private readonly byte_ptrArray4 dstData;
         private readonly int_array4 dstLinesize;
-        private readonly SwsContext* pConvertContext;
+        private readonly SwsContext* convertContext;
+        
+        public readonly int SrcWidth;
+        public readonly int SrcHeight;
+        public readonly int DstWidth;
+        public readonly int DstHeight;
+        public readonly PixelFormat SrcPixelFormat;
+        public readonly PixelFormat DstPixelFormat;
 
         public FrameConverter(int width, int height,
-            AVPixelFormat srcPixelFormat, AVPixelFormat dstPixelFormat)
+            PixelFormat srcPixelFormat, PixelFormat dstPixelFormat)
         : this(width, height, srcPixelFormat, width, height, dstPixelFormat)
         {
         }
 
         public FrameConverter(
-            int srcWidth, int srcHeight, AVPixelFormat srcPixelFormat,
-            int dstWidth, int dstHeight, AVPixelFormat dstPixelFormat)
+            int srcWidth, int srcHeight, PixelFormat srcPixelFormat,
+            int dstWidth, int dstHeight, PixelFormat dstPixelFormat)
         {
-            this.dstWidth = dstWidth;
-            this.dstHeight = dstHeight;
+            SrcWidth = srcWidth;
+            SrcHeight = srcHeight;
+            DstWidth = dstWidth;
+            DstHeight = dstHeight;
+            SrcPixelFormat = srcPixelFormat;
+            DstPixelFormat = dstPixelFormat;
 
-            pConvertContext = ffmpeg.sws_getContext(
-                srcWidth,
-                srcHeight,
-                srcPixelFormat,
-                dstWidth,
-                dstHeight,
-                dstPixelFormat,
+            var srcPF = (AVPixelFormat)srcPixelFormat;
+            var dstPF = (AVPixelFormat)dstPixelFormat;
+
+            convertContext = ffmpeg.sws_getContext(
+                srcWidth, srcHeight, srcPF,
+                dstWidth, dstHeight, dstPF,
                 ffmpeg.SWS_FAST_BILINEAR,
-                null,
-                null,
-                null);
-            if (pConvertContext == null)
+                null, null, null);
+
+            if (convertContext == null)
                 throw new ApplicationException("Could not initialize the conversion context.");
 
-            var convertedFrameBufferSize = ffmpeg.av_image_get_buffer_size(dstPixelFormat,
-                dstWidth,
-                dstHeight,
-                1);
+            var convertedFrameBufferSize = ffmpeg.av_image_get_buffer_size(dstPF, dstWidth, dstHeight, 1);
             convertedFrameBufferPtr = Marshal.AllocHGlobal(convertedFrameBufferSize);
             dstData = new byte_ptrArray4();
             dstLinesize = new int_array4();
 
-            ffmpeg.av_image_fill_arrays(ref dstData,
-                ref dstLinesize,
-                (byte*)convertedFrameBufferPtr,
-                dstPixelFormat,
-                dstWidth,
-                dstHeight,
-                1);
+            ffmpeg.av_image_fill_arrays(ref dstData, ref dstLinesize,
+                (byte*)convertedFrameBufferPtr, dstPF, dstWidth, dstHeight, 1);
         }
 
         public void Dispose()
         {
             Marshal.FreeHGlobal(convertedFrameBufferPtr);
-            ffmpeg.sws_freeContext(pConvertContext);
+            ffmpeg.sws_freeContext(convertContext);
         }
 
-        public AVFrame Convert(AVFrame sourceFrame)
+        public AVFrame Convert(AVFrame srcFrame)
         {
-            ffmpeg.sws_scale(pConvertContext,
-                sourceFrame.data,
-                sourceFrame.linesize,
-                0,
-                sourceFrame.height,
-                dstData,
-                dstLinesize);
+            ffmpeg.sws_scale(convertContext,
+                srcFrame.data, srcFrame.linesize, 0, srcFrame.height,
+                dstData, dstLinesize);
 
             var data = new byte_ptrArray8();
             data.UpdateFrom(dstData);
@@ -81,8 +76,8 @@ namespace SeeShark
             {
                 data = data,
                 linesize = linesize,
-                width = dstWidth,
-                height = dstHeight
+                width = DstWidth,
+                height = DstHeight
             };
         }
     }
