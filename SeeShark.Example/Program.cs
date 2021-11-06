@@ -21,10 +21,10 @@ namespace SeeShark.Example
             Console.WriteLine($"FFmpeg version info: {FFmpegVersion}");
 
             Console.WriteLine("Decoding...");
-            DecodeAllFramesToImages(cameraDevice, outputFilename);
+            ReadFrames(cameraDevice, outputFilename);
         }
 
-        private static unsafe void DecodeAllFramesToImages(string url, string outputFilename)
+        private static unsafe void ReadFrames(string url, string outputFilename)
         {
             using var decoder = new CameraStreamDecoder("v4l2", url, AVHWDeviceType.AV_HWDEVICE_TYPE_NONE);
 
@@ -46,16 +46,16 @@ namespace SeeShark.Example
             
             var outputStream = File.Create(outputFilename);
 
-            var frameNumber = 0;
-            while (decoder.TryDecodeNextFrame(out var frame))
+            for (int frameCount = 1; decoder.TryDecodeNextFrame(out var frame); frameCount++)
             {
                 var cFrame = vfc.Convert(frame);
-
                 var span0 = new ReadOnlySpan<byte>(cFrame.data[0], cFrame.linesize[0] * cFrame.height);
+                
+                // Only write one frame in the file.
+                outputStream.Seek(0, SeekOrigin.Begin);
                 outputStream.Write(span0);
 
-                Console.WriteLine($"frame: {frameNumber}");
-                frameNumber++;
+                Console.WriteLine($"Read {frameCount} frames");
             }
         }
     }
