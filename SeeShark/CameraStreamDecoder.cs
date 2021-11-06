@@ -22,7 +22,7 @@ namespace SeeShark
         public readonly int FrameHeight;
         public readonly AVPixelFormat PixelFormat;
 
-        public CameraStreamDecoder(string formatShortName, string url, AVHWDeviceType HWDeviceType = AVHWDeviceType.AV_HWDEVICE_TYPE_NONE)
+        public CameraStreamDecoder(string formatShortName, string url, HardwareAccelDevice hwAccelDevice)
         {
             SetupFFmpeg();
 
@@ -36,8 +36,8 @@ namespace SeeShark
                 .av_find_best_stream(formatContext, AVMediaType.AVMEDIA_TYPE_VIDEO, -1, -1, &codec, 0)
                 .ThrowExceptionIfError();
             codecContext = ffmpeg.avcodec_alloc_context3(codec);
-            if (HWDeviceType != AVHWDeviceType.AV_HWDEVICE_TYPE_NONE)
-                ffmpeg.av_hwdevice_ctx_create(&codecContext->hw_device_ctx, HWDeviceType, null, null, 0)
+            if (hwAccelDevice != HardwareAccelDevice.None)
+                ffmpeg.av_hwdevice_ctx_create(&codecContext->hw_device_ctx, (AVHWDeviceType)hwAccelDevice, null, null, 0)
                     .ThrowExceptionIfError();
             ffmpeg.avcodec_parameters_to_context(codecContext, formatContext->streams[streamIndex]->codecpar)
                 .ThrowExceptionIfError();

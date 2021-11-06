@@ -26,7 +26,7 @@ namespace SeeShark.Example
 
         private static unsafe void ReadFrames(string url, string outputFilename)
         {
-            using var decoder = new CameraStreamDecoder("v4l2", url, AVHWDeviceType.AV_HWDEVICE_TYPE_NONE);
+            using var decoder = new CameraStreamDecoder("v4l2", url, HardwareAccelDevice.None);
 
             Console.WriteLine($"Codec name: {decoder.CodecName}");
 
