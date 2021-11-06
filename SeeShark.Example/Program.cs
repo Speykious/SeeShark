@@ -28,25 +28,21 @@ namespace SeeShark.Example
         {
             using var decoder = new CameraStreamDecoder("v4l2", url, AVHWDeviceType.AV_HWDEVICE_TYPE_NONE);
 
-            Console.WriteLine($"codec name: {decoder.CodecName}");
+            Console.WriteLine($"Codec name: {decoder.CodecName}");
 
             var info = decoder.GetContextInfo();
-            info.ToList().ForEach(x => Console.WriteLine($"{x.Key} = {x.Value}"));
+            foreach (var field in info)
+                Console.WriteLine($"{field.Key} = {field.Value}");
 
             var srcPixelFormat = decoder.PixelFormat;
             var dstPixelFormat = AVPixelFormat.AV_PIX_FMT_RGB24;
             var width = decoder.FrameWidth;
             var height = decoder.FrameHeight;
+            
             using var vfc = new FrameConverter(
                 width, height, srcPixelFormat,
                 width, height, dstPixelFormat
             );
-
-            var dstData = new byte_ptrArray4();
-            var dstLineSizes = new int_array4();
-            int bufferSize = ffmpeg.av_image_alloc(
-                ref dstData, ref dstLineSizes,
-                width, height, dstPixelFormat, 1).ThrowExceptionIfError();
             
             var outputStream = File.Create(outputFilename);
 
@@ -55,7 +51,7 @@ namespace SeeShark.Example
             {
                 var cFrame = vfc.Convert(frame);
 
-                var span0 = new ReadOnlySpan<byte>(cFrame.data[0], bufferSize);
+                var span0 = new ReadOnlySpan<byte>(cFrame.data[0], cFrame.linesize[0] * cFrame.height);
                 outputStream.Write(span0);
 
                 Console.WriteLine($"frame: {frameNumber}");
