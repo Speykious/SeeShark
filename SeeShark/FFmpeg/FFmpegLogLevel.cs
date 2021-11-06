@@ -2,6 +2,9 @@ using FFmpeg.AutoGen;
 
 namespace SeeShark.FFmpeg
 {
+    /// <summary>
+    /// Log level for FFmpeg.
+    /// </summary>
     public enum FFmpegLogLevel : int
     {
         Quiet = ffmpeg.AV_LOG_QUIET,
