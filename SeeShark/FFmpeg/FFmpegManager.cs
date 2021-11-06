@@ -54,6 +54,7 @@ namespace SeeShark.FFmpeg
 
             FFmpegRootPath = rootPath;
             SetupFFmpegLogging(logLevel, logColor);
+            ffmpeg.avdevice_register_all();
 
             IsFFmpegSetup = true;
         }

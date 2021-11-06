@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using FFmpeg.AutoGen;
+using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark
 {
@@ -19,7 +20,8 @@ namespace SeeShark
 
         public CameraStreamDecoder(string formatShortName, string url, AVHWDeviceType HWDeviceType = AVHWDeviceType.AV_HWDEVICE_TYPE_NONE)
         {
-            ffmpeg.avdevice_register_all();
+            SetupFFmpeg();
+            
             inputFormat = ffmpeg.av_find_input_format(formatShortName);
             this.pFormatContext = ffmpeg.avformat_alloc_context();
             receivedFrame = ffmpeg.av_frame_alloc();
