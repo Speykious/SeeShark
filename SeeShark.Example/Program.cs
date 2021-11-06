@@ -1,5 +1,5 @@
-﻿using System.Runtime.InteropServices;
-using FFmpeg.AutoGen;
+﻿using FFmpeg.AutoGen;
+using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark.Example
 {
@@ -18,90 +18,22 @@ namespace SeeShark.Example
 
             Console.WriteLine("Current directory: " + Environment.CurrentDirectory);
             Console.WriteLine("Running in {0}-bit mode.", Environment.Is64BitProcess ? "64" : "32");
-
-            // FFmpegBinariesHelper.RegisterFFmpegBinaries();
-            ffmpeg.RootPath = "/usr/lib";
-
-            Console.WriteLine($"FFmpeg version info: {ffmpeg.av_version_info()}");
-
-            SetupLogging();
-            ConfigureHWDecoder(out var deviceType);
+            Console.WriteLine($"FFmpeg version info: {FFmpegVersion}");
 
             Console.WriteLine("Decoding...");
-            DecodeAllFramesToImages(deviceType, cameraDevice, outputFilename);
+            DecodeAllFramesToImages(cameraDevice, outputFilename);
         }
 
-        private static void ConfigureHWDecoder(out AVHWDeviceType HWtype)
+        private static unsafe void DecodeAllFramesToImages(string url, string outputFilename)
         {
-            HWtype = AVHWDeviceType.AV_HWDEVICE_TYPE_NONE;
-            Console.Write("Use hardware acceleration for decoding? [y/N] ");
-            var key = Console.ReadLine();
-            var availableHWDecoders = new Dictionary<int, AVHWDeviceType>();
-
-            if (key == "y")
-            {
-                Console.WriteLine("Select hardware decoder:");
-                var type = AVHWDeviceType.AV_HWDEVICE_TYPE_NONE;
-                var number = 0;
-
-                while ((type = ffmpeg.av_hwdevice_iterate_types(type)) != AVHWDeviceType.AV_HWDEVICE_TYPE_NONE)
-                {
-                    Console.WriteLine($"{++number}. {type}");
-                    availableHWDecoders.Add(number, type);
-                }
-
-                if (availableHWDecoders.Count == 0)
-                {
-                    Console.WriteLine("Your system have no hardware decoders.");
-                    HWtype = AVHWDeviceType.AV_HWDEVICE_TYPE_NONE;
-                    return;
-                }
-
-                var decoderNumber = availableHWDecoders
-                    .SingleOrDefault(t => t.Value == AVHWDeviceType.AV_HWDEVICE_TYPE_DXVA2).Key;
-                if (decoderNumber == 0)
-                    decoderNumber = availableHWDecoders.First().Key;
-                Console.Write($"Selected [{decoderNumber}] ");
-                int.TryParse(Console.ReadLine(), out var inputDecoderNumber);
-                availableHWDecoders.TryGetValue(inputDecoderNumber == 0 ? decoderNumber : inputDecoderNumber,
-                    out HWtype);
-            }
-        }
-
-        private static unsafe void SetupLogging()
-        {
-            ffmpeg.av_log_set_level(ffmpeg.AV_LOG_VERBOSE);
-
-            // do not convert to local function
-            av_log_set_callback_callback logCallback = (p0, level, format, vl) =>
-            {
-                if (level > ffmpeg.av_log_get_level()) return;
-
-                var lineSize = 1024;
-                var lineBuffer = stackalloc byte[lineSize];
-                var printPrefix = 1;
-                ffmpeg.av_log_format_line(p0, level, format, vl, lineBuffer, lineSize, &printPrefix);
-                var line = Marshal.PtrToStringAnsi((IntPtr)lineBuffer);
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write(line);
-                Console.ResetColor();
-            };
-
-            ffmpeg.av_log_set_callback(logCallback);
-        }
-
-        private static unsafe void DecodeAllFramesToImages(AVHWDeviceType HWDevice, string url, string outputFilename)
-        {
-            using var decoder = new CameraStreamDecoder("v4l2", url, HWDevice);
+            using var decoder = new CameraStreamDecoder("v4l2", url, AVHWDeviceType.AV_HWDEVICE_TYPE_NONE);
 
             Console.WriteLine($"codec name: {decoder.CodecName}");
 
             var info = decoder.GetContextInfo();
             info.ToList().ForEach(x => Console.WriteLine($"{x.Key} = {x.Value}"));
 
-            var srcPixelFormat = HWDevice == AVHWDeviceType.AV_HWDEVICE_TYPE_NONE
-                ? decoder.PixelFormat
-                : GetHWPixelFormat(HWDevice);
+            var srcPixelFormat = decoder.PixelFormat;
             var dstPixelFormat = AVPixelFormat.AV_PIX_FMT_RGB24;
             var width = decoder.FrameWidth;
             var height = decoder.FrameHeight;
@@ -129,25 +61,6 @@ namespace SeeShark.Example
                 Console.WriteLine($"frame: {frameNumber}");
                 frameNumber++;
             }
-        }
-
-        private static AVPixelFormat GetHWPixelFormat(AVHWDeviceType hWDevice)
-        {
-            return hWDevice switch
-            {
-                AVHWDeviceType.AV_HWDEVICE_TYPE_NONE => AVPixelFormat.AV_PIX_FMT_NONE,
-                AVHWDeviceType.AV_HWDEVICE_TYPE_VDPAU => AVPixelFormat.AV_PIX_FMT_VDPAU,
-                AVHWDeviceType.AV_HWDEVICE_TYPE_CUDA => AVPixelFormat.AV_PIX_FMT_CUDA,
-                AVHWDeviceType.AV_HWDEVICE_TYPE_VAAPI => AVPixelFormat.AV_PIX_FMT_VAAPI,
-                AVHWDeviceType.AV_HWDEVICE_TYPE_DXVA2 => AVPixelFormat.AV_PIX_FMT_NV12,
-                AVHWDeviceType.AV_HWDEVICE_TYPE_QSV => AVPixelFormat.AV_PIX_FMT_QSV,
-                AVHWDeviceType.AV_HWDEVICE_TYPE_VIDEOTOOLBOX => AVPixelFormat.AV_PIX_FMT_VIDEOTOOLBOX,
-                AVHWDeviceType.AV_HWDEVICE_TYPE_D3D11VA => AVPixelFormat.AV_PIX_FMT_NV12,
-                AVHWDeviceType.AV_HWDEVICE_TYPE_DRM => AVPixelFormat.AV_PIX_FMT_DRM_PRIME,
-                AVHWDeviceType.AV_HWDEVICE_TYPE_OPENCL => AVPixelFormat.AV_PIX_FMT_OPENCL,
-                AVHWDeviceType.AV_HWDEVICE_TYPE_MEDIACODEC => AVPixelFormat.AV_PIX_FMT_MEDIACODEC,
-                _ => AVPixelFormat.AV_PIX_FMT_NONE
-            };
         }
     }
 }
