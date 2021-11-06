@@ -7,7 +7,14 @@ namespace SeeShark.FFmpeg
     {
         public static bool IsFFmpegSetup { get; private set; } = false;
 
-        public static string FFmpegVersion => ffmpeg.av_version_info();
+        public static string FFmpegVersion
+        {
+            get
+            {
+                SetupFFmpeg();
+                return ffmpeg.av_version_info();
+            }
+        }
         public static string FFmpegRootPath
         {
             get => ffmpeg.RootPath;
@@ -16,8 +23,13 @@ namespace SeeShark.FFmpeg
 
         public static void SetupFFmpeg(string rootPath = "/usr/lib", FFmpegLogLevel logLevel = FFmpegLogLevel.Panic, ConsoleColor logColor = ConsoleColor.Yellow)
         {
+            if (IsFFmpegSetup)
+                return;
+
             FFmpegRootPath = rootPath;
             SetupFFmpegLogging(logLevel, logColor);
+
+            IsFFmpegSetup = true;
         }
 
         internal static unsafe void SetupFFmpegLogging(FFmpegLogLevel logLevel, ConsoleColor logColor)
