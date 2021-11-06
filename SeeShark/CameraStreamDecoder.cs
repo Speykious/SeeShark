@@ -10,67 +10,70 @@ namespace SeeShark
     /// </summary>
     public sealed unsafe class CameraStreamDecoder : IDisposable
     {
-        private readonly AVCodecContext* pCodecContext;
-        private readonly AVFormatContext* pFormatContext;
-        private readonly AVFrame* pFrame;
-        private readonly AVPacket* pPacket;
-        private readonly AVFrame* receivedFrame;
-        private readonly AVInputFormat* inputFormat;
+        private readonly AVCodecContext* codecContext;
+        private readonly AVFormatContext* formatContext;
+        private readonly AVFrame* frame;
+        private readonly AVFrame* hwFrame;
+        private readonly AVPacket* packet;
         private readonly int streamIndex;
+
+        public readonly string CodecName;
+        public readonly int FrameWidth;
+        public readonly int FrameHeight;
+        public readonly AVPixelFormat PixelFormat;
 
         public CameraStreamDecoder(string formatShortName, string url, AVHWDeviceType HWDeviceType = AVHWDeviceType.AV_HWDEVICE_TYPE_NONE)
         {
             SetupFFmpeg();
             
-            inputFormat = ffmpeg.av_find_input_format(formatShortName);
-            this.pFormatContext = ffmpeg.avformat_alloc_context();
-            receivedFrame = ffmpeg.av_frame_alloc();
-            var pFormatContext = this.pFormatContext;
-            ffmpeg.avformat_open_input(&pFormatContext, url, inputFormat, null).ThrowExceptionIfError();
-            ffmpeg.avformat_find_stream_info(pFormatContext, null).ThrowExceptionIfError();
+            var inputFormat = ffmpeg.av_find_input_format(formatShortName);
+            this.formatContext = ffmpeg.avformat_alloc_context();
+            var formatContext = this.formatContext;
+            ffmpeg.avformat_open_input(&formatContext, url, inputFormat, null).ThrowExceptionIfError();
+            ffmpeg.avformat_find_stream_info(formatContext, null).ThrowExceptionIfError();
             AVCodec* codec = null;
             streamIndex = ffmpeg
-                .av_find_best_stream(pFormatContext, AVMediaType.AVMEDIA_TYPE_VIDEO, -1, -1, &codec, 0)
+                .av_find_best_stream(formatContext, AVMediaType.AVMEDIA_TYPE_VIDEO, -1, -1, &codec, 0)
                 .ThrowExceptionIfError();
-            pCodecContext = ffmpeg.avcodec_alloc_context3(codec);
+            codecContext = ffmpeg.avcodec_alloc_context3(codec);
             if (HWDeviceType != AVHWDeviceType.AV_HWDEVICE_TYPE_NONE)
-                ffmpeg.av_hwdevice_ctx_create(&pCodecContext->hw_device_ctx, HWDeviceType, null, null, 0)
+                ffmpeg.av_hwdevice_ctx_create(&codecContext->hw_device_ctx, HWDeviceType, null, null, 0)
                     .ThrowExceptionIfError();
-            ffmpeg.avcodec_parameters_to_context(pCodecContext, pFormatContext->streams[streamIndex]->codecpar)
+            ffmpeg.avcodec_parameters_to_context(codecContext, formatContext->streams[streamIndex]->codecpar)
                 .ThrowExceptionIfError();
-            ffmpeg.avcodec_open2(pCodecContext, codec, null).ThrowExceptionIfError();
+            ffmpeg.avcodec_open2(codecContext, codec, null).ThrowExceptionIfError();
 
             CodecName = ffmpeg.avcodec_get_name(codec->id);
-            FrameWidth = pCodecContext->width;
-            FrameHeight = pCodecContext->height;
-            PixelFormat = pCodecContext->pix_fmt;
+            FrameWidth = codecContext->width;
+            FrameHeight = codecContext->height;
+            PixelFormat = codecContext->pix_fmt;
 
-            pPacket = ffmpeg.av_packet_alloc();
-            pFrame = ffmpeg.av_frame_alloc();
+            packet = ffmpeg.av_packet_alloc();
+            frame = ffmpeg.av_frame_alloc();
+            hwFrame = ffmpeg.av_frame_alloc();
         }
-
-        public string CodecName { get; }
-        public int FrameWidth { get; private set; }
-        public int FrameHeight { get; private set; }
-        public AVPixelFormat PixelFormat { get; }
 
         public void Dispose()
         {
-            var pFrame = this.pFrame;
-            ffmpeg.av_frame_free(&pFrame);
+            ffmpeg.avcodec_close(codecContext);
 
-            var pPacket = this.pPacket;
-            ffmpeg.av_packet_free(&pPacket);
+            var formatContext = this.formatContext;
+            ffmpeg.avformat_close_input(&formatContext);
 
-            ffmpeg.avcodec_close(pCodecContext);
-            var pFormatContext = this.pFormatContext;
-            ffmpeg.avformat_close_input(&pFormatContext);
+            var frame = this.frame;
+            ffmpeg.av_frame_free(&frame);
+
+            var hwFrame = this.hwFrame;
+            ffmpeg.av_frame_free(&hwFrame);
+
+            var packet = this.packet;
+            ffmpeg.av_packet_free(&packet);
         }
 
-        public bool TryDecodeNextFrame(out AVFrame frame)
+        public bool TryDecodeNextFrame(out AVFrame nextFrame)
         {
-            ffmpeg.av_frame_unref(pFrame);
-            ffmpeg.av_frame_unref(receivedFrame);
+            ffmpeg.av_frame_unref(frame);
+            ffmpeg.av_frame_unref(hwFrame);
             int error;
 
             do
@@ -79,37 +82,37 @@ namespace SeeShark
                 {
                     do
                     {
-                        ffmpeg.av_packet_unref(pPacket);
-                        error = ffmpeg.av_read_frame(pFormatContext, pPacket);
+                        ffmpeg.av_packet_unref(packet);
+                        error = ffmpeg.av_read_frame(formatContext, packet);
 
                         if (error == ffmpeg.AVERROR_EOF)
                         {
-                            frame = *pFrame;
+                            nextFrame = *frame;
                             return false;
                         }
 
                         error.ThrowExceptionIfError();
-                    } while (pPacket->stream_index != streamIndex);
+                    } while (packet->stream_index != streamIndex);
 
-                    ffmpeg.avcodec_send_packet(pCodecContext, pPacket).ThrowExceptionIfError();
+                    ffmpeg.avcodec_send_packet(codecContext, packet).ThrowExceptionIfError();
                 }
                 finally
                 {
-                    ffmpeg.av_packet_unref(pPacket);
+                    ffmpeg.av_packet_unref(packet);
                 }
 
-                error = ffmpeg.avcodec_receive_frame(pCodecContext, pFrame);
+                error = ffmpeg.avcodec_receive_frame(codecContext, frame);
             } while (error == ffmpeg.AVERROR(ffmpeg.EAGAIN));
 
             error.ThrowExceptionIfError();
 
-            if (pCodecContext->hw_device_ctx != null)
+            if (codecContext->hw_device_ctx != null)
             {
-                ffmpeg.av_hwframe_transfer_data(receivedFrame, pFrame, 0).ThrowExceptionIfError();
-                frame = *receivedFrame;
+                ffmpeg.av_hwframe_transfer_data(hwFrame, frame, 0).ThrowExceptionIfError();
+                nextFrame = *hwFrame;
             }
             else
-                frame = *pFrame;
+                nextFrame = *frame;
 
             return true;
         }
@@ -119,7 +122,7 @@ namespace SeeShark
             AVDictionaryEntry* tag = null;
             var result = new Dictionary<string, string>();
 
-            while ((tag = ffmpeg.av_dict_get(pFormatContext->metadata, "", tag, ffmpeg.AV_DICT_IGNORE_SUFFIX)) != null)
+            while ((tag = ffmpeg.av_dict_get(formatContext->metadata, "", tag, ffmpeg.AV_DICT_IGNORE_SUFFIX)) != null)
             {
                 var key = Marshal.PtrToStringAnsi((IntPtr)tag->key);
                 var value = Marshal.PtrToStringAnsi((IntPtr)tag->value);
