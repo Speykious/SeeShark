@@ -6,9 +6,8 @@ namespace SeeShark
     public sealed unsafe class FrameConverter : IDisposable
     {
         private readonly IntPtr convertedFrameBufferPtr;
-        private readonly byte_ptrArray4 dstData;
-        private readonly int_array4 dstLinesize;
         private readonly SwsContext* convertContext;
+        private readonly AVFrame* dstFrame;
         
         public readonly int SrcWidth;
         public readonly int SrcHeight;
@@ -48,37 +47,35 @@ namespace SeeShark
 
             var convertedFrameBufferSize = ffmpeg.av_image_get_buffer_size(dstPF, dstWidth, dstHeight, 1);
             convertedFrameBufferPtr = Marshal.AllocHGlobal(convertedFrameBufferSize);
-            dstData = new byte_ptrArray4();
-            dstLinesize = new int_array4();
 
+            var dstData = new byte_ptrArray4();
+            var dstLinesize = new int_array4();
             ffmpeg.av_image_fill_arrays(ref dstData, ref dstLinesize,
                 (byte*)convertedFrameBufferPtr, dstPF, dstWidth, dstHeight, 1);
+
+            dstFrame = ffmpeg.av_frame_alloc();
+            dstFrame->width = DstWidth;
+            dstFrame->height = DstHeight;
+            dstFrame->data.UpdateFrom(dstData);
+            dstFrame->linesize.UpdateFrom(dstLinesize);
         }
 
         public void Dispose()
         {
             Marshal.FreeHGlobal(convertedFrameBufferPtr);
             ffmpeg.sws_freeContext(convertContext);
+
+            var dstFrame = this.dstFrame;
+            ffmpeg.av_frame_free(&dstFrame);
         }
 
         public AVFrame Convert(AVFrame srcFrame)
         {
             ffmpeg.sws_scale(convertContext,
                 srcFrame.data, srcFrame.linesize, 0, srcFrame.height,
-                dstData, dstLinesize);
+                dstFrame->data, dstFrame->linesize);
 
-            var data = new byte_ptrArray8();
-            data.UpdateFrom(dstData);
-            var linesize = new int_array8();
-            linesize.UpdateFrom(dstLinesize);
-
-            return new AVFrame
-            {
-                data = data,
-                linesize = linesize,
-                width = DstWidth,
-                height = DstHeight
-            };
+            return *dstFrame;
         }
     }
 }
