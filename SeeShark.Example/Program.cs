@@ -43,9 +43,9 @@ namespace SeeShark.Example
 
             var outputStream = File.Create(outputFilename);
 
-            for (int frameCount = 1; decoder.TryDecodeNextFrame(out var frame); frameCount++)
+            for (int frameCount = 1; decoder.TryDecodeNextFrame(out var cFrame); frameCount++)
             {
-                var cFrame = vfc.Convert(frame);
+                // var cFrame = vfc.Convert(frame);
                 var span0 = new ReadOnlySpan<byte>(cFrame.data[0], cFrame.linesize[0] * cFrame.height);
 
                 // Only write one frame in the file.
