@@ -1,4 +1,8 @@
-﻿using FFmpeg.AutoGen;
+﻿// Copyright (c) The Vignette Authors
+// This file is part of SeeShark.
+// SeeShark is licensed under LGPL v3. See LICENSE.LESSER.md for details.
+
+using FFmpeg.AutoGen;
 using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark.Example
@@ -21,10 +25,10 @@ namespace SeeShark.Example
             Console.WriteLine($"FFmpeg version info: {FFmpegVersion}");
 
             Console.WriteLine("Decoding...");
-            ReadFrames(cameraDevice, outputFilename);
+            readFrames(cameraDevice, outputFilename);
         }
 
-        private static unsafe void ReadFrames(string url, string outputFilename)
+        private static unsafe void readFrames(string url, string outputFilename)
         {
             using var decoder = new CameraStreamDecoder("v4l2", url, HardwareAccelDevice.None);
 

@@ -1,3 +1,7 @@
+// Copyright (c) The Vignette Authors
+// This file is part of SeeShark.
+// SeeShark is licensed under LGPL v3. See LICENSE.LESSER.md for details.
+
 using System.Runtime.InteropServices;
 using FFmpeg.AutoGen;
 
@@ -8,7 +12,7 @@ namespace SeeShark
         private readonly IntPtr convertedFrameBufferPtr;
         private readonly SwsContext* convertContext;
         private readonly AVFrame* dstFrame;
-        
+
         public readonly int SrcWidth;
         public readonly int SrcHeight;
         public readonly int DstWidth;
@@ -79,3 +83,4 @@ namespace SeeShark
         }
     }
 }
+

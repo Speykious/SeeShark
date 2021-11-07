@@ -1,3 +1,7 @@
+// Copyright (c) The Vignette Authors
+// This file is part of SeeShark.
+// SeeShark is licensed under LGPL v3. See LICENSE.LESSER.md for details.
+
 using System.Runtime.InteropServices;
 using FFmpeg.AutoGen;
 using static SeeShark.FFmpeg.FFmpegManager;
@@ -36,9 +40,16 @@ namespace SeeShark
                 .av_find_best_stream(formatContext, AVMediaType.AVMEDIA_TYPE_VIDEO, -1, -1, &codec, 0)
                 .ThrowExceptionIfError();
             codecContext = ffmpeg.avcodec_alloc_context3(codec);
+
             if (hwAccelDevice != HardwareAccelDevice.None)
-                ffmpeg.av_hwdevice_ctx_create(&codecContext->hw_device_ctx, (AVHWDeviceType)hwAccelDevice, null, null, 0)
-                    .ThrowExceptionIfError();
+            {
+                ffmpeg.av_hwdevice_ctx_create(
+                    &codecContext->hw_device_ctx,
+                    (AVHWDeviceType)hwAccelDevice,
+                    null, null, 0
+                ).ThrowExceptionIfError();
+            }
+
             ffmpeg.avcodec_parameters_to_context(codecContext, formatContext->streams[streamIndex]->codecpar)
                 .ThrowExceptionIfError();
             ffmpeg.avcodec_open2(codecContext, codec, null).ThrowExceptionIfError();
@@ -112,7 +123,9 @@ namespace SeeShark
                 nextFrame = *hwFrame;
             }
             else
+            {
                 nextFrame = *frame;
+            }
 
             return true;
         }

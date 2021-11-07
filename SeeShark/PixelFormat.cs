@@ -1,3 +1,7 @@
+// Copyright (c) The Vignette Authors
+// This file is part of SeeShark.
+// SeeShark is licensed under LGPL v3. See LICENSE.LESSER.md for details.
+
 using FFmpeg.AutoGen;
 
 namespace SeeShark
@@ -113,7 +117,7 @@ namespace SeeShark
         VaapiIdct = AVPixelFormat.AV_PIX_FMT_VAAPI_IDCT,
         /// HW decoding through VA API, Picture.data[3] contains a VASurfaceID
         VaapiVld = AVPixelFormat.AV_PIX_FMT_VAAPI_VLD,
-        /// @}
+        /// alias for VaapiVld
         Vaapi = AVPixelFormat.AV_PIX_FMT_VAAPI,
         /// planar YUV 4:2:0, 24bpp, (1 Cr & Cb sample per 2x2 Y samples), little-endian
         Yuv420P16Le = AVPixelFormat.AV_PIX_FMT_YUV420P16LE,
