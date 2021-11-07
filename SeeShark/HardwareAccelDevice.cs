@@ -21,4 +21,26 @@ namespace SeeShark
         Mediacodec = AVHWDeviceType.AV_HWDEVICE_TYPE_MEDIACODEC,
         Vulkan = AVHWDeviceType.AV_HWDEVICE_TYPE_VULKAN
     }
+
+    public static class HardwareAccelDeviceExtension
+    {
+        public static PixelFormat ToPixelFormat(this HardwareAccelDevice hwAccelDevice)
+        {
+            return hwAccelDevice switch
+            {
+                HardwareAccelDevice.Vdpau => PixelFormat.Vdpau,
+                HardwareAccelDevice.Cuda => PixelFormat.Cuda,
+                HardwareAccelDevice.Vaapi => PixelFormat.Vaapi,
+                HardwareAccelDevice.Dxva2 => PixelFormat.Dxva2Vld,
+                HardwareAccelDevice.Qsv => PixelFormat.Qsv,
+                HardwareAccelDevice.Videotoolbox => PixelFormat.Videotoolbox,
+                HardwareAccelDevice.D3D11Va => PixelFormat.D3D11VaVld,
+                HardwareAccelDevice.Drm => PixelFormat.DrmPrime,
+                HardwareAccelDevice.Opencl => PixelFormat.Opencl,
+                HardwareAccelDevice.Mediacodec => PixelFormat.Mediacodec,
+                HardwareAccelDevice.Vulkan => PixelFormat.Vulkan,
+                _ => PixelFormat.None
+            };
+        }
+    }
 }
