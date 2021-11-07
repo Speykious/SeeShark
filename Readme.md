@@ -4,6 +4,10 @@
 
 ![See the Shark :)](https://repository-images.githubusercontent.com/424622946/78724333-f93d-44b7-a338-dc3933078000)
 
+> Source: https://twitter.com/klaius/status/1309870343067111427
+>
+> Finding that source was hard, because normally you just search for "Gawr Gura wallpaper" or something and you only get the image. Thank me later. ;)
+
 When you SeeShark, you C#!
 
 Currently Work In Progress.
