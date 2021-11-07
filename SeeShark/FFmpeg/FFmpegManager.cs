@@ -33,6 +33,8 @@ namespace SeeShark.FFmpeg
             private set => ffmpeg.RootPath = value;
         }
 
+        private static av_log_set_callback_callback? logCallback;
+
         /// <summary>
         /// Setup FFmpeg: root path and logging.
         /// <br/>
@@ -64,7 +66,7 @@ namespace SeeShark.FFmpeg
             ffmpeg.av_log_set_level((int)logLevel);
 
             // Do not convert to local function!
-            av_log_set_callback_callback logCallback = (p0, level, format, vl) =>
+            logCallback = (p0, level, format, vl) =>
             {
                 if (level > ffmpeg.av_log_get_level())
                     return;
