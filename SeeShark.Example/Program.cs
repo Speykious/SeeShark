@@ -23,7 +23,6 @@ namespace SeeShark.Example
 
             Console.WriteLine("Current directory: " + Environment.CurrentDirectory);
             Console.WriteLine("Running in {0}-bit mode.", Environment.Is64BitProcess ? "64" : "32");
-            SetupFFmpeg(logLevel: FFmpegLogLevel.Debug);
             Console.WriteLine($"FFmpeg version info: {FFmpegVersion}");
 
             Console.WriteLine("Decoding...");
@@ -54,7 +53,7 @@ namespace SeeShark.Example
                 // Only write one frame in the file.
                 outputStream.Seek(0, SeekOrigin.Begin);
                 outputStream.Write(frame.RawData);
-                // Console.WriteLine($"Read {frameCount} frames");
+                Console.WriteLine($"Read {frameCount} frames");
             }
         }
     }
