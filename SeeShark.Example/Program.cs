@@ -3,6 +3,7 @@
 // SeeShark is licensed under LGPL v3. See LICENSE.LESSER.md for details.
 
 using FFmpeg.AutoGen;
+using SeeShark.FFmpeg;
 using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark.Example
@@ -22,41 +23,38 @@ namespace SeeShark.Example
 
             Console.WriteLine("Current directory: " + Environment.CurrentDirectory);
             Console.WriteLine("Running in {0}-bit mode.", Environment.Is64BitProcess ? "64" : "32");
+            SetupFFmpeg(logLevel: FFmpegLogLevel.Debug);
             Console.WriteLine($"FFmpeg version info: {FFmpegVersion}");
 
             Console.WriteLine("Decoding...");
             readFrames(cameraDevice, outputFilename);
         }
 
-        private static unsafe void readFrames(string url, string outputFilename)
+        private static void readFrames(string url, string outputFilename)
         {
-            using var decoder = new CameraStreamDecoder("v4l2", url, HardwareAccelDevice.None);
+            using var dec = new CameraStreamDecoder("v4l2", url, HardwareAccelDevice.None);
 
-            Console.WriteLine($"Codec name: {decoder.CodecName}");
+            Console.WriteLine($"Codec name: {dec.CodecName}");
 
-            var info = decoder.GetContextInfo();
+            var info = dec.GetContextInfo();
             foreach (var field in info)
                 Console.WriteLine($"{field.Key} = {field.Value}");
 
-            var srcPixelFormat = decoder.PixelFormat;
-            var dstPixelFormat = PixelFormat.Rgb24;
-            var width = decoder.FrameWidth;
-            var height = decoder.FrameHeight;
-
-            using var vfc = new FrameConverter(width, height, srcPixelFormat, dstPixelFormat);
+            using var vfc = new FrameConverter(
+                dec.FrameWidth, dec.FrameHeight,
+                dec.PixelFormat, PixelFormat.Rgb24
+            );
 
             var outputStream = File.Create(outputFilename);
 
-            for (int frameCount = 1; decoder.TryDecodeNextFrame(out var cFrame); frameCount++)
+            for (int frameCount = 1; dec.TryDecodeNextFrame(out var frame); frameCount++)
             {
                 // var cFrame = vfc.Convert(frame);
-                var span0 = new ReadOnlySpan<byte>(cFrame.data[0], cFrame.linesize[0] * cFrame.height);
 
                 // Only write one frame in the file.
                 outputStream.Seek(0, SeekOrigin.Begin);
-                outputStream.Write(span0);
-
-                Console.WriteLine($"Read {frameCount} frames");
+                outputStream.Write(frame.RawData);
+                // Console.WriteLine($"Read {frameCount} frames");
             }
         }
     }
