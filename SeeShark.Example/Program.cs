@@ -2,8 +2,6 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under LGPL v3. See LICENSE.LESSER.md for details.
 
-using FFmpeg.AutoGen;
-using SeeShark.FFmpeg;
 using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark.Example
