@@ -12,22 +12,23 @@ namespace SeeShark.Example
         {
             if (args.Length < 2)
             {
-                Console.WriteLine("Usage: dotnet run <camera-device> <output-file>");
+                Console.WriteLine("Usage: dotnet run <camera-device> <output-file> [n-frames]");
                 return;
             }
 
             var cameraDevice = args[0];
             var outputFilename = args[1];
+            var nFrames = args.Length >= 3 ? int.Parse(args[2]) : 100;
 
             Console.WriteLine("Current directory: " + Environment.CurrentDirectory);
             Console.WriteLine("Running in {0}-bit mode.", Environment.Is64BitProcess ? "64" : "32");
             Console.WriteLine($"FFmpeg version info: {FFmpegVersion}");
 
             Console.WriteLine("Decoding...");
-            readFrames(cameraDevice, outputFilename);
+            readFrames(cameraDevice, outputFilename, nFrames);
         }
 
-        private static void readFrames(string url, string outputFilename)
+        private static void readFrames(string url, string outputFilename, int n = 1000)
         {
             using var dec = new CameraStreamDecoder("v4l2", url, HardwareAccelDevice.None);
 
@@ -44,7 +45,7 @@ namespace SeeShark.Example
 
             var outputStream = File.Create(outputFilename);
 
-            for (int frameCount = 1; dec.TryDecodeNextFrame(out var frame); frameCount++)
+            for (int frameCount = 1; dec.TryDecodeNextFrame(out var frame) && frameCount <= n; frameCount++)
             {
                 // var cFrame = vfc.Convert(frame);
 
