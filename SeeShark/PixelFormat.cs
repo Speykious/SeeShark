@@ -6,6 +6,9 @@ using FFmpeg.AutoGen;
 
 namespace SeeShark
 {
+    /// <summary>
+    /// Includes any pixel format that libav supports.
+    /// </summary>
     public enum PixelFormat : int
     {
         /// <summary>
