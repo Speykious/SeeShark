@@ -4,6 +4,9 @@
 
 namespace SeeShark
 {
+    /// <summary>
+    /// Adjustable setting for a camera.
+    /// </summary>
     public enum AdjustableCameraSetting
     {
         Saturation,

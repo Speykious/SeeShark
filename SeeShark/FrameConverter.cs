@@ -7,12 +7,15 @@ using FFmpeg.AutoGen;
 
 namespace SeeShark
 {
+    /// <summary>
+    /// Converts a frame into another pixel format and/or resizes it.
+    /// </summary>
     public sealed unsafe class FrameConverter : IDisposable
     {
         private readonly IntPtr convertedFrameBufferPtr;
         private readonly SwsContext* convertContext;
-        private readonly AVFrame* dstFrame;
 
+        public readonly Frame DstFrame;
         public readonly int SrcWidth;
         public readonly int SrcHeight;
         public readonly int DstWidth;
@@ -20,9 +23,30 @@ namespace SeeShark
         public readonly PixelFormat SrcPixelFormat;
         public readonly PixelFormat DstPixelFormat;
 
+        public FrameConverter(Frame frame, PixelFormat pixelFormat)
+        : this(frame, frame.Width, frame.Height, pixelFormat)
+        {
+        }
+
         public FrameConverter(int width, int height,
             PixelFormat srcPixelFormat, PixelFormat dstPixelFormat)
         : this(width, height, srcPixelFormat, width, height, dstPixelFormat)
+        {
+        }
+
+        public FrameConverter(Frame frame, int width, int height)
+        : this(frame, width, height, frame.PixelFormat)
+        {
+        }
+
+        public FrameConverter(int srcWidth, int srcHeight,
+            PixelFormat srcPixelFormat, int dstWidth, int dstHeight)
+        : this(srcWidth, srcHeight, srcPixelFormat, dstWidth, dstHeight, srcPixelFormat)
+        {
+        }
+
+        public FrameConverter(Frame frame, int width, int height, PixelFormat pixelFormat)
+        : this(frame.Width, frame.Height, frame.PixelFormat, width, height, pixelFormat)
         {
         }
 
@@ -57,11 +81,12 @@ namespace SeeShark
             ffmpeg.av_image_fill_arrays(ref dstData, ref dstLinesize,
                 (byte*)convertedFrameBufferPtr, dstPF, dstWidth, dstHeight, 1);
 
-            dstFrame = ffmpeg.av_frame_alloc();
+            var dstFrame = ffmpeg.av_frame_alloc();
             dstFrame->width = DstWidth;
             dstFrame->height = DstHeight;
             dstFrame->data.UpdateFrom(dstData);
             dstFrame->linesize.UpdateFrom(dstLinesize);
+            DstFrame = new Frame(dstFrame);
         }
 
         public void Dispose()
@@ -69,18 +94,18 @@ namespace SeeShark
             Marshal.FreeHGlobal(convertedFrameBufferPtr);
             ffmpeg.sws_freeContext(convertContext);
 
-            var dstFrame = this.dstFrame;
-            ffmpeg.av_frame_free(&dstFrame);
+            DstFrame.Dispose();
         }
 
         public Frame Convert(Frame srcFrame)
         {
-            var avFrame = srcFrame.AVFrame;
+            var srcAVFrame = srcFrame.AVFrame;
+            var dstAVFrame = DstFrame.AVFrame;
             ffmpeg.sws_scale(convertContext,
-                avFrame->data, avFrame->linesize, 0, avFrame->height,
-                dstFrame->data, dstFrame->linesize);
+                srcAVFrame->data, srcAVFrame->linesize, 0, srcAVFrame->height,
+                dstAVFrame->data, dstAVFrame->linesize);
 
-            return new Frame(dstFrame);
+            return DstFrame;
         }
     }
 }
