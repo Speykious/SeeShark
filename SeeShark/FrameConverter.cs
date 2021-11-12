@@ -73,13 +73,14 @@ namespace SeeShark
             ffmpeg.av_frame_free(&dstFrame);
         }
 
-        public AVFrame Convert(AVFrame srcFrame)
+        public Frame Convert(Frame srcFrame)
         {
+            var avFrame = srcFrame.AVFrame;
             ffmpeg.sws_scale(convertContext,
-                srcFrame.data, srcFrame.linesize, 0, srcFrame.height,
+                avFrame->data, avFrame->linesize, 0, avFrame->height,
                 dstFrame->data, dstFrame->linesize);
 
-            return *dstFrame;
+            return new Frame(dstFrame);
         }
     }
 }
