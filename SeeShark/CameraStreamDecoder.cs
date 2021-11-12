@@ -98,6 +98,7 @@ namespace SeeShark
                         if (error == ffmpeg.AVERROR_EOF)
                         {
                             nextFrame = frame;
+                            GC.Collect();
                             return false;
                         }
 
@@ -126,6 +127,7 @@ namespace SeeShark
                 nextFrame = frame;
             }
 
+            GC.Collect();
             return true;
         }
 
