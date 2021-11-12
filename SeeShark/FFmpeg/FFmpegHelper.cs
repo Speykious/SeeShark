@@ -5,7 +5,7 @@
 using System.Runtime.InteropServices;
 using FFmpeg.AutoGen;
 
-namespace SeeShark
+namespace SeeShark.FFmpeg
 {
     internal static class FFmpegHelper
     {
