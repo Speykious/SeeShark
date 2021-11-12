@@ -12,23 +12,22 @@ namespace SeeShark.Example
         {
             if (args.Length < 2)
             {
-                Console.WriteLine("Usage: dotnet run <camera-device> <output-file> [n-frames]");
+                Console.WriteLine("Usage: dotnet run <camera-device> <output-file>");
                 return;
             }
 
             var cameraDevice = args[0];
             var outputFilename = args[1];
-            var nFrames = args.Length >= 3 ? int.Parse(args[2]) : 100;
 
             Console.WriteLine("Current directory: " + Environment.CurrentDirectory);
             Console.WriteLine("Running in {0}-bit mode.", Environment.Is64BitProcess ? "64" : "32");
             Console.WriteLine($"FFmpeg version info: {FFmpegVersion}");
 
             Console.WriteLine("Decoding...");
-            readFrames(cameraDevice, outputFilename, nFrames);
+            readFrames(cameraDevice, outputFilename);
         }
 
-        private static void readFrames(string url, string outputFilename, int n = 1000)
+        private static void readFrames(string url, string outputFilename)
         {
             using var dec = new CameraStreamDecoder("v4l2", url, HardwareAccelDevice.None);
 
@@ -45,13 +44,14 @@ namespace SeeShark.Example
 
             var outputStream = File.Create(outputFilename);
 
-            for (int frameCount = 1; dec.TryDecodeNextFrame(out var frame) && frameCount <= n; frameCount++)
+            for (int frameCount = 1; dec.TryDecodeNextFrame(out var frame); frameCount++)
             {
-                // var cFrame = vfc.Convert(frame);
+                var cFrame = vfc.Convert(frame);
 
                 // Only write one frame in the file.
                 outputStream.Seek(0, SeekOrigin.Begin);
-                outputStream.Write(frame.RawData);
+                outputStream.Write(cFrame.RawData);
+
                 Console.WriteLine($"Read {frameCount} frames");
             }
         }
