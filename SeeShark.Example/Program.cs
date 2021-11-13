@@ -2,6 +2,7 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under LGPL v3. See LICENSE.LESSER.md for details.
 
+using SeeShark.FFmpeg;
 using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark.Example
@@ -29,7 +30,7 @@ namespace SeeShark.Example
 
         private static void readFrames(string url, string outputFilename)
         {
-            using var dec = new CameraStreamDecoder("v4l2", url, HardwareAccelDevice.None);
+            using var dec = new CameraStreamDecoder(url, "v4l2");
 
             Console.WriteLine($"Codec name: {dec.CodecName}");
 
