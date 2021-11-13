@@ -13,6 +13,13 @@ the `CameraStreamDecoder` class is now operational! Now a bunch of abstractions 
 A few have been made, especially some `enum` types that are going to be used outside of the library.
 A very subtle memory leak has been fixed and we ca now focus on abstractions again.
 
+## TODO
+
+- [x] Abstract `CameraStreamDecoder` into a `VideoStreamDecoder`
+- [ ] Extract frame sending logic from `ICamera` into an `IVideo`
+- [ ] Implement a way to enumerate camera devices
+- [ ] Write a `Camera` class that implements `ICamera` so that it is used instead of `CameraStreamDecoder`
+
 ***
 
 ## License
