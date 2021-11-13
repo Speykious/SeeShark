@@ -7,14 +7,14 @@ namespace SeeShark
     /// <summary>
     /// Contains event data for a camera frame - in other words, just a <see cref="Frame"/>.
     /// </summary>
-    public class CameraFrameEventArgs : EventArgs
+    public class FrameEventArgs : EventArgs
     {
         /// <summary>
         /// The frame sent from the camera.
         /// </summary>
         public Frame Frame { get; private set; }
 
-        public CameraFrameEventArgs(Frame frame)
+        public FrameEventArgs(Frame frame)
         {
             Frame = frame;
         }

@@ -29,7 +29,7 @@ namespace SeeShark
         /// <summary>
         /// Fires whenever there's a new frame ready to be read.
         /// </summary>
-        public event EventHandler<CameraFrameEventArgs> OnNewFrame;
+        public event EventHandler<FrameEventArgs> OnNewFrame;
 
         /// <summary>
         /// Whether or not this <see cref="ICamera"/> is an <see cref="IAdjustableCamera"/>.
