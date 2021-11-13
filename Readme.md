@@ -16,7 +16,7 @@ A very subtle memory leak has been fixed and we ca now focus on abstractions aga
 ## TODO
 
 - [x] Abstract `CameraStreamDecoder` into a `VideoStreamDecoder`
-- [ ] Extract frame sending logic from `ICamera` into an `IVideo`
+- [x] Extract frame sending logic from `ICamera` into an `IVideo`
 - [ ] Implement a way to enumerate camera devices
 - [ ] Write a `Camera` class that implements `ICamera` so that it is used instead of `CameraStreamDecoder`
 
