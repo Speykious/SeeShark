@@ -9,17 +9,17 @@ namespace SeeShark
         /// <summary>
         /// Whether it is sending frames.
         /// </summary>
-        public bool IsActive { get; }
+        public bool IsPlaying { get; }
 
         /// <summary>
         /// Starts sending frames to the <see cref="OnNewFrame"/> event handler.
         /// </summary>
-        public void Start();
+        public void Play();
 
         /// <summary>
         /// Stops sending frames to the <see cref="OnNewFrame"/> event handler.
         /// </summary>
-        public void Stop();
+        public void Pause();
 
         /// <summary>
         /// Fires whenever there's a new frame ready to be read.
