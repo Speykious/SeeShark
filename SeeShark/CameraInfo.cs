@@ -7,7 +7,7 @@ namespace SeeShark
     /// <summary>
     /// Various information about the camera device.
     /// </summary>
-    public struct CameraInfo
+    public struct CameraInfo : IEquatable<CameraInfo>
     {
         /// <summary>
         /// Name of the camera. When it doesn't have a specific name, it is equal to its <see cref="Path"/>.
@@ -23,5 +23,14 @@ namespace SeeShark
             Name = name;
             Path = path;
         }
+
+        public bool Equals(CameraInfo other) => Path == other.Path;
+        public override bool Equals(object? obj) => obj is CameraInfo info && Equals(info);
+        public override int GetHashCode() => Path.GetHashCode();
+
+        public static bool operator ==(CameraInfo left, CameraInfo right) => left.Equals(right);
+        public static bool operator !=(CameraInfo left, CameraInfo right) => !(left == right);
+
+        public override string? ToString() => $"{Name} ({Path})";
     }
 }
