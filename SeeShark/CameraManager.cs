@@ -3,6 +3,7 @@
 // SeeShark is licensed under LGPL v3. See LICENSE.LESSER.md for details.
 
 using System.Collections.Immutable;
+using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark
 {
@@ -53,6 +54,7 @@ namespace SeeShark
         /// </remarks>
         public CameraManager()
         {
+            SetupFFmpeg();
             SyncCameraDevices();
 
             deviceWatcher = new Timer(
