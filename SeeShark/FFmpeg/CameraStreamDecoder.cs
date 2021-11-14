@@ -12,8 +12,8 @@ namespace SeeShark.FFmpeg
     /// <remarks>It is actually just a <see cref="VideoStreamDecoder"/> with a specific input format in disguise.</remarks>
     public sealed unsafe class CameraStreamDecoder : VideoStreamDecoder
     {
-        public CameraStreamDecoder(string url, string formatShortName)
-        : base(url, ffmpeg.av_find_input_format(formatShortName))
+        public CameraStreamDecoder(string url, DeviceInputFormat inputFormat)
+        : base(url, ffmpeg.av_find_input_format(inputFormat.ToString()))
         {
         }
     }

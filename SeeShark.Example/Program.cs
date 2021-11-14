@@ -30,7 +30,7 @@ namespace SeeShark.Example
 
         private static void readFrames(string url, string outputFilename)
         {
-            using var dec = new CameraStreamDecoder(url, "v4l2");
+            using var dec = new CameraStreamDecoder(url, DeviceInputFormat.V4l2);
 
             Console.WriteLine($"Codec name: {dec.CodecName}");
 
