@@ -141,26 +141,29 @@ namespace SeeShark
             Devices = newDevices;
         }
 
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (IsDisposed)
                 return;
 
             if (disposing)
-                ffmpeg.avformat_free_context(avFormatContext);
+            {
+                deviceWatcher.Dispose();
+            }
 
+            ffmpeg.avformat_free_context(avFormatContext);
             IsDisposed = true;
         }
 
         ~CameraManager()
         {
             Dispose(false);
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
     }
 }

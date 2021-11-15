@@ -23,6 +23,8 @@ namespace SeeShark
         public readonly PixelFormat SrcPixelFormat;
         public readonly PixelFormat DstPixelFormat;
 
+        public bool IsDisposed { get; private set; }
+
         public FrameConverter(Frame frame, PixelFormat pixelFormat)
         : this(frame, frame.Width, frame.Height, pixelFormat)
         {
@@ -89,14 +91,6 @@ namespace SeeShark
             DstFrame = new Frame(dstFrame);
         }
 
-        public void Dispose()
-        {
-            Marshal.FreeHGlobal(convertedFrameBufferPtr);
-            ffmpeg.sws_freeContext(convertContext);
-
-            DstFrame.Dispose();
-        }
-
         public Frame Convert(Frame srcFrame)
         {
             var srcAVFrame = srcFrame.AVFrame;
@@ -106,6 +100,33 @@ namespace SeeShark
                 dstAVFrame->data, dstAVFrame->linesize);
 
             return DstFrame;
+        }
+
+        public void Dispose()
+        {
+            dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void dispose(bool disposing)
+        {
+            if (IsDisposed)
+                return;
+
+            if (disposing)
+            {
+                DstFrame.Dispose();
+            }
+
+            Marshal.FreeHGlobal(convertedFrameBufferPtr);
+            ffmpeg.sws_freeContext(convertContext);
+
+            IsDisposed = true;
+        }
+
+        ~FrameConverter()
+        {
+            dispose(false);
         }
     }
 }

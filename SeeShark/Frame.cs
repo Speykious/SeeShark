@@ -33,6 +33,8 @@ namespace SeeShark
         /// </summary>
         public ReadOnlySpan<byte> RawData => new ReadOnlySpan<byte>(AVFrame->data[0], WidthStep * Height);
 
+        public bool IsDisposed { get; private set; }
+
         // This constructor is internal because the user of the library
         // is not supposed to deal with any actual FFmpeg type.
         internal Frame()
@@ -43,12 +45,6 @@ namespace SeeShark
         internal Frame(AVFrame* avFrame)
         {
             AVFrame = avFrame;
-        }
-
-        public void Dispose()
-        {
-            var frame = AVFrame;
-            ffmpeg.av_frame_free(&frame);
         }
 
         /// <summary>
@@ -77,5 +73,31 @@ namespace SeeShark
         /// Other negative values: legitimate decoding errors
         /// </returns>
         internal int Receive(AVCodecContext* codecContext) => ffmpeg.avcodec_receive_frame(codecContext, AVFrame);
+
+        public void Dispose()
+        {
+            dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void dispose(bool disposing)
+        {
+            if (IsDisposed)
+                return;
+
+            if (disposing)
+            {
+            }
+
+            var frame = AVFrame;
+            ffmpeg.av_frame_free(&frame);
+
+            IsDisposed = true;
+        }
+
+        ~Frame()
+        {
+            dispose(false);
+        }
     }
 }

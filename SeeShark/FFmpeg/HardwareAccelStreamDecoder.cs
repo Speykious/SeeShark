@@ -37,10 +37,17 @@ namespace SeeShark.FFmpeg
             return ret;
         }
 
-        public new void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            HwFrame.Dispose();
-            base.Dispose();
+            if (IsDisposed)
+                return;
+
+            if (disposing)
+            {
+                HwFrame.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

@@ -26,6 +26,8 @@ namespace SeeShark.FFmpeg
         public readonly int FrameHeight;
         public readonly PixelFormat PixelFormat;
 
+        public bool IsDisposed { get; private set; }
+
         public VideoStreamDecoder(string url, AVInputFormat* inputFormat = null)
         {
             SetupFFmpeg();
@@ -52,21 +54,6 @@ namespace SeeShark.FFmpeg
 
             Packet = ffmpeg.av_packet_alloc();
             Frame = new Frame();
-        }
-
-        public void Dispose()
-        {
-            ffmpeg.avcodec_close(CodecContext);
-
-            var formatContext = this.FormatContext;
-            ffmpeg.avformat_close_input(&formatContext);
-
-            Frame.Dispose();
-
-            var packet = this.Packet;
-            ffmpeg.av_packet_free(&packet);
-
-            GC.SuppressFinalize(this);
         }
 
         public bool TryDecodeNextFrame(out Frame nextFrame)
@@ -125,6 +112,39 @@ namespace SeeShark.FFmpeg
             }
 
             return result;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (IsDisposed)
+                return;
+
+            if (disposing)
+            {
+                // Dispose managed resources
+                Frame.Dispose();
+            }
+
+            ffmpeg.avcodec_close(CodecContext);
+
+            var formatContext = FormatContext;
+            ffmpeg.avformat_close_input(&formatContext);
+
+            var packet = Packet;
+            ffmpeg.av_packet_free(&packet);
+
+            IsDisposed = true;
+        }
+
+        ~VideoStreamDecoder()
+        {
+            Dispose(false);
         }
     }
 }
