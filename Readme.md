@@ -16,6 +16,7 @@ The library is quite close to a first beta release!
 - [x] Extract frame sending logic from `ICamera` into an `IVideo`
 - [x] Implement a way to enumerate camera devices
 - [x] Write a `Camera` class that implements `ICamera`
+- [ ] Review implementations of `IDisposable`
 - [ ] Make so that `CameraManager` can provide cameras
 - [ ] Implement platform-dependant helpers
 - [ ] Use `Camera` instead of `CameraStreamDecoder` in `SeeShark.Example`
