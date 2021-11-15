@@ -8,17 +8,17 @@ Currently Work In Progress.
 
 ## State of the library
 
-the `CameraStreamDecoder` class is now operational! Now a bunch of abstractions and encapsulation needs to be done for the library to be usable at all.
-
-A few have been made, especially some `enum` types that are going to be used outside of the library.
-A very subtle memory leak has been fixed and we ca now focus on abstractions again.
+The library is quite close to a first beta release!
 
 ## TODO
 
 - [x] Abstract `CameraStreamDecoder` into a `VideoStreamDecoder`
 - [x] Extract frame sending logic from `ICamera` into an `IVideo`
-- [ ] Implement a way to enumerate camera devices
-- [ ] Write a `Camera` class that implements `ICamera` so that it is used instead of `CameraStreamDecoder`
+- [x] Implement a way to enumerate camera devices
+- [x] Write a `Camera` class that implements `ICamera`
+- [ ] Make so that `CameraManager` can provide cameras
+- [ ] Implement platform-dependant helpers
+- [ ] Use `Camera` instead of `CameraStreamDecoder` in `SeeShark.Example`
 
 ***
 
