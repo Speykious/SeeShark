@@ -3,6 +3,10 @@
 // SeeShark is licensed under LGPL v3. See LICENSE.LESSER.md for details.
 
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
+using FFmpeg.AutoGen;
+using SeeShark.FFmpeg;
 using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark
@@ -12,14 +16,21 @@ namespace SeeShark
     /// It can also watch for available devices, and fire up <see cref="OnNewDevice"/> and
     /// <see cref="OnLostDevice"/> events when it happens.
     /// </summary>
-    public abstract class CameraManager : IDisposable
+    public unsafe class CameraManager : IDisposable
     {
+        private readonly AVInputFormat* avInputFormat;
+        private readonly AVFormatContext* avFormatContext;
         private readonly Timer deviceWatcher;
 
         /// <summary>
         /// Whether this <see cref="CameraManager"/> is watching for devices.
         /// </summary>
         public bool IsWatching { get; private set; }
+
+        /// <summary>
+        /// Input format used by this <see cref="CameraManager"/> to watch devices.
+        /// </summary>
+        public readonly DeviceInputFormat InputFormat;
 
         /// <summary>
         /// List of all the available camera devices.
@@ -44,7 +55,32 @@ namespace SeeShark
         /// <summary>
         /// Enumerates available devices.
         /// </summary>
-        protected abstract IEnumerable<CameraInfo> EnumerateDevices();
+        protected CameraInfo[] EnumerateDevices()
+        {
+            AVDeviceInfoList* avDeviceInfoList = null;
+            ffmpeg.avdevice_list_input_sources(avInputFormat, null, null, &avDeviceInfoList).ThrowExceptionIfError();
+            int nDevices = avDeviceInfoList->nb_devices;
+            var avDevices = avDeviceInfoList->devices;
+
+            var devices = new CameraInfo[nDevices];
+            for (int i = 0; i < nDevices; i++)
+            {
+                var avDevice = avDevices[i];
+                var name = Marshal.PtrToStringAnsi((IntPtr)avDevice->device_description);
+                var path = Marshal.PtrToStringAnsi((IntPtr)avDevice->device_name);
+
+                if (path == null)
+                    throw new InvalidOperationException($"Device at index {i} doesn't have a path!");
+
+                if (name == null)
+                    name = path;
+
+                devices[i] = new CameraInfo(name, path);
+            }
+
+            ffmpeg.avdevice_free_list_devices(&avDeviceInfoList);
+            return devices;
+        }
 
         /// <summary>
         /// Creates a new <see cref="CameraManager"/>.
@@ -52,11 +88,14 @@ namespace SeeShark
         /// <remarks>
         /// Upon creation, it will call <see cref="SyncCameraDevices"/> once, but won't be in a watching state.
         /// </remarks>
-        public CameraManager()
+        public CameraManager(DeviceInputFormat inputFormat)
         {
             SetupFFmpeg();
-            SyncCameraDevices();
+            InputFormat = inputFormat;
+            avInputFormat = ffmpeg.av_find_input_format(InputFormat.ToString());
+            avFormatContext = ffmpeg.avformat_alloc_context();
 
+            SyncCameraDevices();
             deviceWatcher = new Timer(
                 (object? _state) => SyncCameraDevices(),
                 null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan
@@ -106,6 +145,9 @@ namespace SeeShark
         {
             if (IsDisposed)
                 return;
+
+            if (disposing)
+                ffmpeg.avformat_free_context(avFormatContext);
 
             IsDisposed = true;
         }
