@@ -4,7 +4,7 @@
 
 namespace SeeShark
 {
-    public interface ICamera : IVideo, IDisposable
+    public interface ICamera : IVideo
     {
         /// <summary>
         /// Information on this <see cref="ICamera"/>.

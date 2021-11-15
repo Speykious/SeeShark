@@ -12,23 +12,18 @@ namespace SeeShark
         public bool IsPlaying { get; }
 
         /// <summary>
-        /// Starts sending frames to the <see cref="OnNewFrame"/> event handler.
+        /// Starts sending frames to the <see cref="NewFrameHandler"/> event handler.
         /// </summary>
         public void Play();
 
         /// <summary>
-        /// Stops sending frames to the <see cref="OnNewFrame"/> event handler.
+        /// Stops sending frames to the <see cref="NewFrameHandler"/> event handler.
         /// </summary>
         public void Pause();
 
         /// <summary>
         /// Fires whenever there's a new frame ready to be read.
         /// </summary>
-        public event EventHandler<FrameEventArgs> OnNewFrame;
-
-        /// <summary>
-        /// Whether or not this <see cref="IVideo"/> has been disposed yet.
-        /// </summary>
-        public bool IsDisposed { get; }
+        public event EventHandler<FrameEventArgs> NewFrameHandler;
     }
 }
