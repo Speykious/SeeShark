@@ -4,7 +4,6 @@
 
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Text;
 using static SeeShark.FFmpeg.FFmpegManager;
 
@@ -83,7 +82,6 @@ namespace SeeShark.Example
         private static StringBuilder builder = new StringBuilder();
         public static void OnNewFrame(object? _sender, FrameEventArgs e)
         {
-
             var frame = e.Frame;
             if (converter == null || Console.WindowWidth != converter.SrcWidth ||
                 Console.WindowHeight != converter.SrcHeight)
@@ -112,7 +110,7 @@ namespace SeeShark.Example
 
             if (frameCount == 10)
             {
-                Console.Title = "FPS: " + frameCount / (watch.ElapsedMilliseconds * 1000f);
+                Console.Title = "FPS: " + frameCount / (watch.ElapsedMilliseconds / 1000f);
                 frameCount = 0;
                 watch.Restart();
             }
