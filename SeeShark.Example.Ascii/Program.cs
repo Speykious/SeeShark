@@ -96,15 +96,17 @@ namespace SeeShark.Example
             char[] chars = "`'.,-~:;\"^=+*rcvuoeasnmwzxiygjlfthkqpdb!?ILOAEBCDFGHJKMNPRSTUVYZWQX(){}[]|\\/&$@#"
                 .ToCharArray();
 
+            Console.SetCursorPosition(0, 0);
+            string line = "";
             for (int y = 0; y < outputFrame.Height; y++)
             {
-                string line = "";
                 for (int x = 0; x < outputFrame.Width; x++)
                 {
                     line += chars[map(outputFrame.RawData[y * outputFrame.Width + x], 0, 255, 0, chars.Length - 1)];
                 }
-                Console.Write(line);
             }
+            Console.Write(line);
+            Console.Out.Flush();
 
             if (frameCount == 10)
             {
