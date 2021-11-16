@@ -3,6 +3,7 @@
 // SeeShark is licensed under LGPL v3. See LICENSE.LESSER.md for details.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using static SeeShark.FFmpeg.FFmpegManager;
 
@@ -79,6 +80,7 @@ namespace SeeShark.Example
 
         static uint frameCount = 0;
         private static FrameConverter? converter;
+        private static Stopwatch watch = new Stopwatch();
         public static void OnNewFrame(object? _sender, FrameEventArgs e)
         {
 
@@ -104,6 +106,17 @@ namespace SeeShark.Example
                     line += chars[map(outputFrame.RawData[x * y], 0, 255, 0, chars.Length - 1)];
                 }
                 Console.WriteLine(line);
+            }
+
+            if (frameCount == 10)
+            {
+                Console.Title = "FPS: " + frameCount / (watch.ElapsedMilliseconds * 1000f);
+                frameCount = 0;
+                watch.Restart();
+            }
+            else if (frameCount == 0)
+            {
+                watch.Start();
             }
             frameCount++;
         }
