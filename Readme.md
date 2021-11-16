@@ -17,9 +17,11 @@ The library is quite close to a first beta release!
 - [x] Implement a way to enumerate camera devices
 - [x] Write a `Camera` class that implements `ICamera`
 - [x] Review implementations of `IDisposable`
-- [ ] Make so that `CameraManager` can provide cameras
-- [ ] Implement platform-dependant helpers
+- [x] Make so that `CameraManager` can provide cameras
+- [x] Implement platform-dependant helpers
 - [ ] Use `Camera` instead of `CameraStreamDecoder` in `SeeShark.Example`
+- [ ] Make an ASCII art example *(yes, I will)*
+- [ ] Document usage of the library
 
 ***
 
