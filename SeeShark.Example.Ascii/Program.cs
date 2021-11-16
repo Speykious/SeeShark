@@ -103,7 +103,7 @@ namespace SeeShark.Example
                 {
                     line += chars[map(outputFrame.RawData[x * y], 0, 255, 0, chars.Length - 1)];
                 }
-                Console.Write(line);
+                Console.WriteLine(line);
             }
             frameCount++;
         }
