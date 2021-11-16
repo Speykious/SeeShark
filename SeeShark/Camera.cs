@@ -52,6 +52,7 @@ namespace SeeShark
 
             IsPlaying = true;
             decodingThread = new Thread(new ThreadStart(DecodeLoop));
+            decodingThread.Start();
         }
 
         public void Dispose()
