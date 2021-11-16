@@ -114,6 +114,9 @@ namespace SeeShark
             IsWatching = false;
         }
 
+        public Camera GetCamera(CameraInfo info) => new Camera(info, InputFormat);
+        public Camera GetCamera(int index = 0) => GetCamera(Devices[index]);
+
         /// <summary>
         /// Starts watching for available devices.
         /// </summary>
