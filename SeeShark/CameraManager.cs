@@ -15,7 +15,7 @@ namespace SeeShark
     /// It can also watch for available devices, and fire up <see cref="OnNewDevice"/> and
     /// <see cref="OnLostDevice"/> events when it happens.
     /// </summary>
-    public unsafe class CameraManager : IDisposable
+    public sealed unsafe class CameraManager : IDisposable
     {
         private readonly AVInputFormat* avInputFormat;
         private readonly AVFormatContext* avFormatContext;
@@ -54,7 +54,7 @@ namespace SeeShark
         /// <summary>
         /// Enumerates available devices.
         /// </summary>
-        protected CameraInfo[] EnumerateDevices()
+        private CameraInfo[] enumerateDevices()
         {
             AVDeviceInfoList* avDeviceInfoList = null;
             ffmpeg.avdevice_list_input_sources(avInputFormat, null, null, &avDeviceInfoList).ThrowExceptionIfError();
@@ -140,7 +140,7 @@ namespace SeeShark
         /// </summary>
         public void SyncCameraDevices()
         {
-            var newDevices = EnumerateDevices().ToImmutableList();
+            var newDevices = enumerateDevices().ToImmutableList();
 
             if (Devices.SequenceEqual(newDevices))
                 return;
@@ -160,7 +160,7 @@ namespace SeeShark
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool disposing)
+        public void Dispose(bool disposing)
         {
             if (IsDisposed)
                 return;
