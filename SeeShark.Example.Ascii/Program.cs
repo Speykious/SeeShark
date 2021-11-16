@@ -5,6 +5,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark.Example
@@ -79,6 +80,7 @@ namespace SeeShark.Example
         static uint frameCount = 0;
         private static FrameConverter? converter;
         private static Stopwatch watch = new Stopwatch();
+        private static StringBuilder builder = new StringBuilder();
         public static void OnNewFrame(object? _sender, FrameEventArgs e)
         {
 
@@ -97,16 +99,16 @@ namespace SeeShark.Example
                 .ToCharArray();
 
             Console.SetCursorPosition(0, 0);
-            string line = "";
             for (int y = 0; y < outputFrame.Height; y++)
             {
                 for (int x = 0; x < outputFrame.Width; x++)
                 {
-                    line += chars[map(outputFrame.RawData[y * outputFrame.Width + x], 0, 255, 0, chars.Length - 1)];
+                    builder.Append(chars[map(outputFrame.RawData[y * outputFrame.Width + x], 0, 255, 0, chars.Length - 1)]);
                 }
             }
-            Console.Write(line);
+            Console.Write(builder.ToString());
             Console.Out.Flush();
+            builder.Clear();
 
             if (frameCount == 10)
             {
