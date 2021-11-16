@@ -116,6 +116,7 @@ namespace SeeShark
 
         public Camera GetCamera(CameraInfo info) => new Camera(info, InputFormat);
         public Camera GetCamera(int index = 0) => GetCamera(Devices[index]);
+        public Camera GetCamera(string path) => GetCamera(Devices.First((ci) => ci.Path == path));
 
         /// <summary>
         /// Starts watching for available devices.
