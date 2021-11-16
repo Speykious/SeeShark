@@ -3,7 +3,6 @@
 // SeeShark is licensed under LGPL v3. See LICENSE.LESSER.md for details.
 
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using FFmpeg.AutoGen;
 using SeeShark.FFmpeg;
@@ -82,16 +81,27 @@ namespace SeeShark
             return devices;
         }
 
+
         /// <summary>
         /// Creates a new <see cref="CameraManager"/>.
+        /// It will call <see cref="SyncCameraDevices"/> once, but won't be in a watching state.
         /// </summary>
         /// <remarks>
-        /// Upon creation, it will call <see cref="SyncCameraDevices"/> once, but won't be in a watching state.
+        /// If you don't specify any input format, it will attempt to choose one suitable for your OS platform.
         /// </remarks>
-        public CameraManager(DeviceInputFormat inputFormat)
+        /// <param name="inputFormat">
+        /// Input format used to enumerate devices and create cameras.
+        /// </param>
+        public CameraManager(DeviceInputFormat? inputFormat = null)
         {
             SetupFFmpeg();
-            InputFormat = inputFormat;
+
+            InputFormat = inputFormat ?? (
+                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? DeviceInputFormat.DShow
+                : RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? DeviceInputFormat.V4l2
+                : RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? DeviceInputFormat.AVFoundation
+                : throw new NotSupportedException($"Cannot find adequate input format for RID '{RuntimeInformation.RuntimeIdentifier}'."));
+
             avInputFormat = ffmpeg.av_find_input_format(InputFormat.ToString());
             avFormatContext = ffmpeg.avformat_alloc_context();
 
