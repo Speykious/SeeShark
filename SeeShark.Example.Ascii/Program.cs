@@ -11,8 +11,6 @@ namespace SeeShark.Example
 {
     class Program
     {
-        static FileStream? outputStream;
-
         static void Main(string[] args)
         {
             Console.CancelKeyPress += (object? _sender, ConsoleCancelEventArgs e) =>
@@ -98,14 +96,14 @@ namespace SeeShark.Example
             char[] chars = "`'.,-~:;\"^=+*rcvuoeasnmwzxiygjlfthkqpdb!?ILOAEBCDFGHJKMNPRSTUVYZWQX(){}[]|\\/&$@#"
                 .ToCharArray();
 
-            for (int y = 1; y <= outputFrame.Height; y++)
+            for (int y = 0; y < outputFrame.Height; y++)
             {
                 string line = "";
                 for (int x = 0; x < outputFrame.Width; x++)
                 {
-                    line += chars[map(outputFrame.RawData[x * y], 0, 255, 0, chars.Length - 1)];
+                    line += chars[map(outputFrame.RawData[y * outputFrame.Width + x], 0, 255, 0, chars.Length - 1)];
                 }
-                Console.WriteLine(line);
+                Console.Write(line);
             }
 
             if (frameCount == 10)
