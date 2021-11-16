@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 
+#
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeeShark", "SeeShark\SeeShark.csproj", "{597FF28C-A0C2-4E82-859D-1B8AE5A68E08}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeeShark.Example", "SeeShark.Example\SeeShark.Example.csproj", "{D83BB33E-369E-417F-8379-F5FFF731F1C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeeShark.Example.Ascii", "SeeShark.Example.Ascii\SeeShark.Example.Ascii.csproj", "{13526A3F-67DF-42D7-976F-136F0DEB4063}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,5 +21,9 @@ Global
 		{D83BB33E-369E-417F-8379-F5FFF731F1C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D83BB33E-369E-417F-8379-F5FFF731F1C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D83BB33E-369E-417F-8379-F5FFF731F1C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13526A3F-67DF-42D7-976F-136F0DEB4063}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13526A3F-67DF-42D7-976F-136F0DEB4063}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13526A3F-67DF-42D7-976F-136F0DEB4063}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13526A3F-67DF-42D7-976F-136F0DEB4063}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
