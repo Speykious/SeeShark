@@ -25,24 +25,38 @@ namespace SeeShark.Example
                 converter?.Dispose();
             };
 
-            if (args.Length < 1)
-            {
-                Console.WriteLine("Usage: dotnet run <camera-device>");
-                return;
-            }
-
-            var devicePath = args[0];
-
             Console.WriteLine($"Current directory: {Environment.CurrentDirectory}");
             Console.WriteLine("Running in {0}-bit mode.", Environment.Is64BitProcess ? "64" : "32");
             Console.WriteLine($"FFmpeg version info: {FFmpegVersion}");
 
+            string devicePath = "";
+
             Console.WriteLine("Creating camera manager...");
             var manager = new CameraManager();
 
-            Console.WriteLine("\nDevices available:");
-            foreach (var device in manager.Devices)
-                Console.WriteLine($"| {device.Path} ({device.Name})");
+            if (args.Length < 1)
+            {
+                while (true)
+                {
+                    Console.WriteLine("\nDevices available:");
+                    for (int i = 0; i < manager.Devices.Count; i++)
+                    {
+                        Console.WriteLine($"#{i} | {manager.Devices[i].Path} ({manager.Devices[i].Name})");
+                    }
+
+                    Console.WriteLine("\nChoose a camera by index: ");
+                    int index;
+                    if (int.TryParse(Console.ReadLine(), out index) && index < manager.Devices.Count && index >= 0)
+                    {
+                        devicePath = manager.Devices[index].Path;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                devicePath = args[0];
+            }
 
             Console.WriteLine("\nCreating camera...");
             karen = manager.GetCamera(devicePath);
