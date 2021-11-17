@@ -20,7 +20,7 @@ The library is quite close to a first beta release!
 - [x] Make so that `CameraManager` can provide cameras
 - [x] Implement platform-dependant helpers
 - [x] Use `Camera` instead of `CameraStreamDecoder` in `SeeShark.Example`
-- [ ] Make an ASCII art example *(yes, I will)*
+- [x] Make an ASCII art example *(yes, I will)*
 - [ ] Document usage of the library
 
 ***
