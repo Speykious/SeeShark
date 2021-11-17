@@ -69,6 +69,7 @@ namespace SeeShark.Example
                     case ConsoleKey.Enter:
                     case ConsoleKey.Escape:
                         karen.Pause();
+                        karen.Dispose();
                         loop = false;
                         break;
                 }
