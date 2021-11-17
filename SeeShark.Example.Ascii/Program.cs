@@ -94,9 +94,7 @@ namespace SeeShark.Example
             }
 
             Frame outputFrame = converter.Convert(frame);
-
-            char[] chars = "`'.,-~:;\"^=+*rcvuoeasnmwzxiygjlfthkqpdb!?ILOAEBCDFGHJKMNPRSTUVYZWQX(){}[]|\\/&$@#"
-                .ToCharArray();
+            char[] chars = " `'.,-~:;<>\"^=+*!?|\\/(){}[]#&$@".ToCharArray();
 
             builder.Clear();
             Console.SetCursorPosition(0, 0);
@@ -105,8 +103,6 @@ namespace SeeShark.Example
                 builder.Append(chars[map(outputFrame.RawData[i], 0, 255, 0, chars.Length - 1)]);
 
             Console.Write(builder.ToString());
-
-            Console.SetCursorPosition(0, 0);
 
             if (frameCount == 10)
             {
