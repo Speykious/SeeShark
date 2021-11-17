@@ -11,6 +11,7 @@ namespace SeeShark.Example
 {
     class Program
     {
+        private static Camera? karen;
         static void Main(string[] args)
         {
             Console.CancelKeyPress += (object? _sender, ConsoleCancelEventArgs e) =>
@@ -19,6 +20,9 @@ namespace SeeShark.Example
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Error.WriteLine("Oof :(");
                 Console.ResetColor();
+                karen?.Pause();
+                karen?.Dispose();
+                converter?.Dispose();
             };
 
             if (args.Length < 1)
@@ -41,7 +45,7 @@ namespace SeeShark.Example
                 Console.WriteLine($"| {device.Path} ({device.Name})");
 
             Console.WriteLine("\nCreating camera...");
-            var karen = manager.GetCamera(devicePath);
+            karen = manager.GetCamera(devicePath);
             karen.NewFrameHandler += OnNewFrame;
 
             Console.WriteLine("Start the decoding process...");
