@@ -107,12 +107,11 @@ namespace SeeShark.Example
             Console.Write(builder.ToString());
 
             Console.SetCursorPosition(0, 0);
-            Console.Write($"[FPS: {fps}]");
 
             if (frameCount == 10)
             {
                 fps = frameCount * 1000f / watch.ElapsedMilliseconds;
-                Console.Title = $"FPS: {fps}";
+                Console.Title = $"{outputFrame.Width}x{outputFrame.Height}@{fps.ToString("#.##")}fps";
                 frameCount = 0;
                 watch.Restart();
             }
