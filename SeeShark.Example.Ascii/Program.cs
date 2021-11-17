@@ -125,7 +125,7 @@ namespace SeeShark.Example
             if (frameCount == 10)
             {
                 fps = frameCount * 1000f / watch.ElapsedMilliseconds;
-                Console.Title = $"{outputFrame.Width}x{outputFrame.Height}@{fps.ToString("#.##")}fps";
+                Console.Title = $"{outputFrame.Width}x{outputFrame.Height}@{fps:#.##}fps";
                 frameCount = 0;
                 watch.Restart();
             }
@@ -138,8 +138,7 @@ namespace SeeShark.Example
             Console.Out.Flush();
         }
 
-        static int map(int x, int in_min, int in_max, int out_min, int out_max) {
-            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-        }
+        static int map(int x, int in_min, int in_max, int out_min, int out_max)
+        => (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
 }
