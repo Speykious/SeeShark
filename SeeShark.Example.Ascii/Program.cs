@@ -81,6 +81,7 @@ namespace SeeShark.Example
         private static FrameConverter? converter;
         private static Stopwatch watch = new Stopwatch();
         private static StringBuilder builder = new StringBuilder();
+        private static float fps = 0;
         public static void OnNewFrame(object? _sender, FrameEventArgs e)
         {
             var frame = e.Frame;
@@ -97,21 +98,21 @@ namespace SeeShark.Example
             char[] chars = "`'.,-~:;\"^=+*rcvuoeasnmwzxiygjlfthkqpdb!?ILOAEBCDFGHJKMNPRSTUVYZWQX(){}[]|\\/&$@#"
                 .ToCharArray();
 
-            Console.SetCursorPosition(0, 0);
-            for (int y = 0; y < outputFrame.Height; y++)
-            {
-                for (int x = 0; x < outputFrame.Width; x++)
-                {
-                    builder.Append(chars[map(outputFrame.RawData[y * outputFrame.Width + x], 0, 255, 0, chars.Length - 1)]);
-                }
-            }
-            Console.Write(builder.ToString());
-            Console.Out.Flush();
             builder.Clear();
+            Console.SetCursorPosition(0, 0);
+            int length = outputFrame.Width * outputFrame.Height;
+            for (int i = 0; i < length; i++)
+                builder.Append(chars[map(outputFrame.RawData[i], 0, 255, 0, chars.Length - 1)]);
+
+            Console.Write(builder.ToString());
+
+            Console.SetCursorPosition(0, 0);
+            Console.Write($"[FPS: {fps}]");
 
             if (frameCount == 10)
             {
-                Console.Title = "FPS: " + frameCount / (watch.ElapsedMilliseconds / 1000f);
+                fps = frameCount * 1000f / watch.ElapsedMilliseconds;
+                Console.Title = $"FPS: {fps}";
                 frameCount = 0;
                 watch.Restart();
             }
@@ -119,7 +120,9 @@ namespace SeeShark.Example
             {
                 watch.Start();
             }
+
             frameCount++;
+            Console.Out.Flush();
         }
 
         static int map(int x, int in_min, int in_max, int out_min, int out_max) {
