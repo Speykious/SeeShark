@@ -109,6 +109,10 @@ namespace SeeShark.Example
                 converter = new FrameConverter(frame.Width, frame.Height, frame.PixelFormat,
                     Console.WindowWidth, Console.WindowHeight, PixelFormat.Gray8);
             }
+            else if (e.Status != FFmpeg.DecodeStatus.NewFrame)
+            {
+                return;
+            }
 
             Frame outputFrame = converter.Convert(frame);
             char[] chars = " `'.,-~:;<>\"^=+*!?|\\/(){}[]#&$@".ToCharArray();

@@ -58,7 +58,7 @@ namespace SeeShark.FFmpeg
             Frame = new Frame();
         }
 
-        public bool TryDecodeNextFrame(out Frame nextFrame)
+        public DecodeStatus TryDecodeNextFrame(out Frame nextFrame)
         {
             int eagain = ffmpeg.AVERROR(ffmpeg.EAGAIN);
             int error;
@@ -77,7 +77,10 @@ namespace SeeShark.FFmpeg
                     nextFrame = Frame;
                     GC.Collect();
                     Thread.Sleep(1);
-                    return error == eagain;
+
+                    return error == eagain
+                        ? DecodeStatus.NoFrameAvailable
+                        : DecodeStatus.EndOfStream;
                 }
 
                 error.ThrowExceptionIfError();
@@ -98,7 +101,7 @@ namespace SeeShark.FFmpeg
 
             nextFrame = Frame;
             GC.Collect();
-            return true;
+            return DecodeStatus.NewFrame;
         }
 
         public IReadOnlyDictionary<string, string> GetContextInfo()

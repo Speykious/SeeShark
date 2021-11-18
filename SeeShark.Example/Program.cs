@@ -81,13 +81,16 @@ namespace SeeShark.Example
         static ulong frameCount = 0;
         public static void OnNewFrame(object? _sender, FrameEventArgs e)
         {
-            var frame = e.Frame;
-            Console.Write($"\x1b[2K\rFrame #{frameCount} | {frame.Width}x{frame.Height} (format {frame.PixelFormat})");
+            if (e.Status == FFmpeg.DecodeStatus.NewFrame)
+            {
+                var frame = e.Frame;
+                Console.Write($"\x1b[2K\rFrame #{frameCount} | {frame.Width}x{frame.Height} (format {frame.PixelFormat})");
 
-            outputStream?.Seek(0, SeekOrigin.Begin);
-            outputStream?.Write(frame.RawData);
+                outputStream?.Seek(0, SeekOrigin.Begin);
+                outputStream?.Write(frame.RawData);
 
-            frameCount++;
+                frameCount++;
+            }
         }
     }
 }

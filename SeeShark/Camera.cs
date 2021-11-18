@@ -27,9 +27,10 @@ namespace SeeShark
 
         protected void DecodeLoop()
         {
-            while (decoder.TryDecodeNextFrame(out var frame))
+            DecodeStatus status;
+            while ((status = decoder.TryDecodeNextFrame(out var frame)) != DecodeStatus.EndOfStream)
             {
-                OnNewFrame(new FrameEventArgs(frame));
+                OnNewFrame(new FrameEventArgs(frame, status));
 
                 if (!IsPlaying)
                     break;
