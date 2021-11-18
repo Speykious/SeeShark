@@ -8,7 +8,11 @@ Currently Work In Progress.
 
 ## State of the library
 
-The library is quite close to a first beta release!
+We just fixed the most significant bug of the library, where `av_read_frame()` would block if you stop your virtual camera.
+
+The library is thus in an MVP state!
+
+We have 2 more key features to add before we can focus on documentation and packaging (See TODO list below).
 
 ## TODO
 
@@ -21,6 +25,9 @@ The library is quite close to a first beta release!
 - [x] Implement platform-dependant helpers
 - [x] Use `Camera` instead of `CameraStreamDecoder` in `SeeShark.Example`
 - [x] Make an ASCII art example *(yes, I will)*
+- [x] Fix significant bug where `av_read_frame()` can block
+- [ ] Implement a `Frame.Save()` method that saves a `Frame` to an image
+- [ ] Create a `VideoStreamRecorder` to record the camera to a video
 - [ ] Document usage of the library
 
 ***
