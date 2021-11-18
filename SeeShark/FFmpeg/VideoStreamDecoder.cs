@@ -32,8 +32,10 @@ namespace SeeShark.FFmpeg
         {
             SetupFFmpeg();
 
-            this.FormatContext = ffmpeg.avformat_alloc_context();
-            var formatContext = this.FormatContext;
+            FormatContext = ffmpeg.avformat_alloc_context();
+            FormatContext->flags = ffmpeg.AVFMT_FLAG_NONBLOCK;
+
+            var formatContext = FormatContext;
             ffmpeg.avformat_open_input(&formatContext, url, inputFormat, null).ThrowExceptionIfError();
             ffmpeg.avformat_find_stream_info(formatContext, null).ThrowExceptionIfError();
 
@@ -58,38 +60,40 @@ namespace SeeShark.FFmpeg
 
         public bool TryDecodeNextFrame(out Frame nextFrame)
         {
-            Frame.Unref();
+            int eagain = ffmpeg.AVERROR(ffmpeg.EAGAIN);
             int error;
 
             do
             {
-                try
+                #region Read frame
+                // Manually wait for a new frame instead of letting it block
+                ffmpeg.av_packet_unref(Packet);
+                error = ffmpeg.av_read_frame(FormatContext, Packet);
+
+                if (error < 0)
                 {
-                    do
-                    {
-                        ffmpeg.av_packet_unref(Packet);
-                        error = ffmpeg.av_read_frame(FormatContext, Packet);
-
-                        if (error == ffmpeg.AVERROR_EOF)
-                        {
-                            nextFrame = Frame;
-                            GC.Collect();
-                            return false;
-                        }
-
-                        error.ThrowExceptionIfError();
-                    } while (Packet->stream_index != StreamIndex);
-
-                    ffmpeg.avcodec_send_packet(CodecContext, Packet).ThrowExceptionIfError();
-                }
-                finally
-                {
-                    ffmpeg.av_packet_unref(Packet);
+                    // Note: here we're returning true if there is no current frame available.
+                    // Maybe a better solution would be to return the value of an enum telling us what the state of decoding is.
+                    nextFrame = Frame;
+                    GC.Collect();
+                    Thread.Sleep(1);
+                    return error == eagain;
                 }
 
+                error.ThrowExceptionIfError();
+                #endregion
+
+                #region Decode packet
+                if (Packet->stream_index != StreamIndex)
+                    throw new InvalidOperationException("Packet does not belong to the decoder's video stream");
+
+                ffmpeg.avcodec_send_packet(CodecContext, Packet).ThrowExceptionIfError();
+
+                Frame.Unref();
                 error = Frame.Receive(CodecContext);
-            } while (error == ffmpeg.AVERROR(ffmpeg.EAGAIN));
-
+                #endregion
+            }
+            while (error == eagain);
             error.ThrowExceptionIfError();
 
             nextFrame = Frame;
