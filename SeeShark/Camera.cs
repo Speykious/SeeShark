@@ -6,7 +6,7 @@ using SeeShark.FFmpeg;
 
 namespace SeeShark
 {
-    public class Camera : ICamera, IDisposable
+    public class Camera : IDisposable
     {
         private Thread? decodingThread;
         private readonly CameraStreamDecoder decoder;
@@ -36,7 +36,7 @@ namespace SeeShark
             }
         }
 
-        public void Pause()
+        public void StopCapture()
         {
             if (!IsPlaying)
                 return;
@@ -45,7 +45,7 @@ namespace SeeShark
             decodingThread?.Join();
         }
 
-        public void Play()
+        public void StartCapture()
         {
             if (IsPlaying)
                 return;
@@ -68,7 +68,7 @@ namespace SeeShark
 
             if (disposing)
             {
-                Pause();
+                StopCapture();
                 decoder.Dispose();
             }
 

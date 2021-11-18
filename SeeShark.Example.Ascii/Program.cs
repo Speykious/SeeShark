@@ -20,7 +20,7 @@ namespace SeeShark.Example
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Error.WriteLine("Oof :(");
                 Console.ResetColor();
-                karen?.Pause();
+                karen?.StopCapture();
                 karen?.Dispose();
                 converter?.Dispose();
             };
@@ -45,8 +45,7 @@ namespace SeeShark.Example
                     }
 
                     Console.WriteLine("\nChoose a camera by index: ");
-                    int index;
-                    if (int.TryParse(Console.ReadLine(), out index) && index < manager.Devices.Count && index >= 0)
+                    if (int.TryParse(Console.ReadLine(), out int index) && index < manager.Devices.Count && index >= 0)
                     {
                         devicePath = manager.Devices[index].Path;
                         break;
@@ -76,15 +75,15 @@ namespace SeeShark.Example
                     case ConsoleKey.P:
                     case ConsoleKey.Spacebar:
                         if (karen.IsPlaying)
-                            karen.Pause();
+                            karen.StopCapture();
                         else
-                            karen.Play();
+                            karen.StartCapture();
                         break;
 
                     case ConsoleKey.Q:
                     case ConsoleKey.Enter:
                     case ConsoleKey.Escape:
-                        karen.Pause();
+                        karen.StopCapture();
                         karen.Dispose();
                         loop = false;
                         converter?.Dispose();
@@ -97,8 +96,8 @@ namespace SeeShark.Example
 
         static uint frameCount = 0;
         private static FrameConverter? converter;
-        private static Stopwatch watch = new Stopwatch();
-        private static StringBuilder builder = new StringBuilder();
+        private static readonly Stopwatch watch = new Stopwatch();
+        private static readonly StringBuilder builder = new StringBuilder();
         private static float fps = 0;
         public static void OnNewFrame(object? _sender, FrameEventArgs e)
         {

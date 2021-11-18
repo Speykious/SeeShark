@@ -45,7 +45,7 @@ namespace SeeShark.Example
             karen.NewFrameHandler += OnNewFrame;
 
             Console.WriteLine("Start the decoding process...");
-            karen.Play();
+            karen.StartCapture();
 
             Console.WriteLine("Press Space or P to play/pause the camera.");
             Console.WriteLine("Press Enter or Q or Escape to exit the program.");
@@ -60,15 +60,15 @@ namespace SeeShark.Example
                     case ConsoleKey.P:
                     case ConsoleKey.Spacebar:
                         if (karen.IsPlaying)
-                            karen.Pause();
+                            karen.StopCapture();
                         else
-                            karen.Play();
+                            karen.StartCapture();
                         break;
 
                     case ConsoleKey.Q:
                     case ConsoleKey.Enter:
                     case ConsoleKey.Escape:
-                        karen.Pause();
+                        karen.StopCapture();
                         karen.Dispose();
                         loop = false;
                         break;
