@@ -31,6 +31,6 @@ namespace SeeShark
         public static bool operator ==(CameraInfo left, CameraInfo right) => left.Equals(right);
         public static bool operator !=(CameraInfo left, CameraInfo right) => !(left == right);
 
-        public override string? ToString() => $"{Name} ({Path})";
+        public override string? ToString() => $"{Path} ({Name})";
     }
 }
