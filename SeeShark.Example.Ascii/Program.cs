@@ -136,7 +136,7 @@ namespace SeeShark.Example.Ascii
             }
             else if (frameCount % 10 == 0)
             {
-                var fps = 1f / watch.Elapsed.Seconds;
+                var fps = 1000f / watch.ElapsedMilliseconds;
                 Console.Title = $"{outputFrame.Width}x{outputFrame.Height}@{fps:#.##}fps";
                 watch.Restart();
             }
