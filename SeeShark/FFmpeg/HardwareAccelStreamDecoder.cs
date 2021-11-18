@@ -27,7 +27,7 @@ namespace SeeShark.FFmpeg
             HwFrame = new Frame();
         }
 
-        public new bool TryDecodeNextFrame(out Frame nextFrame)
+        public new DecodeStatus TryDecodeNextFrame(out Frame nextFrame)
         {
             var ret = base.TryDecodeNextFrame(out var frame);
 
