@@ -5,6 +5,7 @@
 using System;
 using System.Diagnostics;
 using System.Text;
+using FFmpeg.AutoGen;
 using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark.Example.Ascii
@@ -33,6 +34,7 @@ namespace SeeShark.Example.Ascii
                 "/usr/lib",
                 "/usr/lib64"
             );
+            SetupFFmpeg(ffmpeg.RootPath);
 
             Console.WriteLine($"Current directory: {Environment.CurrentDirectory}");
             Console.WriteLine("Running in {0}-bit mode.", Environment.Is64BitProcess ? "64" : "32");
