@@ -4,6 +4,7 @@
 
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
+using DirectShowLib;
 using FFmpeg.AutoGen;
 using SeeShark.FFmpeg;
 using static SeeShark.FFmpeg.FFmpegManager;
@@ -56,29 +57,45 @@ namespace SeeShark
         /// </summary>
         private CameraInfo[] enumerateDevices()
         {
-            AVDeviceInfoList* avDeviceInfoList = null;
-            ffmpeg.avdevice_list_input_sources(avInputFormat, null, null, &avDeviceInfoList).ThrowExceptionIfError();
-            int nDevices = avDeviceInfoList->nb_devices;
-            var avDevices = avDeviceInfoList->devices;
-
-            var devices = new CameraInfo[nDevices];
-            for (int i = 0; i < nDevices; i++)
+            // FFmpeg doesn't implement avdevice_list_input_sources() for the DShow input format yet.
+            // See first SeeShark issue: https://github.com/vignetteapp/SeeShark/issues/1
+            if (InputFormat == DeviceInputFormat.DShow)
             {
-                var avDevice = avDevices[i];
-                var name = Marshal.PtrToStringAnsi((IntPtr)avDevice->device_description);
-                var path = Marshal.PtrToStringAnsi((IntPtr)avDevice->device_name);
-
-                if (path == null)
-                    throw new InvalidOperationException($"Device at index {i} doesn't have a path!");
-
-                if (name == null)
-                    name = path;
-
-                devices[i] = new CameraInfo(name, path);
+                var dsDevices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
+                var devices = new CameraInfo[dsDevices.Length];
+                for (int i = 0; i < dsDevices.Length; i++)
+                {
+                    var dsDevice = dsDevices[i];
+                    devices[i] = new CameraInfo(dsDevice.Name, dsDevice.DevicePath);
+                }
+                return devices;
             }
+            else
+            {
+                AVDeviceInfoList* avDeviceInfoList = null;
+                ffmpeg.avdevice_list_input_sources(avInputFormat, null, null, &avDeviceInfoList).ThrowExceptionIfError();
+                int nDevices = avDeviceInfoList->nb_devices;
+                var avDevices = avDeviceInfoList->devices;
 
-            ffmpeg.avdevice_free_list_devices(&avDeviceInfoList);
-            return devices;
+                var devices = new CameraInfo[nDevices];
+                for (int i = 0; i < nDevices; i++)
+                {
+                    var avDevice = avDevices[i];
+                    var name = Marshal.PtrToStringAnsi((IntPtr)avDevice->device_description);
+                    var path = Marshal.PtrToStringAnsi((IntPtr)avDevice->device_name);
+
+                    if (path == null)
+                        throw new InvalidOperationException($"Device at index {i} doesn't have a path!");
+
+                    if (name == null)
+                        name = path;
+
+                    devices[i] = new CameraInfo(name, path);
+                }
+
+                ffmpeg.avdevice_free_list_devices(&avDeviceInfoList);
+                return devices;
+            }
         }
 
 
