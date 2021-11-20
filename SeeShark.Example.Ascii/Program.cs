@@ -27,6 +27,13 @@ namespace SeeShark.Example.Ascii
                 converter?.Dispose();
             };
 
+            FFmpegLoader.TrySetRootPath(
+                new string[] { "avdevice", "avformat", "avcodec", "swscale" },
+                AppDomain.CurrentDomain.BaseDirectory,
+                "/usr/lib",
+                "/usr/lib64"
+            );
+
             Console.WriteLine($"Current directory: {Environment.CurrentDirectory}");
             Console.WriteLine("Running in {0}-bit mode.", Environment.Is64BitProcess ? "64" : "32");
             Console.WriteLine($"FFmpeg version info: {FFmpegVersion}");
