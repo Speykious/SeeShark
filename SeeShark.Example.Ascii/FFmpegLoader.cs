@@ -63,7 +63,7 @@ namespace SeeShark.Example.Ascii
                 ffmpeg.RootPath = paths.First((path) => CanLoadLibraries(requiredLibraries, path));
                 return true;
             }
-            catch (ArgumentNullException)
+            catch (InvalidOperationException)
             {
                 return false;
             }
