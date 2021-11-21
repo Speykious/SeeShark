@@ -87,9 +87,6 @@ namespace SeeShark
                     if (path == null)
                         throw new InvalidOperationException($"Device at index {i} doesn't have a path!");
 
-                    if (name == null)
-                        name = path;
-
                     devices[i] = new CameraInfo(name, path);
                 }
 
