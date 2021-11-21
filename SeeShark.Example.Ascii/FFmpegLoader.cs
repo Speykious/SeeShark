@@ -56,17 +56,9 @@ namespace SeeShark.Example.Ascii
         /// <param name="requiredLibraries">The required libraries. If you don't need all of them, you can specify them here.</param>
         /// <param name="paths">Every path to try out. It will set the RootPath to th first one that works.</param>
         /// <returns>Whether it succeeded in setting the RootPath.</returns>
-        public static bool TrySetRootPath(string[] requiredLibraries, params string[] paths)
+        public static void TrySetRootPath(string[] requiredLibraries, params string[] paths)
         {
-            try
-            {
-                ffmpeg.RootPath = paths.First((path) => CanLoadLibraries(requiredLibraries, path));
-                return true;
-            }
-            catch (InvalidOperationException)
-            {
-                return false;
-            }
+            ffmpeg.RootPath = paths.First((path) => CanLoadLibraries(requiredLibraries, path));
         }
     }
 }
