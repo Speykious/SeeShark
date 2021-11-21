@@ -4,7 +4,6 @@
 
 using System.Runtime.InteropServices;
 using FFmpeg.AutoGen;
-using SeeShark.FFmpeg;
 using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark.FFmpeg
@@ -72,8 +71,6 @@ namespace SeeShark.FFmpeg
 
                 if (error < 0)
                 {
-                    // Note: here we're returning true if there is no current frame available.
-                    // Maybe a better solution would be to return the value of an enum telling us what the state of decoding is.
                     nextFrame = Frame;
                     GC.Collect();
                     Thread.Sleep(1);
