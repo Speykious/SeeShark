@@ -2,10 +2,8 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under LGPL v3. See LICENSE.LESSER.md for details.
 
-using System;
 using System.Diagnostics;
 using System.Text;
-using FFmpeg.AutoGen;
 using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark.Example.Ascii
@@ -28,13 +26,11 @@ namespace SeeShark.Example.Ascii
                 converter?.Dispose();
             };
 
-            FFmpegLoader.TrySetRootPath(
-                new string[] { "avdevice", "avformat", "avcodec", "swscale" },
+            SetupFFmpeg(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "/usr/lib",
                 "/usr/lib64"
             );
-            SetupFFmpeg(ffmpeg.RootPath);
 
             Console.WriteLine($"Current directory: {Environment.CurrentDirectory}");
             Console.WriteLine("Running in {0}-bit mode.", Environment.Is64BitProcess ? "64" : "32");
