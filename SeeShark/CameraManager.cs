@@ -66,7 +66,7 @@ namespace SeeShark
                 for (int i = 0; i < dsDevices.Length; i++)
                 {
                     var dsDevice = dsDevices[i];
-                    devices[i] = new CameraInfo(dsDevice.Name, $"video={dsDevice.DevicePath}");
+                    devices[i] = new CameraInfo(dsDevice.Name, $"video={dsDevice.Name}");
                 }
                 return devices;
             }
