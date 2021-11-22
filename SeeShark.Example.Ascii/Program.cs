@@ -15,6 +15,7 @@ namespace SeeShark.Example.Ascii
 
         static void Main(string[] args)
         {
+            // Casually displaying "Oof :(" when exiting the program with force.
             Console.CancelKeyPress += (object? _sender, ConsoleCancelEventArgs e) =>
             {
                 Console.Error.WriteLine("\n\n");
@@ -24,6 +25,7 @@ namespace SeeShark.Example.Ascii
                 Dispose();
             };
 
+            // You can add your own path for FFmpeg libraries here!
             SetupFFmpeg(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "/usr/lib",
@@ -39,6 +41,9 @@ namespace SeeShark.Example.Ascii
             string devicePath;
             if (args.Length < 1)
             {
+                /// Select an available camera device.
+                /// <see cref="CameraManager.Devices"/> only gets filled when the camera manager is instanciated,
+                /// since it is not watching devices by default.
                 while (true)
                 {
                     Console.WriteLine("\nDevices available:");
@@ -59,13 +64,22 @@ namespace SeeShark.Example.Ascii
                 devicePath = args[0];
             }
 
+            /// You can get a <see cref="Camera"/> from either a string
+            /// representing the device path, or a <see cref="CameraInfo">.
+
+            // Unfortunately, she saw the manager
             karen = manager.GetCamera(devicePath);
+
+            /// Attach our <see cref="OnNewFrame"/> method to the camera's frame event handler,
+            /// so that we can process every coming frame the way we want.
             karen.NewFrameHandler += OnNewFrame;
 
             Console.WriteLine($"Camera chosen: {karen.Info}");
             Console.WriteLine("Press Space or P to play/pause the camera.");
             Console.WriteLine("Press Enter or Q or Escape to exit the program.");
 
+            // I could have written a simple `while (true)`, but then I used a `switch` statement.
+            // If only C# had labelled loops like Rust :(
             for (var loop = true; loop;)
             {
                 Console.WriteLine("\x1b[2K\rCamera is {0}", karen.IsPlaying ? "Playing" : "Paused");
@@ -89,31 +103,46 @@ namespace SeeShark.Example.Ascii
             }
 
             Dispose();
+
+            // Unless you filmed a shark with your camera, no.
             Console.WriteLine("\n\nDid you SeeShark? :)");
         }
 
         static long frameCount = 0;
+
+        /// <summary>
+        /// Our custom frame event callback.
+        /// Each time it is triggered, it will draw a new ASCII frame on the screen
+        /// and update the terminal window title.
+        /// </summary>
         public static void OnNewFrame(object? _sender, FrameEventArgs e)
         {
             var frame = e.Frame;
             if (converter == null || Console.WindowWidth != converter.SrcWidth ||
                 Console.WindowHeight != converter.SrcHeight)
             {
+                // We can't just override the FrameConverter's DstWidth and DstHeight, due to how FFmpeg works.
+                // We have to dispose the previous one and instanciate a new one with the new window size.
                 converter?.Dispose();
                 converter = new FrameConverter(frame, Console.WindowWidth, Console.WindowHeight, PixelFormat.Gray8);
             }
             else if (e.Status != FFmpeg.DecodeStatus.NewFrame)
             {
+                // Don't redraw the frame if it's not new, unless it's resized.
                 return;
             }
 
+            // Resize the frame to the size of the terminal window, then draw it in ASCII.
             Frame cFrame = converter.Convert(frame);
             DrawAsciiFrame(cFrame);
-            DisplayTitle(frameCount, cFrame);
+            DisplayTitle(frameCount, cFrame.Width, cFrame.Height);
 
             frameCount++;
         }
 
+        /// <summary>
+        /// Dispose our <see cref="IDisposable"/> objects.
+        /// </summary>
         public static void Dispose()
         {
             karen?.StopCapture();
@@ -123,11 +152,26 @@ namespace SeeShark.Example.Ascii
 
         static readonly StringBuilder builder = new StringBuilder();
         static readonly char[] asciiPixels = " `'.,-~:;<>\"^=+*!?|\\/(){}[]#&$@".ToCharArray();
+
+        /// <summary>
+        /// Draw a frame in ASCII art.
+        /// </summary>
+        /// <remarks>
+        /// In this particular example we know that the frame has the Gray8 pixel format
+        /// and that it has been resized to have the exact size of the terminal window.
+        /// </remarks>
+        /// <param name="frame">Frame containing raw Gray8 pixel data.</param>
         public static void DrawAsciiFrame(Frame frame)
         {
+            // We don't call Console.Clear() here because it actually adds stutter.
+            // Go ahead and try this example in Alacritty to see how smooth it is!
             builder.Clear();
             Console.SetCursorPosition(0, 0);
             int length = frame.Width * frame.Height;
+
+            // Since we know that the frame has the exact size of the terminal window,
+            // we have no need to add any newline characters. Thus we can just go through
+            // the entire byte array to build the ASCII converted string.
             for (int i = 0; i < length; i++)
                 builder.Append(asciiPixels[RangeMap(frame.RawData[i], 0, 255, 0, asciiPixels.Length - 1)]);
 
@@ -135,8 +179,18 @@ namespace SeeShark.Example.Ascii
             Console.Out.Flush();
         }
 
+        /// <summary>
+        /// Stopwatch used to measure the FPS.
+        /// </summary>
         static readonly Stopwatch watch = new Stopwatch();
-        public static void DisplayTitle(long frameCount, Frame outputFrame)
+
+        /// <summary>
+        /// Updates the title of the terminal window to display width, height and FPS information.
+        /// </summary>
+        /// <param name="frameCount">Number of frames decoded so far.</param>
+        /// <param name="width">Current terminal window width.</param>
+        /// <param name="height">Current terminal window height.</param>
+        public static void DisplayTitle(long frameCount, int width, int height)
         {
             if (frameCount == 0)
             {
@@ -145,7 +199,7 @@ namespace SeeShark.Example.Ascii
             else if (frameCount % 10 == 0)
             {
                 var fps = 1000f / watch.ElapsedMilliseconds;
-                Console.Title = $"{outputFrame.Width}x{outputFrame.Height}@{fps:#.##}fps";
+                Console.Title = $"{width}x{height}@{fps:#.##}fps";
                 watch.Restart();
             }
         }
