@@ -11,8 +11,8 @@ namespace SeeShark.Example.Ascii
     class Program
     {
         static Camera? karen;
-
         static FrameConverter? converter;
+
         static void Main(string[] args)
         {
             Console.CancelKeyPress += (object? _sender, ConsoleCancelEventArgs e) =>
@@ -21,9 +21,7 @@ namespace SeeShark.Example.Ascii
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Error.WriteLine("Oof :(");
                 Console.ResetColor();
-                karen?.StopCapture();
-                karen?.Dispose();
-                converter?.Dispose();
+                Dispose();
             };
 
             SetupFFmpeg(
@@ -90,9 +88,7 @@ namespace SeeShark.Example.Ascii
                 }
             }
 
-            karen.StopCapture();
-            karen.Dispose();
-            converter?.Dispose();
+            Dispose();
             Console.WriteLine("\n\nDid you SeeShark? :)");
         }
 
@@ -116,6 +112,13 @@ namespace SeeShark.Example.Ascii
             DisplayTitle(frameCount, cFrame);
 
             frameCount++;
+        }
+
+        public static void Dispose()
+        {
+            karen?.StopCapture();
+            karen?.Dispose();
+            converter?.Dispose();
         }
 
         static readonly StringBuilder builder = new StringBuilder();
