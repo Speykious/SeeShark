@@ -1,38 +1,91 @@
 # SeeShark
 
-> Simple C# camera library.
+> Simple C# camera library. First release coming soon!
+
+![SeeShark banner.](https://repository-images.githubusercontent.com/424622946/346f57c6-73f0-4276-9913-4a3101f9fc2f)
+
+[![Discord](https://img.shields.io/discord/871618277258960896?color=7289DA&label=%20&logo=discord&logoColor=white)](https://discord.gg/Tz96ZdKjSA)
 
 When you SeeShark, you C#!
 
-Currently Work In Progress.
+SeeShark is a simple cross-platform .NET library for handling camera inputs on Linux, Windows and MacOS.
 
-## State of the library
+Using FFmpeg, it allows you to enumerate camera devices and decode raw frames in 199 different pixel formats (because that's how powerful FFmpeg is!).
 
-We just fixed the most significant bug of the library, where `av_read_frame()` would block if you stop your virtual camera.
+Features include:
+- zero-copy
+- memory-safe
+- access to raw data
+- conversion of a frame from a pixel format to another
+- scaling frames
+- managing camera devices
 
-The library is thus in an MVP state!
-
-We decided not to include any image saving or video stream recording feature for now.
-The reason is that there are already other libraries that use FFmpeg and that can do that, using FFmpeg or something else.
-This is honestly way enough abstraction to have to get a working camera stream.
-
-Thus we can now focus on documentation, and then later on packaging.
-
-## TODO
-
-- [x] Abstract `CameraStreamDecoder` into a `VideoStreamDecoder`
-- [x] Extract frame sending logic from `ICamera` into an `IVideo`
-- [x] Implement a way to enumerate camera devices
-- [x] Write a `Camera` class that implements `ICamera`
-- [x] Review implementations of `IDisposable`
-- [x] Make so that `CameraManager` can provide cameras
-- [x] Implement platform-dependant helpers
-- [x] Use `Camera` instead of `CameraStreamDecoder` in `SeeShark.Example`
-- [x] Make an ASCII art example *(yes, I will)*
-- [x] Fix significant bug where `av_read_frame()` can block
-- [ ] Document usage of the library
+Features **don't** include:
+- saving a frame to some image file format
+- recording a camera stream to a video file
+- manage audio devices
 
 ***
+
+## Example code
+
+```cs
+using System;
+using System.Threading;
+using SeeShark;
+
+namespace YourProgram
+{
+    // This program will display camera frames info for 10 seconds.
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // Create a CameraManager to manage camera devices
+            using var manager = new CameraManager();
+
+            // Get the first camera available
+            using var camera = manager.GetCamera(0);
+
+            // Attach your callback to the camera's frame event handler
+            camera.NewFrameHandler += OnNewFrame;
+
+            // Start decoding frames
+            camera.StartCapture();
+
+            // The camera decodes frames asynchronously.
+            Thread.Sleep(TimeSpan.FromSeconds(10));
+
+            // Stop decoding frames
+            camera.StopCapture();
+        }
+
+        // Create a callback for decoded camera frames
+        public static void OnNewFrame(object? _sender, FrameEventArgs e)
+        {
+            Frame frame = e.Frame;
+
+            // Get information and raw data from a frame
+            Console.WriteLine($"New frame ({frame.Width}x{frame.Height} | {frame.PixelFormat})");
+            Console.WriteLine($"Length of raw data: {frame.RawData.Length} bytes");
+        }
+    }
+}
+
+```
+
+You can also look at our overcommented [`SeeShark.Example.Ascii`](./SeeShark.Example.Ascii/) program which displays your camera input with ASCII characters.
+
+***
+
+## Contribute
+
+You can request a feature or fix a bug by reporting an issue.
+
+If you feel like fixing a bug or implementing a feature, you can fork this repository and make a pull request at any time!
+
+You can also join our discord server where we talk about our different projects.
+This one has a particular **#Project SeeShark** thread that can be found under the **#main** channel.
 
 ## License
 
