@@ -12,7 +12,11 @@ We just fixed the most significant bug of the library, where `av_read_frame()` w
 
 The library is thus in an MVP state!
 
-We have 2 more key features to add before we can focus on documentation and packaging (See TODO list below).
+We decided not to include any image saving or video stream recording feature for now.
+The reason is that there are already other libraries that use FFmpeg and that can do that, using FFmpeg or something else.
+This is honestly way enough abstraction to have to get a working camera stream.
+
+Thus we can now focus on documentation, and then later on packaging.
 
 ## TODO
 
@@ -26,8 +30,6 @@ We have 2 more key features to add before we can focus on documentation and pack
 - [x] Use `Camera` instead of `CameraStreamDecoder` in `SeeShark.Example`
 - [x] Make an ASCII art example *(yes, I will)*
 - [x] Fix significant bug where `av_read_frame()` can block
-- [ ] Implement a `Frame.Save()` method that saves a `Frame` to an image
-- [ ] Create a `VideoStreamRecorder` to record the camera to a video
 - [ ] Document usage of the library
 
 ***
