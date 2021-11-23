@@ -2,8 +2,6 @@
 
 > Simple C# camera library. First release coming soon!
 
-![SeeShark banner.](https://repository-images.githubusercontent.com/424622946/346f57c6-73f0-4276-9913-4a3101f9fc2f)
-
 [![Discord](https://img.shields.io/discord/871618277258960896?color=7289DA&label=%20&logo=discord&logoColor=white)](https://discord.gg/Tz96ZdKjSA)
 
 When you SeeShark, you C#!
