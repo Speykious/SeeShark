@@ -74,6 +74,10 @@ namespace YourProgram
 
 You can also look at our overcommented [`SeeShark.Example.Ascii`](./SeeShark.Example.Ascii/) program which displays your camera input with ASCII characters.
 
+See demo of the example below.
+
+![ASCII output of OBS virtual camera, feat. Bad Apple!!](https://cdn.discordapp.com/attachments/893505802004992100/912332261293166602/SeeShark-demo.gif)
+
 ***
 
 ## Contribute
