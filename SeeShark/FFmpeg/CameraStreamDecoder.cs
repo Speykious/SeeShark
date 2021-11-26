@@ -1,6 +1,6 @@
 // Copyright (c) The Vignette Authors
 // This file is part of SeeShark.
-// SeeShark is licensed under LGPL v3. See LICENSE.LESSER.md for details.
+// SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
 using FFmpeg.AutoGen;
 
