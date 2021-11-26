@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
+  <PropertyGroup Label="Project">
+    <AssemtlyTitle>SeeShark</AssemtlyTitle>
+    <AssemblyName>SeeShark</AssemblyName>
     <TargetFramework>net6.0</TargetFramework>
     <OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -8,9 +10,26 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
+  <PropertyGroup Label="Nuget">
+    <PackageId>SeeShark</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>The Vignette Authors</Authors>
+    <PackageTags>FFmpeg;Camera;Webcam;Stream;</PackageTags>
+    <Title>SeeShark</Title>
+    <Description>Simple Camera library</Description>
+    <Copyright>2021 The Vignette Authors</Copyright>
+    <PackageProjectUrl>https://github.com/vignetteapp/SeeShark</PackageProjectUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+  </PropertyGroup>
+
+  <ItemGroup Label="Package References">
     <PackageReference Include="DirectShowLib.Standard" Version="2.1.0" />
     <PackageReference Include="FFmpeg.AutoGen" Version="4.4.1" />
+  </ItemGroup>
+
+  <ItemGroup Label="Documents">
+    <Content Include="..\Readme.md" Link="Readme.md" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
