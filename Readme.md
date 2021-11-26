@@ -91,7 +91,5 @@ This one has a particular **#Project SeeShark** thread that can be found under t
 
 ## License
 
-![LGPL v3 logo - Free as in Freedom.](https://www.gnu.org/graphics/lgplv3-with-text-154x68.png)
-
-This library is licensed under the [LGPL v3](https://www.gnu.org/licenses/lgpl-3.0.html), which is a set of additional permissions on top of the [GPL v3](https://www.gnu.org/licenses/gpl-3.0.html).
-See [LICENSE.LESSER.md](LICENSE.LESSER.md) for details.
+This library is licensed under the BSD 3-Clause License.
+See [LICENSE](LICENSE) for details.
