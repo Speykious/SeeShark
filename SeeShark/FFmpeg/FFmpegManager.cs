@@ -64,7 +64,12 @@ namespace SeeShark.FFmpeg
             if (IsFFmpegSetup)
                 return;
 
-            TrySetRootPath(LF.AVCodec | LF.AVDevice | LF.AVFormat | LF.SWScale, paths);
+            var requiredLibs = LF.AVCodec | LF.AVDevice | LF.AVFormat | LF.SWScale;
+
+            if (paths.Length == 0)
+                TrySetRootPath(requiredLibs, AppDomain.CurrentDomain.BaseDirectory);
+            else
+                TrySetRootPath(requiredLibs, paths);
             SetupFFmpegLogging(logLevel, logColor);
             ffmpeg.avdevice_register_all();
 
