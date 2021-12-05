@@ -46,7 +46,7 @@ namespace YourProgram
             using var camera = manager.GetCamera(0);
 
             // Attach your callback to the camera's frame event handler
-            camera.NewFrameHandler += OnNewFrame;
+            camera.OnFrame += FrameEventHandler;
 
             // Start decoding frames
             camera.StartCapture();
@@ -59,7 +59,7 @@ namespace YourProgram
         }
 
         // Create a callback for decoded camera frames
-        public static void OnNewFrame(object? _sender, FrameEventArgs e)
+        public static void FrameEventHandler(object? _sender, FrameEventArgs e)
         {
             Frame frame = e.Frame;
 
