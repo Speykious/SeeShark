@@ -20,6 +20,7 @@
     <Copyright>2021 The Vignette Authors</Copyright>
     <PackageProjectUrl>https://github.com/vignetteapp/SeeShark</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup Label="Package References">
@@ -28,7 +29,7 @@
   </ItemGroup>
 
   <ItemGroup Label="Documents">
-    <Content Include="..\Readme.md" Link="Readme.md" />
+    <None Include="..\Readme.md" Pack="true" PackagePath="" />
     <None Include="..\LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
 
