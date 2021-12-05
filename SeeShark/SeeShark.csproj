@@ -5,7 +5,7 @@
     <AssemblyName>SeeShark</AssemblyName>
     <TargetFramework>net6.0</TargetFramework>
     <OutputType>Library</OutputType>
-    <ImplicitUsings>enable</ImplicitUsings>
+    <ImplicitUsings>disable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
   </PropertyGroup>

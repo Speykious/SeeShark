@@ -2,6 +2,10 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using FFmpeg.AutoGen;
 using LF = SeeShark.FFmpeg.LibraryFlags;

@@ -2,6 +2,8 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
+using System;
+using System.Threading;
 using SeeShark.FFmpeg;
 
 namespace SeeShark
@@ -11,11 +13,11 @@ namespace SeeShark
         private Thread? decodingThread;
         private readonly CameraStreamDecoder decoder;
 
-        public CameraInfo Info { get; private set; }
+        public CameraInfo Info { get; }
         public bool IsPlaying { get; private set; }
         public bool IsDisposed { get; private set; }
 
-        public event EventHandler<FrameEventArgs>? NewFrameHandler;
+        public event EventHandler<FrameEventArgs>? OnFrame;
 
         public Camera(CameraInfo info, DeviceInputFormat inputFormat)
         {
@@ -23,14 +25,12 @@ namespace SeeShark
             decoder = new CameraStreamDecoder(info.Path, inputFormat);
         }
 
-        protected void OnNewFrame(FrameEventArgs e) => NewFrameHandler?.Invoke(this, e);
-
         protected void DecodeLoop()
         {
             DecodeStatus status;
             while ((status = decoder.TryDecodeNextFrame(out var frame)) != DecodeStatus.EndOfStream)
             {
-                OnNewFrame(new FrameEventArgs(frame, status));
+                OnFrame?.Invoke(this, new FrameEventArgs(frame, status));
 
                 if (!IsPlaying)
                     break;
@@ -52,7 +52,7 @@ namespace SeeShark
                 return;
 
             IsPlaying = true;
-            decodingThread = new Thread(new ThreadStart(DecodeLoop));
+            decodingThread = new Thread(DecodeLoop);
             decodingThread.Start();
         }
 
