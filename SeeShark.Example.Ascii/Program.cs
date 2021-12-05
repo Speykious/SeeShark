@@ -2,6 +2,7 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
+using System;
 using System.Diagnostics;
 using System.Text;
 using static SeeShark.FFmpeg.FFmpegManager;
@@ -72,7 +73,7 @@ namespace SeeShark.Example.Ascii
 
             /// Attach our <see cref="OnNewFrame"/> method to the camera's frame event handler,
             /// so that we can process every coming frame the way we want.
-            karen.NewFrameHandler += OnNewFrame;
+            karen.OnFrame += OnFrameEventHandler;
 
             Console.WriteLine($"Camera chosen: {karen.Info}");
             Console.WriteLine("Press Space or P to play/pause the camera.");
@@ -115,7 +116,7 @@ namespace SeeShark.Example.Ascii
         /// Each time it is triggered, it will draw a new ASCII frame on the screen
         /// and update the terminal window title.
         /// </summary>
-        public static void OnNewFrame(object? _sender, FrameEventArgs e)
+        public static void OnFrameEventHandler(object? _sender, FrameEventArgs e)
         {
             var frame = e.Frame;
             if (converter == null || Console.WindowWidth != converter.SrcWidth ||
