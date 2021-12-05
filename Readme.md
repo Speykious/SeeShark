@@ -76,7 +76,7 @@ You can also look at our overcommented [`SeeShark.Example.Ascii`](./SeeShark.Exa
 
 See demo of the example below.
 
-![ASCII output of OBS virtual camera, feat. Bad Apple!!](https://media3.giphy.com/media/6GmAOVBsU1wVvVORRG/giphy.gif)
+![ASCII output of OBS virtual camera, feat. Bad Apple!!](https://i.imgur.com/YnW5Nn2.gif)
 
 ***
 
