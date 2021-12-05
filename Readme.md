@@ -1,8 +1,8 @@
 # SeeShark
 
-> Simple C# camera library. First release coming soon!
+> Simple C# camera library.
 
-[![Discord](https://img.shields.io/discord/871618277258960896?color=7289DA&label=%20&logo=discord&logoColor=white)](https://discord.gg/Tz96ZdKjSA)
+[![Discord](https://img.shields.io/discord/871618277258960896?color=7289DA&label=%20&logo=discord&logoColor=white)](https://discord.gg/Tz96ZdKjSA) ![NuGet](https://img.shields.io/nuget/v/SeeShark)
 
 When you SeeShark, you C#!
 
