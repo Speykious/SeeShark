@@ -48,7 +48,7 @@ namespace SeeShark
         /// <summary>
         /// Invoked when a camera device has been disconnected.
         /// </summary>
-        public event Action<CameraInfo>? OnDeviceLost;
+        public event Action<CameraInfo>? OnLostDevice;
 
         /// <summary>
         /// Whether this <see cref="CameraManager"/> has been disposed yet.
@@ -167,7 +167,7 @@ namespace SeeShark
                 OnNewDevice?.Invoke(device);
 
             foreach (var device in Devices.Except(newDevices))
-                OnDeviceLost?.Invoke(device);
+                OnLostDevice?.Invoke(device);
 
             Devices = newDevices;
         }
