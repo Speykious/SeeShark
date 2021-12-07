@@ -3,7 +3,7 @@
   <PropertyGroup Label="Project">
     <AssemtlyTitle>SeeShark</AssemtlyTitle>
     <AssemblyName>SeeShark</AssemblyName>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net6.0;net5.0;</TargetFrameworks>
     <OutputType>Library</OutputType>
     <ImplicitUsings>disable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
