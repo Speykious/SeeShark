@@ -7,7 +7,7 @@ using FFmpeg.AutoGen;
 
 namespace SeeShark
 {
-    public sealed unsafe class Frame : IDisposable
+    public sealed unsafe class Frame : Disposable
     {
         internal readonly AVFrame* AVFrame;
 
@@ -33,8 +33,6 @@ namespace SeeShark
         /// Raw data of the frame in bytes.
         /// </summary>
         public ReadOnlySpan<byte> RawData => new ReadOnlySpan<byte>(AVFrame->data[0], WidthStep * Height);
-
-        public bool IsDisposed { get; private set; }
 
         // This constructor is internal because the user of the library
         // is not supposed to deal with any actual FFmpeg type.
@@ -75,30 +73,14 @@ namespace SeeShark
         /// </returns>
         internal int Receive(AVCodecContext* codecContext) => ffmpeg.avcodec_receive_frame(codecContext, AVFrame);
 
-        public void Dispose()
+        protected override void DisposeManaged()
         {
-            dispose(true);
-            GC.SuppressFinalize(this);
         }
 
-        private void dispose(bool disposing)
+        protected override void FreeUnmanaged()
         {
-            if (IsDisposed)
-                return;
-
-            if (disposing)
-            {
-            }
-
             var frame = AVFrame;
             ffmpeg.av_frame_free(&frame);
-
-            IsDisposed = true;
-        }
-
-        ~Frame()
-        {
-            dispose(false);
         }
     }
 }

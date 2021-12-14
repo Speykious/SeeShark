@@ -8,14 +8,13 @@ using SeeShark.FFmpeg;
 
 namespace SeeShark
 {
-    public class Camera : IDisposable
+    public class Camera : Disposable
     {
         private Thread? decodingThread;
         private readonly CameraStreamDecoder decoder;
 
         public CameraInfo Info { get; }
         public bool IsPlaying { get; private set; }
-        public bool IsDisposed { get; private set; }
 
         public event EventHandler<FrameEventArgs>? OnFrame;
 
@@ -56,29 +55,14 @@ namespace SeeShark
             decodingThread.Start();
         }
 
-        public void Dispose()
+        protected override void DisposeManaged()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            StopCapture();
+            decoder.Dispose();
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected override void FreeUnmanaged()
         {
-            if (IsDisposed)
-                return;
-
-            if (disposing)
-            {
-                StopCapture();
-                decoder.Dispose();
-            }
-
-            IsDisposed = true;
-        }
-
-        ~Camera()
-        {
-            Dispose(false);
         }
     }
 }

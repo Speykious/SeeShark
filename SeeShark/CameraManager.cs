@@ -19,7 +19,7 @@ namespace SeeShark
     /// It can also watch for available devices, and fire up <see cref="OnNewDevice"/> and
     /// <see cref="OnLostDevice"/> events when it happens.
     /// </summary>
-    public sealed unsafe class CameraManager : IDisposable
+    public sealed unsafe class CameraManager : Disposable
     {
         private readonly AVInputFormat* avInputFormat;
         private readonly AVFormatContext* avFormatContext;
@@ -49,11 +49,6 @@ namespace SeeShark
         /// Invoked when a camera device has been disconnected.
         /// </summary>
         public event Action<CameraInfo>? OnLostDevice;
-
-        /// <summary>
-        /// Whether this <see cref="CameraManager"/> has been disposed yet.
-        /// </summary>
-        public bool IsDisposed { get; private set; }
 
         /// <summary>
         /// Enumerates available devices.
@@ -172,29 +167,14 @@ namespace SeeShark
             Devices = newDevices;
         }
 
-        public void Dispose()
+        protected override void DisposeManaged()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            deviceWatcher.Dispose();
         }
 
-        public void Dispose(bool disposing)
+        protected override void FreeUnmanaged()
         {
-            if (IsDisposed)
-                return;
-
-            if (disposing)
-            {
-                deviceWatcher.Dispose();
-            }
-
             ffmpeg.avformat_free_context(avFormatContext);
-            IsDisposed = true;
-        }
-
-        ~CameraManager()
-        {
-            Dispose(false);
         }
     }
 }

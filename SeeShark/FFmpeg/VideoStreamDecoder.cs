@@ -15,7 +15,7 @@ namespace SeeShark.FFmpeg
     /// Decodes a video stream. <br/>
     /// Based on https://github.com/Ruslan-B/FFmpeg.AutoGen/blob/master/FFmpeg.AutoGen.Example/VideoStreamDecoder.cs.
     /// </summary>
-    public unsafe class VideoStreamDecoder : IDisposable
+    public unsafe class VideoStreamDecoder : Disposable
     {
         protected readonly AVCodecContext* CodecContext;
         protected readonly AVFormatContext* FormatContext;
@@ -27,8 +27,6 @@ namespace SeeShark.FFmpeg
         public readonly int FrameWidth;
         public readonly int FrameHeight;
         public readonly PixelFormat PixelFormat;
-
-        public bool IsDisposed { get; private set; }
 
         public VideoStreamDecoder(string url, AVInputFormat* inputFormat = null)
         {
@@ -121,23 +119,13 @@ namespace SeeShark.FFmpeg
             return result;
         }
 
-        public void Dispose()
+        protected override void DisposeManaged()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            Frame.Dispose();
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected override void FreeUnmanaged()
         {
-            if (IsDisposed)
-                return;
-
-            if (disposing)
-            {
-                // Dispose managed resources
-                Frame.Dispose();
-            }
-
             ffmpeg.avcodec_close(CodecContext);
 
             var formatContext = FormatContext;
@@ -145,13 +133,6 @@ namespace SeeShark.FFmpeg
 
             var packet = Packet;
             ffmpeg.av_packet_free(&packet);
-
-            IsDisposed = true;
-        }
-
-        ~VideoStreamDecoder()
-        {
-            Dispose(false);
         }
     }
 }
