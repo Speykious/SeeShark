@@ -11,6 +11,7 @@ SeeShark is a simple cross-platform .NET library for handling camera inputs on L
 Using FFmpeg, it allows you to enumerate camera devices and decode raw frames in 199 different pixel formats (because that's how powerful FFmpeg is!).
 
 Features include:
+
 - Zero-copy.
 - Memory-safe.
 - Cross platform (Tested on Windows and Linux, might work on more platforms like MacOS).
@@ -23,6 +24,7 @@ Features include:
 - Access to raw pixel data.
 
 Features **don't** include:
+
 - Saving a frame as an image (here's a [wiki page on how to do it](https://github.com/vignetteapp/SeeShark/wiki/Saving-images) using ImageSharp).
 - Recording a camera stream to a video file.
 - Manage audio devices.
@@ -85,7 +87,7 @@ You can also look at our overcommented [`SeeShark.Example.Ascii`](./SeeShark.Exa
 
 See demo of the example below.
 
-[![ASCII output of OBS virtual camera, feat. Bad Apple!!](https://i.imgur.com/YnW5Nn2.gif)](https://i.imgur.com/YnW5Nn2.gif)
+[![ASCII output of OBS virtual camera, feat. Bad Apple!!](Preview.gif)](Preview.gif)
 
 ***
 
