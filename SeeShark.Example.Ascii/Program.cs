@@ -101,6 +101,7 @@ namespace SeeShark.Example.Ascii
                         loop = false;
                         break;
                 }
+                Console.CursorVisible = karen.IsPlaying;
             }
 
             Dispose();
