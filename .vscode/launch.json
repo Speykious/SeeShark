@@ -5,15 +5,13 @@
             // Use IntelliSense to find out which attributes exist for C# debugging
             // Use hover for the description of the existing attributes
             // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
-            "name": ".NET Core Launch (console)",
+            "name": "ASCII Camera Example (.NET 6)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/SeeShark.Example/bin/Debug/net6.0/SeeShark.Example.dll",
-            // Put your Linux camera device here, then the name of the raw output file.
-            "args": ["/dev/video1", "raw_output.rgb24"],
-            "cwd": "${workspaceFolder}/SeeShark.Example/bin/Debug/net6.0",
+            "program": "${workspaceFolder}/SeeShark.Example.Ascii/bin/Debug/net6.0/SeeShark.Example.Ascii.dll",
+            "cwd": "${workspaceFolder}/SeeShark.Example.Ascii/bin/Debug/net6.0",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "externalTerminal",
             "stopAtEntry": false
