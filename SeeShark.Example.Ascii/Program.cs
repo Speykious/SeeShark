@@ -93,11 +93,13 @@ namespace SeeShark.Example.Ascii
                             karen.StopCapture();
                         else
                             karen.StartCapture();
+                        Console.CursorVisible = !karen.IsPlaying;
                         break;
 
                     case ConsoleKey.Q:
                     case ConsoleKey.Enter:
                     case ConsoleKey.Escape:
+                        Console.CursorVisible = true;
                         loop = false;
                         break;
                 }
