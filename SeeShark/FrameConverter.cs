@@ -11,7 +11,7 @@ namespace SeeShark
     /// <summary>
     /// Converts a frame into another pixel format and/or resizes it.
     /// </summary>
-    public sealed unsafe class FrameConverter : IDisposable
+    public sealed unsafe class FrameConverter : Disposable
     {
         private readonly IntPtr convertedFrameBufferPtr;
         private readonly SwsContext* convertContext;
@@ -103,31 +103,15 @@ namespace SeeShark
             return DstFrame;
         }
 
-        public void Dispose()
+        protected override void DisposeManaged()
         {
-            dispose(true);
-            GC.SuppressFinalize(this);
+            DstFrame.Dispose();
         }
 
-        private void dispose(bool disposing)
+        protected override void DisposeUnmanaged()
         {
-            if (IsDisposed)
-                return;
-
-            if (disposing)
-            {
-                DstFrame.Dispose();
-            }
-
             Marshal.FreeHGlobal(convertedFrameBufferPtr);
             ffmpeg.sws_freeContext(convertContext);
-
-            IsDisposed = true;
-        }
-
-        ~FrameConverter()
-        {
-            dispose(false);
         }
     }
 }
