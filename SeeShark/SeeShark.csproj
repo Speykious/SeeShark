@@ -12,7 +12,7 @@
 
   <PropertyGroup Label="Nuget">
     <PackageId>SeeShark</PackageId>
-    <Version>2.0.1</Version>
+    <Version>2.2.0</Version>
     <Authors>The Vignette Authors</Authors>
     <PackageTags>FFmpeg;Camera;Webcam;Stream;</PackageTags>
     <Title>SeeShark</Title>
