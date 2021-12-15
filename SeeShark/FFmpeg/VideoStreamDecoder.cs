@@ -21,6 +21,7 @@ namespace SeeShark.FFmpeg
         protected readonly AVFormatContext* FormatContext;
         protected readonly Frame Frame;
         protected readonly AVPacket* Packet;
+        protected readonly AVStream* Stream;
         protected readonly int StreamIndex;
 
         public readonly string CodecName;
@@ -43,9 +44,10 @@ namespace SeeShark.FFmpeg
             StreamIndex = ffmpeg
                 .av_find_best_stream(formatContext, AVMediaType.AVMEDIA_TYPE_VIDEO, -1, -1, &codec, 0)
                 .ThrowExceptionIfError();
+            Stream = formatContext->streams[StreamIndex];
             CodecContext = ffmpeg.avcodec_alloc_context3(codec);
 
-            ffmpeg.avcodec_parameters_to_context(CodecContext, formatContext->streams[StreamIndex]->codecpar)
+            ffmpeg.avcodec_parameters_to_context(CodecContext, Stream->codecpar)
                 .ThrowExceptionIfError();
             ffmpeg.avcodec_open2(CodecContext, codec, null).ThrowExceptionIfError();
 
@@ -58,6 +60,13 @@ namespace SeeShark.FFmpeg
             Frame = new Frame();
         }
 
+        /// <summary>
+        /// Trigger field, used to decide whether we wait longer during a Thread.Sleep()
+        /// when there are no frames available.
+        /// </summary>
+        /// <remarks>
+        /// Waiting longer would mean a full frame interval (for example ~16ms when 60 fps), 1ms otherwise.
+        private bool waitLonger = false;
         public DecodeStatus TryDecodeNextFrame(out Frame nextFrame)
         {
             int eagain = ffmpeg.AVERROR(ffmpeg.EAGAIN);
@@ -74,8 +83,13 @@ namespace SeeShark.FFmpeg
                 {
                     nextFrame = Frame;
                     GC.Collect();
-                    Thread.Sleep(1);
 
+                    // Big brain move to avoid overloading the CPU \o/
+                    AVRational fps = Stream->r_frame_rate;
+                    Thread.Sleep(waitLonger ? 1000 * fps.den / (fps.num + 5) : 1);
+
+                    // We only wait longer once to make sure we catch the frame on time.
+                    waitLonger = false;
                     return error == eagain
                         ? DecodeStatus.NoFrameAvailable
                         : DecodeStatus.EndOfStream;
@@ -98,6 +112,8 @@ namespace SeeShark.FFmpeg
             error.ThrowExceptionIfError();
 
             nextFrame = Frame;
+            // Always wait longer just after receiving a new frame.
+            waitLonger = true;
             GC.Collect();
             return DecodeStatus.NewFrame;
         }
