@@ -172,7 +172,7 @@ namespace SeeShark
             deviceWatcher.Dispose();
         }
 
-        protected override void FreeUnmanaged()
+        protected override void DisposeUnmanaged()
         {
             ffmpeg.avformat_free_context(avFormatContext);
         }

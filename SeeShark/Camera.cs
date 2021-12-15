@@ -61,7 +61,7 @@ namespace SeeShark
             decoder.Dispose();
         }
 
-        protected override void FreeUnmanaged()
+        protected override void DisposeUnmanaged()
         {
         }
     }

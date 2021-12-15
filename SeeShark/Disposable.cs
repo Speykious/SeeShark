@@ -23,7 +23,7 @@ namespace SeeShark
             if (disposing)
                 DisposeManaged();
 
-            FreeUnmanaged();
+            DisposeUnmanaged();
 
             Disposed = true;
         }
@@ -35,7 +35,7 @@ namespace SeeShark
         }
 
         protected abstract void DisposeManaged();
-        protected abstract void FreeUnmanaged();
+        protected abstract void DisposeUnmanaged();
 
         ~Disposable()
         {

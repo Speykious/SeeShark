@@ -124,7 +124,7 @@ namespace SeeShark.FFmpeg
             Frame.Dispose();
         }
 
-        protected override void FreeUnmanaged()
+        protected override void DisposeUnmanaged()
         {
             ffmpeg.avcodec_close(CodecContext);
 

@@ -108,7 +108,7 @@ namespace SeeShark
             DstFrame.Dispose();
         }
 
-        protected override void FreeUnmanaged()
+        protected override void DisposeUnmanaged()
         {
             Marshal.FreeHGlobal(convertedFrameBufferPtr);
             ffmpeg.sws_freeContext(convertContext);
