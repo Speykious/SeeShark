@@ -12,6 +12,7 @@ namespace SeeShark.Example.Ascii
     class Program
     {
         static Camera? karen;
+        static CameraManager? manager;
         static FrameConverter? converter;
 
         static void Main(string[] args)
@@ -37,7 +38,7 @@ namespace SeeShark.Example.Ascii
             Console.WriteLine("Running in {0}-bit mode.", Environment.Is64BitProcess ? "64" : "32");
             Console.WriteLine($"FFmpeg version info: {FFmpegVersion}");
 
-            var manager = new CameraManager();
+            manager = new CameraManager();
 
             string devicePath;
             if (args.Length < 1)
@@ -150,6 +151,7 @@ namespace SeeShark.Example.Ascii
         {
             karen?.StopCapture();
             karen?.Dispose();
+            manager?.Dispose();
             converter?.Dispose();
         }
 

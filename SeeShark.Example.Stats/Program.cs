@@ -11,6 +11,7 @@ namespace SeeShark.Example.Stats
     class Program
     {
         static Camera? karen;
+        static CameraManager? manager;
 
         static void Main(string[] args)
         {
@@ -31,7 +32,7 @@ namespace SeeShark.Example.Stats
                 "/usr/lib64"
             );
 
-            var manager = new CameraManager();
+            manager = new CameraManager();
 
             string devicePath;
             if (args.Length < 1)
@@ -153,6 +154,7 @@ namespace SeeShark.Example.Stats
         {
             karen?.StopCapture();
             karen?.Dispose();
+            manager?.Dispose();
         }
     }
 }
