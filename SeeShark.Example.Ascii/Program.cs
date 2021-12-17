@@ -121,6 +121,10 @@ namespace SeeShark.Example.Ascii
         /// </summary>
         public static void OnFrameEventHandler(object? _sender, FrameEventArgs e)
         {
+            // Don't redraw the frame if it's not new, unless it's resized.
+            if (e.Status != FFmpeg.DecodeStatus.NewFrame)
+                return;
+
             var frame = e.Frame;
             if (converter == null || Console.WindowWidth != converter.SrcWidth ||
                 Console.WindowHeight != converter.SrcHeight)
@@ -129,11 +133,6 @@ namespace SeeShark.Example.Ascii
                 // We have to dispose the previous one and instanciate a new one with the new window size.
                 converter?.Dispose();
                 converter = new FrameConverter(frame, Console.WindowWidth, Console.WindowHeight, PixelFormat.Gray8);
-            }
-            else if (e.Status != FFmpeg.DecodeStatus.NewFrame)
-            {
-                // Don't redraw the frame if it's not new, unless it's resized.
-                return;
             }
 
             // Resize the frame to the size of the terminal window, then draw it in ASCII.

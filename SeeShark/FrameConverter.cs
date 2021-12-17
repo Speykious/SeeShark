@@ -57,6 +57,9 @@ namespace SeeShark
             int srcWidth, int srcHeight, PixelFormat srcPixelFormat,
             int dstWidth, int dstHeight, PixelFormat dstPixelFormat)
         {
+            if (srcWidth == 0 || srcHeight == 0 || dstWidth == 0 || dstHeight == 0)
+                throw new ArgumentException("Source/Destination's Width/Height cannot be zero");
+
             SrcWidth = srcWidth;
             SrcHeight = srcHeight;
             DstWidth = dstWidth;
