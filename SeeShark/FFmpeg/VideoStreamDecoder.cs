@@ -38,7 +38,6 @@ namespace SeeShark.FFmpeg
 
             var formatContext = FormatContext;
             ffmpeg.avformat_open_input(&formatContext, url, inputFormat, null).ThrowExceptionIfError();
-            ffmpeg.avformat_find_stream_info(formatContext, null).ThrowExceptionIfError();
 
             AVCodec* codec = null;
             StreamIndex = ffmpeg
