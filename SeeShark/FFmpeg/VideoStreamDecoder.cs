@@ -29,6 +29,29 @@ namespace SeeShark.FFmpeg
         public readonly int FrameHeight;
         public readonly PixelFormat PixelFormat;
 
+        public bool UseDefaultFps { get; set; }
+        private float fps;
+        public float Fps
+        {
+            get
+            {
+                if (UseDefaultFps)
+                {
+                    AVRational fps = Stream->r_frame_rate;
+                    return (float)fps.num / fps.den;
+                }
+                else
+                {
+                    return fps;
+                }
+            }
+            set
+            {
+                UseDefaultFps = false;
+                fps = value;
+            }
+        }
+
         public VideoStreamDecoder(string url, AVInputFormat* inputFormat = null)
         {
             SetupFFmpeg();
@@ -55,6 +78,7 @@ namespace SeeShark.FFmpeg
             FrameHeight = CodecContext->height;
             PixelFormat = (PixelFormat)CodecContext->pix_fmt;
 
+            UseDefaultFps = true;
             Packet = ffmpeg.av_packet_alloc();
             Frame = new Frame();
         }
@@ -84,8 +108,7 @@ namespace SeeShark.FFmpeg
                     GC.Collect();
 
                     // Big brain move to avoid overloading the CPU \o/
-                    AVRational fps = Stream->r_frame_rate;
-                    Thread.Sleep(waitLonger ? 1000 * fps.den / (fps.num + 5) : 1);
+                    Thread.Sleep(waitLonger ? (1000 / (int)Fps) - 5 : 1);
 
                     // We only wait longer once to make sure we catch the frame on time.
                     waitLonger = false;
