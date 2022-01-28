@@ -35,6 +35,7 @@ namespace SeeShark.FFmpeg
         /// See the <see href="https://ffmpeg.org/ffmpeg-all.html#video4linux2_002c-v4l2">v4l2 input device documentation</see> for more information.
         /// </summary>
         V4l2,
+        X11Grab,
         #endregion
 
         #region MacOS compatible
@@ -70,6 +71,7 @@ namespace SeeShark.FFmpeg
                 DeviceInputFormat.DShow => "dshow",
                 DeviceInputFormat.VfWCap => "vfwcap",
                 DeviceInputFormat.V4l2 => "v4l2",
+                DeviceInputFormat.X11Grab => "x11grab",
                 DeviceInputFormat.AVFoundation => "avfoundation",
                 DeviceInputFormat.QTKit => "qtkit",
                 _ => throw new ArgumentException("Unknown device input format"),

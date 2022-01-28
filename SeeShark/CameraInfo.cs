@@ -20,13 +20,13 @@ namespace SeeShark
         /// </summary>
         public readonly string Path;
 
-        internal CameraInfo(string path)
+        public CameraInfo(string path)
         {
             Name = null;
             Path = path;
         }
 
-        internal CameraInfo(string? name, string path)
+        public CameraInfo(string? name, string path)
         {
             Name = name;
             Path = path;
