@@ -5,12 +5,9 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
-using DirectShowLib;
 using FFmpeg.AutoGen;
 using SeeShark.FFmpeg;
-using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark
 {
@@ -49,39 +46,6 @@ namespace SeeShark
         /// Invoked when a video device has been disconnected.
         /// </summary>
         public abstract event Action<VideoDeviceInfo>? OnLostDevice;
-
-
-        /// <summary>
-        /// Creates a new <see cref="VideoDeviceManager"/>.
-        /// It will call <see cref="SyncDevices"/> once, but won't be in a watching state.
-        /// </summary>
-        /// <remarks>
-        /// If you don't specify any input format, it will attempt to choose one suitable for your OS platform.
-        /// </remarks>
-        /// <param name="inputFormat">
-        /// Input format used to enumerate devices and create video devices.
-        /// </param>
-        public VideoDeviceManager(DeviceInputFormat? inputFormat = null)
-        {
-            SetupFFmpeg();
-
-            InputFormat = inputFormat ?? (
-                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? DeviceInputFormat.GdiGrab
-                : RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? DeviceInputFormat.X11Grab
-                : RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? DeviceInputFormat.AVFoundation
-                : throw new NotSupportedException($"Cannot find adequate input format for RID '{RuntimeInformation.RuntimeIdentifier}'."));
-
-            AvInputFormat = ffmpeg.av_find_input_format(InputFormat.ToString());
-            AvFormatContext = ffmpeg.avformat_alloc_context();
-
-            SyncDevices();
-            DeviceWatcher = new Timer(
-                (object? _state) => SyncDevices(),
-                null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan
-            );
-
-            IsWatching = false;
-        }
 
         public abstract T GetDevice(VideoDeviceInfo info);
         public T GetDevice(int index = 0) => GetDevice(Devices[index]);

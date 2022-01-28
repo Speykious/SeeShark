@@ -26,7 +26,7 @@ namespace SeeShark
 
         public override Camera GetDevice(VideoDeviceInfo info) => new Camera(info, InputFormat);
 
-            /// <summary>
+        /// <summary>
         /// Enumerates available devices.
         /// </summary>
         private VideoDeviceInfo[] enumerateDevices()
@@ -36,11 +36,11 @@ namespace SeeShark
             if (InputFormat == DeviceInputFormat.DShow)
             {
                 var dsDevices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
-                var devices = new VideoDeviceInfo[dsDevices.Length];
+                var devices = new CameraInfo[dsDevices.Length];
                 for (int i = 0; i < dsDevices.Length; i++)
                 {
                     var dsDevice = dsDevices[i];
-                    devices[i] = new VideoDeviceInfo(dsDevice.Name, $"video={dsDevice.Name}");
+                    devices[i] = new CameraInfo(dsDevice.Name, $"video={dsDevice.Name}");
                 }
                 return devices;
             }
@@ -51,7 +51,7 @@ namespace SeeShark
                 int nDevices = avDeviceInfoList->nb_devices;
                 var avDevices = avDeviceInfoList->devices;
 
-                var devices = new VideoDeviceInfo[nDevices];
+                var devices = new CameraInfo[nDevices];
                 for (int i = 0; i < nDevices; i++)
                 {
                     var avDevice = avDevices[i];
@@ -61,7 +61,7 @@ namespace SeeShark
                     if (path == null)
                         throw new InvalidOperationException($"Device at index {i} doesn't have a path!");
 
-                    devices[i] = new VideoDeviceInfo(name, path);
+                    devices[i] = new CameraInfo(name, path);
                 }
 
                 ffmpeg.avdevice_free_list_devices(&avDeviceInfoList);
@@ -80,7 +80,7 @@ namespace SeeShark
         /// <param name="inputFormat">
         /// Input format used to enumerate devices and create cameras.
         /// </param>
-        public CameraManager(DeviceInputFormat? inputFormat = null) : base(inputFormat)
+        public CameraManager(DeviceInputFormat? inputFormat = null)
         {
             SetupFFmpeg();
 
@@ -115,6 +115,7 @@ namespace SeeShark
             foreach (var device in Devices.Except(newDevices))
                 OnLostDevice?.Invoke(device);
 
-            Devices = newDevices;        }
+            Devices = newDevices;
+        }
     }
 }

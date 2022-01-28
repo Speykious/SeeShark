@@ -2,9 +2,14 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
-namespace SeeShark;
+using SeeShark.FFmpeg;
 
-public class Display
+namespace SeeShark
 {
-    
+    public class Display : VideoDevice
+    {
+        public Display(VideoDeviceInfo info, DeviceInputFormat inputFormat) : base(info, inputFormat)
+        {
+        }
+    }
 }

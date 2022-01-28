@@ -2,13 +2,11 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
-using SeeShark.FFmpeg;
-
 namespace SeeShark
 {
-    public class Camera : VideoDevice
+    public class CameraInfo : VideoDeviceInfo
     {
-        public Camera(VideoDeviceInfo info, DeviceInputFormat inputFormat) : base(info, inputFormat)
+        public CameraInfo(string? name, string path) : base(name, path)
         {
         }
     }
