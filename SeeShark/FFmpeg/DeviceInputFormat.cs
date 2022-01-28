@@ -27,6 +27,7 @@ namespace SeeShark.FFmpeg
         /// See <see href="https://trac.ffmpeg.org/wiki/DirectShow">DirectShow</see> for more information.
         /// </remarks>
         VfWCap,
+        GdiGrab,
         #endregion
 
         #region Linux compatible
@@ -70,6 +71,7 @@ namespace SeeShark.FFmpeg
             {
                 DeviceInputFormat.DShow => "dshow",
                 DeviceInputFormat.VfWCap => "vfwcap",
+                DeviceInputFormat.GdiGrab => "gdigrab",
                 DeviceInputFormat.V4l2 => "v4l2",
                 DeviceInputFormat.X11Grab => "x11grab",
                 DeviceInputFormat.AVFoundation => "avfoundation",

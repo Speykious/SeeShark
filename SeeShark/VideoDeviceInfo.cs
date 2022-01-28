@@ -9,7 +9,7 @@ namespace SeeShark
     /// <summary>
     /// Various information about the camera device.
     /// </summary>
-    public struct CameraInfo : IEquatable<CameraInfo>
+    public struct VideoDeviceInfo : IEquatable<VideoDeviceInfo>
     {
         /// <summary>
         /// Name of the camera. Can be null.
@@ -20,24 +20,24 @@ namespace SeeShark
         /// </summary>
         public readonly string Path;
 
-        public CameraInfo(string path)
+        public VideoDeviceInfo(string path)
         {
             Name = null;
             Path = path;
         }
 
-        public CameraInfo(string? name, string path)
+        public VideoDeviceInfo(string? name, string path)
         {
             Name = name;
             Path = path;
         }
 
-        public bool Equals(CameraInfo other) => Path == other.Path;
-        public override bool Equals(object? obj) => obj is CameraInfo info && Equals(info);
+        public bool Equals(VideoDeviceInfo other) => Path == other.Path;
+        public override bool Equals(object? obj) => obj is VideoDeviceInfo info && Equals(info);
         public override int GetHashCode() => Path.GetHashCode();
 
-        public static bool operator ==(CameraInfo left, CameraInfo right) => left.Equals(right);
-        public static bool operator !=(CameraInfo left, CameraInfo right) => !(left == right);
+        public static bool operator ==(VideoDeviceInfo left, VideoDeviceInfo right) => left.Equals(right);
+        public static bool operator !=(VideoDeviceInfo left, VideoDeviceInfo right) => !(left == right);
 
         public override string? ToString() => Name == null ? Path : $"{Name} ({Path})";
     }

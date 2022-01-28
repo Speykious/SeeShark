@@ -15,12 +15,41 @@ using static SeeShark.FFmpeg.FFmpegManager;
 namespace SeeShark
 {
     /// <summary>
-    /// Manages your camera devices. Is able to enumerate them and create new <see cref="Camera"/>s.
+    /// Manages your video devices. Is able to enumerate them and create new <see cref="Camera"/>s.
     /// It can also watch for available devices, and fire up <see cref="OnNewDevice"/> and
     /// <see cref="OnLostDevice"/> events when it happens.
     /// </summary>
-    public sealed unsafe class CameraManager : VideoDeviceManager
+    public abstract unsafe class VideoDeviceManager : Disposable
     {
+        protected AVInputFormat* AvInputFormat;
+        protected AVFormatContext* AvFormatContext;
+        protected Timer DeviceWatcher;
+
+        /// <summary>
+        /// Whether this <see cref="VideoDeviceManager"/> is watching for devices.
+        /// </summary>
+        public bool IsWatching { get; protected set; }
+
+        /// <summary>
+        /// Input format used by this <see cref="VideoDeviceManager"/> to watch devices.
+        /// </summary>
+        public DeviceInputFormat InputFormat { get; protected set; }
+
+        /// <summary>
+        /// List of all the available video devices.
+        /// </summary>
+        public ImmutableList<VideoDeviceInfo> Devices { get; protected set; } = ImmutableList<VideoDeviceInfo>.Empty;
+
+        /// <summary>
+        /// Invoked when a video device has been connected.
+        /// </summary>
+        public event Action<VideoDeviceInfo>? OnNewDevice;
+
+        /// <summary>
+        /// Invoked when a video device has been disconnected.
+        /// </summary>
+        public event Action<VideoDeviceInfo>? OnLostDevice;
+
         /// <summary>
         /// Enumerates available devices.
         /// </summary>
@@ -66,22 +95,22 @@ namespace SeeShark
 
 
         /// <summary>
-        /// Creates a new <see cref="CameraManager"/>.
-        /// It will call <see cref="SyncCameraDevices"/> once, but won't be in a watching state.
+        /// Creates a new <see cref="VideoDeviceManager"/>.
+        /// It will call <see cref="SyncDevices"/> once, but won't be in a watching state.
         /// </summary>
         /// <remarks>
         /// If you don't specify any input format, it will attempt to choose one suitable for your OS platform.
         /// </remarks>
         /// <param name="inputFormat">
-        /// Input format used to enumerate devices and create cameras.
+        /// Input format used to enumerate devices and create video devices.
         /// </param>
-        public CameraManager(DeviceInputFormat? inputFormat = null) : base(inputFormat)
+        public VideoDeviceManager(DeviceInputFormat? inputFormat = null)
         {
             SetupFFmpeg();
 
             InputFormat = inputFormat ?? (
-                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? DeviceInputFormat.DShow
-                : RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? DeviceInputFormat.V4l2
+                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? DeviceInputFormat.GdiGrab
+                : RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? DeviceInputFormat.X11Grab
                 : RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? DeviceInputFormat.AVFoundation
                 : throw new NotSupportedException($"Cannot find adequate input format for RID '{RuntimeInformation.RuntimeIdentifier}'."));
 
@@ -90,7 +119,7 @@ namespace SeeShark
 
             SyncDevices();
             DeviceWatcher = new Timer(
-                (object? _state) => SyncCameraDevices(),
+                (object? _state) => SyncDevices(),
                 null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan
             );
 
@@ -102,9 +131,27 @@ namespace SeeShark
         public Camera GetCamera(string path) => GetCamera(Devices.First((ci) => ci.Path == path));
 
         /// <summary>
+        /// Starts watching for available devices.
+        /// </summary>
+        public void StartWatching()
+        {
+            DeviceWatcher.Change(TimeSpan.Zero, TimeSpan.FromSeconds(1));
+            IsWatching = true;
+        }
+
+        /// <summary>
+        /// Stops watching for available devices.
+        /// </summary>
+        public void StopWatching()
+        {
+            DeviceWatcher.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+            IsWatching = false;
+        }
+
+        /// <summary>
         /// Looks for available devices and triggers <see cref="OnNewDevice"/> and <see cref="OnLostDevice"/> events.
         /// </summary>
-        public void SyncCameraDevices()
+        public void SyncDevices()
         {
             var newDevices = enumerateDevices().ToImmutableList();
 
@@ -118,6 +165,16 @@ namespace SeeShark
                 OnLostDevice?.Invoke(device);
 
             Devices = newDevices;
+        }
+
+        protected override void DisposeManaged()
+        {
+            DeviceWatcher.Dispose();
+        }
+
+        protected override void DisposeUnmanaged()
+        {
+            ffmpeg.avformat_free_context(AvFormatContext);
         }
     }
 }
