@@ -9,7 +9,7 @@ namespace SeeShark
     /// <summary>
     /// Various information about the camera device.
     /// </summary>
-    public struct VideoDeviceInfo : IEquatable<VideoDeviceInfo>
+    public class VideoDeviceInfo : IEquatable<VideoDeviceInfo>
     {
         /// <summary>
         /// Name of the camera. Can be null.

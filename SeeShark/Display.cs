@@ -4,10 +4,7 @@
 
 namespace SeeShark;
 
-public class DisplayManager : VideoDeviceManager
+public class Display
 {
-    public override void SyncDevices()
-    {
-
-    }
+    
 }

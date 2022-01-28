@@ -19,9 +19,14 @@ namespace SeeShark
     /// It can also watch for available devices, and fire up <see cref="OnNewDevice"/> and
     /// <see cref="OnLostDevice"/> events when it happens.
     /// </summary>
-    public sealed unsafe class CameraManager : VideoDeviceManager
+    public sealed unsafe class CameraManager : VideoDeviceManager<Camera>
     {
-        /// <summary>
+        public override event Action<VideoDeviceInfo>? OnNewDevice;
+        public override event Action<VideoDeviceInfo>? OnLostDevice;
+
+        public override Camera GetDevice(VideoDeviceInfo info) => new Camera(info, InputFormat);
+
+            /// <summary>
         /// Enumerates available devices.
         /// </summary>
         private VideoDeviceInfo[] enumerateDevices()
@@ -90,21 +95,14 @@ namespace SeeShark
 
             SyncDevices();
             DeviceWatcher = new Timer(
-                (object? _state) => SyncCameraDevices(),
+                (object? _state) => SyncDevices(),
                 null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan
             );
 
             IsWatching = false;
         }
 
-        public Camera GetCamera(VideoDeviceInfo info) => new Camera(info, InputFormat);
-        public Camera GetCamera(int index = 0) => GetCamera(Devices[index]);
-        public Camera GetCamera(string path) => GetCamera(Devices.First((ci) => ci.Path == path));
-
-        /// <summary>
-        /// Looks for available devices and triggers <see cref="OnNewDevice"/> and <see cref="OnLostDevice"/> events.
-        /// </summary>
-        public void SyncCameraDevices()
+        public override void SyncDevices()
         {
             var newDevices = enumerateDevices().ToImmutableList();
 
@@ -117,7 +115,6 @@ namespace SeeShark
             foreach (var device in Devices.Except(newDevices))
                 OnLostDevice?.Invoke(device);
 
-            Devices = newDevices;
-        }
+            Devices = newDevices;        }
     }
 }

@@ -15,11 +15,11 @@ using static SeeShark.FFmpeg.FFmpegManager;
 namespace SeeShark
 {
     /// <summary>
-    /// Manages your video devices. Is able to enumerate them and create new <see cref="Camera"/>s.
+    /// Manages your video devices. Is able to enumerate them and create new <see cref="T"/>s.
     /// It can also watch for available devices, and fire up <see cref="OnNewDevice"/> and
     /// <see cref="OnLostDevice"/> events when it happens.
     /// </summary>
-    public abstract unsafe class VideoDeviceManager : Disposable
+    public abstract unsafe class VideoDeviceManager<T> : Disposable where T : VideoDevice
     {
         protected AVInputFormat* AvInputFormat;
         protected AVFormatContext* AvFormatContext;
@@ -43,12 +43,12 @@ namespace SeeShark
         /// <summary>
         /// Invoked when a video device has been connected.
         /// </summary>
-        public event Action<VideoDeviceInfo>? OnNewDevice;
+        public abstract event Action<VideoDeviceInfo>? OnNewDevice;
 
         /// <summary>
         /// Invoked when a video device has been disconnected.
         /// </summary>
-        public event Action<VideoDeviceInfo>? OnLostDevice;
+        public abstract event Action<VideoDeviceInfo>? OnLostDevice;
 
 
         /// <summary>
@@ -83,9 +83,9 @@ namespace SeeShark
             IsWatching = false;
         }
 
-        public Camera GetDevice(VideoDeviceInfo info) => new Camera(info, InputFormat);
-        public Camera GetDevice(int index = 0) => GetDevice(Devices[index]);
-        public Camera GetDevice(string path) => GetDevice(Devices.First((ci) => ci.Path == path));
+        public abstract T GetDevice(VideoDeviceInfo info);
+        public T GetDevice(int index = 0) => GetDevice(Devices[index]);
+        public T GetDevice(string path) => GetDevice(Devices.First((ci) => ci.Path == path));
 
         /// <summary>
         /// Starts watching for available devices.
