@@ -50,49 +50,6 @@ namespace SeeShark
         /// </summary>
         public event Action<VideoDeviceInfo>? OnLostDevice;
 
-        /// <summary>
-        /// Enumerates available devices.
-        /// </summary>
-        private VideoDeviceInfo[] enumerateDevices()
-        {
-            // FFmpeg doesn't implement avdevice_list_input_sources() for the DShow input format yet.
-            // See first SeeShark issue: https://github.com/vignetteapp/SeeShark/issues/1
-            if (InputFormat == DeviceInputFormat.DShow)
-            {
-                var dsDevices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
-                var devices = new VideoDeviceInfo[dsDevices.Length];
-                for (int i = 0; i < dsDevices.Length; i++)
-                {
-                    var dsDevice = dsDevices[i];
-                    devices[i] = new VideoDeviceInfo(dsDevice.Name, $"video={dsDevice.Name}");
-                }
-                return devices;
-            }
-            else
-            {
-                AVDeviceInfoList* avDeviceInfoList = null;
-                ffmpeg.avdevice_list_input_sources(AvInputFormat, null, null, &avDeviceInfoList).ThrowExceptionIfError();
-                int nDevices = avDeviceInfoList->nb_devices;
-                var avDevices = avDeviceInfoList->devices;
-
-                var devices = new VideoDeviceInfo[nDevices];
-                for (int i = 0; i < nDevices; i++)
-                {
-                    var avDevice = avDevices[i];
-                    var name = Marshal.PtrToStringAnsi((IntPtr)avDevice->device_description);
-                    var path = Marshal.PtrToStringAnsi((IntPtr)avDevice->device_name);
-
-                    if (path == null)
-                        throw new InvalidOperationException($"Device at index {i} doesn't have a path!");
-
-                    devices[i] = new VideoDeviceInfo(name, path);
-                }
-
-                ffmpeg.avdevice_free_list_devices(&avDeviceInfoList);
-                return devices;
-            }
-        }
-
 
         /// <summary>
         /// Creates a new <see cref="VideoDeviceManager"/>.
@@ -126,9 +83,9 @@ namespace SeeShark
             IsWatching = false;
         }
 
-        public Camera GetCamera(VideoDeviceInfo info) => new Camera(info, InputFormat);
-        public Camera GetCamera(int index = 0) => GetCamera(Devices[index]);
-        public Camera GetCamera(string path) => GetCamera(Devices.First((ci) => ci.Path == path));
+        public Camera GetDevice(VideoDeviceInfo info) => new Camera(info, InputFormat);
+        public Camera GetDevice(int index = 0) => GetDevice(Devices[index]);
+        public Camera GetDevice(string path) => GetDevice(Devices.First((ci) => ci.Path == path));
 
         /// <summary>
         /// Starts watching for available devices.
@@ -151,21 +108,8 @@ namespace SeeShark
         /// <summary>
         /// Looks for available devices and triggers <see cref="OnNewDevice"/> and <see cref="OnLostDevice"/> events.
         /// </summary>
-        public void SyncDevices()
-        {
-            var newDevices = enumerateDevices().ToImmutableList();
+        public abstract void SyncDevices();
 
-            if (Devices.SequenceEqual(newDevices))
-                return;
-
-            foreach (var device in newDevices.Except(Devices))
-                OnNewDevice?.Invoke(device);
-
-            foreach (var device in Devices.Except(newDevices))
-                OnLostDevice?.Invoke(device);
-
-            Devices = newDevices;
-        }
 
         protected override void DisposeManaged()
         {
