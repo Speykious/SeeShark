@@ -29,7 +29,7 @@ namespace SeeShark.FFmpeg
         public readonly int FrameHeight;
         public readonly PixelFormat PixelFormat;
 
-        public bool UseDefaultFps { get; set; }
+        public bool UseDefaultFps { get; set; } = true;
         private float fps;
         public float Fps
         {
@@ -78,7 +78,6 @@ namespace SeeShark.FFmpeg
             FrameHeight = CodecContext->height;
             PixelFormat = (PixelFormat)CodecContext->pix_fmt;
 
-            UseDefaultFps = true;
             Packet = ffmpeg.av_packet_alloc();
             Frame = new Frame();
         }
