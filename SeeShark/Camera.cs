@@ -13,6 +13,18 @@ namespace SeeShark
         private Thread? decodingThread;
         private readonly CameraStreamDecoder decoder;
 
+        public bool UseDefaultFps
+        {
+            get => decoder.UseDefaultFps;
+            set => decoder.UseDefaultFps = value;
+        }
+
+        public float Fps
+        {
+            get => decoder.Fps;
+            set => decoder.Fps = value;
+        }
+
         public CameraInfo Info { get; }
         public bool IsPlaying { get; private set; }
 
