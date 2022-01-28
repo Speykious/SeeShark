@@ -64,7 +64,7 @@ namespace SeeShark.Example.Stats
             /// representing the device path, or a <see cref="CameraInfo">.
 
             // Unfortunately, she saw the manager
-            karen = manager.GetCamera(devicePath);
+            karen = manager.GetDevice(devicePath);
 
             /// Attach our <see cref="OnNewFrame"/> method to the camera's frame event handler,
             /// so that we can process every coming frame the way we want.
