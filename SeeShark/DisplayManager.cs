@@ -45,20 +45,22 @@ namespace SeeShark
                 {
                     IntPtr display = XLib.XOpenDisplay(null);
                     IntPtr rootWindow = XLib.XDefaultRootWindow(display);
-                    List<XRRMonitorInfo> monitors = getXRandrDisplays(display, rootWindow).ToList();
+                    XRRMonitorInfo[] monitors = getXRandrDisplays(display, rootWindow);
 
-                    DisplayInfo[] info = new DisplayInfo[monitors.Count];
-                    for (int i = 0; i < monitors.Count; i++)
+                    DisplayInfo[] info = new DisplayInfo[monitors.Length];
+                    for (int i = 0; i < info.Length; i++)
                     {
+                        XRRMonitorInfo monitor = monitors[i];
+                        string nameAddition = monitor.Name == null ? "" : $" ({new string(monitor.Name)})";
                         info[i] = new DisplayInfo
                         {
-                            Name = $"Display {i}",
+                            Name = $"Display {i}{nameAddition}",
                             Path = ":0",
-                            X = monitors[i].X,
-                            Y = monitors[i].Y,
-                            Width = monitors[i].Width,
-                            Height = monitors[i].Height,
-                            Primary = monitors[i].Primary > 0,
+                            X = monitor.X,
+                            Y = monitor.Y,
+                            Width = monitor.Width,
+                            Height = monitor.Height,
+                            Primary = monitor.Primary > 0,
                         };
                     }
 
@@ -69,12 +71,12 @@ namespace SeeShark
             return base.EnumerateDevices();
         }
 
-        private unsafe IEnumerable<XRRMonitorInfo> getXRandrDisplays(IntPtr display, IntPtr rootWindow)
+        private unsafe XRRMonitorInfo[] getXRandrDisplays(IntPtr display, IntPtr rootWindow)
         {
-            ICollection<XRRMonitorInfo> monitors = new List<XRRMonitorInfo>();
-            var xRandrMonitors = XRandr.XRRGetMonitors(display, rootWindow, true, out var count);
+            XRRMonitorInfo* xRandrMonitors = XRandr.XRRGetMonitors(display, rootWindow, true, out int count);
+            XRRMonitorInfo[] monitors = new XRRMonitorInfo[count];
             for (int i = 0; i < count; i++)
-                monitors.Add(xRandrMonitors[i]);
+                monitors[i] = xRandrMonitors[i];
             return monitors;
         }
     }
