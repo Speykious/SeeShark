@@ -3,9 +3,14 @@
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
+using FFmpeg.AutoGen;
 using SeeShark.FFmpeg;
+using SeeShark.Interop.X11;
 
 namespace SeeShark
 {
@@ -18,15 +23,34 @@ namespace SeeShark
         /// <summary>
         /// Enumerates available devices.
         /// </summary>
-        private VideoDeviceInfo[] enumerateDevices()
+        private unsafe VideoDeviceInfo[] enumerateDevices()
         {
             if (InputFormat == DeviceInputFormat.X11Grab)
             {
-
+                var display = XLib.XOpenDisplay(null);
+                var rootWindow = XLib.XDefaultRootWindow(display);
+                var monitors = getXRandrDisplays(display, rootWindow).ToList();
             }
             else
             {
             }
+
+            return Array.Empty<VideoDeviceInfo>();
+        }
+
+        private unsafe IEnumerable<XRRMonitorInfo> getXRandrDisplays(IntPtr display, IntPtr rootWindow)
+        {
+            ICollection<XRRMonitorInfo> monitors = new List<XRRMonitorInfo>();
+            var xRandrMonitors = XRandr.XRRGetMonitors(display, rootWindow, true, out var count);
+            for (int i = 0; i < count; i++)
+                monitors.Add(xRandrMonitors[i]);
+            return monitors;
+        }
+
+        public DisplayManager(DeviceInputFormat? inputFormat = null)
+        {
+            InputFormat = DeviceInputFormat.X11Grab;
+            SyncDevices();
         }
 
         public override void SyncDevices()
