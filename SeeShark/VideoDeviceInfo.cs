@@ -14,11 +14,11 @@ namespace SeeShark
         /// <summary>
         /// Name of the camera. Can be null.
         /// </summary>
-        public readonly string? Name;
+        public string? Name { get; }
         /// <summary>
         /// Path of the camera device. It can be anything from a file on the system (on Linux for instance) or a UUID (on Windows for example).
         /// </summary>
-        public readonly string Path;
+        public string Path { get; }
 
         public VideoDeviceInfo(string path)
         {
