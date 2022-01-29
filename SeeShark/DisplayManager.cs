@@ -14,16 +14,16 @@ using SeeShark.Interop.X11;
 
 namespace SeeShark
 {
-    public class DisplayManager : VideoDeviceManager<Display>
+    public class DisplayManager : VideoDeviceManager<DisplayInfo, Display>
     {
-        public override event Action<VideoDeviceInfo>? OnNewDevice;
-        public override event Action<VideoDeviceInfo>? OnLostDevice;
-        public override Display GetDevice(VideoDeviceInfo info) => new Display(info, InputFormat);
+        public override event Action<DisplayInfo>? OnNewDevice;
+        public override event Action<DisplayInfo>? OnLostDevice;
+        public override Display GetDevice(DisplayInfo info) => new Display(info, InputFormat);
 
         /// <summary>
         /// Enumerates available devices.
         /// </summary>
-        private unsafe VideoDeviceInfo[] enumerateDevices()
+        private unsafe DisplayInfo[] enumerateDevices()
         {
             if (InputFormat == DeviceInputFormat.X11Grab)
             {
@@ -35,7 +35,7 @@ namespace SeeShark
             {
             }
 
-            return Array.Empty<VideoDeviceInfo>();
+            return Array.Empty<DisplayInfo>();
         }
 
         private unsafe IEnumerable<XRRMonitorInfo> getXRandrDisplays(IntPtr display, IntPtr rootWindow)

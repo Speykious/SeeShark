@@ -19,17 +19,17 @@ namespace SeeShark
     /// It can also watch for available devices, and fire up <see cref="OnNewDevice"/> and
     /// <see cref="OnLostDevice"/> events when it happens.
     /// </summary>
-    public sealed unsafe class CameraManager : VideoDeviceManager<Camera>
+    public sealed unsafe class CameraManager : VideoDeviceManager<CameraInfo, Camera>
     {
-        public override event Action<VideoDeviceInfo>? OnNewDevice;
-        public override event Action<VideoDeviceInfo>? OnLostDevice;
+        public override event Action<CameraInfo>? OnNewDevice;
+        public override event Action<CameraInfo>? OnLostDevice;
 
-        public override Camera GetDevice(VideoDeviceInfo info) => new Camera(info, InputFormat);
+        public override Camera GetDevice(CameraInfo info) => new Camera(info, InputFormat);
 
         /// <summary>
         /// Enumerates available devices.
         /// </summary>
-        private VideoDeviceInfo[] enumerateDevices()
+        private CameraInfo[] enumerateDevices()
         {
             // FFmpeg doesn't implement avdevice_list_input_sources() for the DShow input format yet.
             // See first SeeShark issue: https://github.com/vignetteapp/SeeShark/issues/1

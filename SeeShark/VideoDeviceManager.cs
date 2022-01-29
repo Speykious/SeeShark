@@ -16,7 +16,7 @@ namespace SeeShark
     /// It can also watch for available devices, and fire up <see cref="OnNewDevice"/> and
     /// <see cref="OnLostDevice"/> events when it happens.
     /// </summary>
-    public abstract unsafe class VideoDeviceManager<T> : Disposable where T : VideoDevice
+    public abstract unsafe class VideoDeviceManager<TDeviceInfo, T> : Disposable where T : VideoDevice where TDeviceInfo : VideoDeviceInfo
     {
         protected AVInputFormat* AvInputFormat;
         protected AVFormatContext* AvFormatContext;
@@ -35,19 +35,19 @@ namespace SeeShark
         /// <summary>
         /// List of all the available video devices.
         /// </summary>
-        public ImmutableList<VideoDeviceInfo> Devices { get; protected set; } = ImmutableList<VideoDeviceInfo>.Empty;
+        public ImmutableList<TDeviceInfo> Devices { get; protected set; } = ImmutableList<TDeviceInfo>.Empty;
 
         /// <summary>
         /// Invoked when a video device has been connected.
         /// </summary>
-        public abstract event Action<VideoDeviceInfo>? OnNewDevice;
+        public abstract event Action<TDeviceInfo>? OnNewDevice;
 
         /// <summary>
         /// Invoked when a video device has been disconnected.
         /// </summary>
-        public abstract event Action<VideoDeviceInfo>? OnLostDevice;
+        public abstract event Action<TDeviceInfo>? OnLostDevice;
 
-        public abstract T GetDevice(VideoDeviceInfo info);
+        public abstract T GetDevice(TDeviceInfo info);
         public T GetDevice(int index = 0) => GetDevice(Devices[index]);
         public T GetDevice(string path) => GetDevice(Devices.First((ci) => ci.Path == path));
 
