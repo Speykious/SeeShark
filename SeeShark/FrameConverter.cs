@@ -24,8 +24,6 @@ namespace SeeShark
         public readonly PixelFormat SrcPixelFormat;
         public readonly PixelFormat DstPixelFormat;
 
-        public bool IsDisposed { get; private set; }
-
         public FrameConverter(Frame frame, PixelFormat pixelFormat)
         : this(frame, frame.Width, frame.Height, pixelFormat)
         {
@@ -118,4 +116,3 @@ namespace SeeShark
         }
     }
 }
-
