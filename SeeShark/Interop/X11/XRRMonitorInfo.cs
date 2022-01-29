@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 namespace SeeShark.Interop.X11
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct XRRMonitorInfo
+    public unsafe struct XRRMonitorInfo
     {
-        public IntPtr Name;
+        public sbyte* Name;
         public int Primary;
         public int Automatic;
         public int NOutput;

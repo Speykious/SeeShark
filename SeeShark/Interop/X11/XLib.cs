@@ -8,25 +8,23 @@ using System.Runtime.InteropServices;
 namespace SeeShark.Interop.X11
 {
     using Display = IntPtr;
-    using IntPtr = IntPtr;
-    using KeySym = IntPtr;
     using Window = IntPtr;
 
-    public class XLib
+    internal class XLib
     {
         private const string lib_x11 = "libX11";
-        private static object Lock = new object();
+        private static readonly object displayLock = new object();
 
         [DllImport(lib_x11, EntryPoint = "XOpenDisplay")]
-        private static extern unsafe IntPtr sys_XOpenDisplay(char* display);
-        public static unsafe IntPtr XOpenDisplay(char* display)
+        private static extern unsafe Display sys_XOpenDisplay(sbyte* display);
+        public static unsafe Display XOpenDisplay(sbyte* display)
         {
-            lock (Lock)
+            lock (displayLock)
                 return sys_XOpenDisplay(display);
         }
 
         [DllImport(lib_x11, EntryPoint = "XCloseDisplay")]
-        public static extern int XCloseDisplay(IntPtr display);
+        public static extern int XCloseDisplay(Display display);
 
         [DllImport(lib_x11, EntryPoint = "XDefaultRootWindow")]
         public static extern Window XDefaultRootWindow(Display display);

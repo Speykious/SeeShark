@@ -10,7 +10,7 @@ namespace SeeShark.Interop.X11
     using Display = IntPtr;
     using Window = IntPtr;
 
-    public static class XRandr
+    internal static class XRandr
     {
         private const string lib_x_randr = "libXrandr";
 
