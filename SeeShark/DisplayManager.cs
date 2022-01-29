@@ -16,34 +16,57 @@ namespace SeeShark
 {
     public class DisplayManager : VideoDeviceManager<DisplayInfo, Display>
     {
-        public override event Action<DisplayInfo>? OnNewDevice;
-        public override event Action<DisplayInfo>? OnLostDevice;
+        public static DeviceInputFormat DefaultInputFormat
+        {
+            get
+            {
+                return OperatingSystem.IsWindows() ? DeviceInputFormat.GdiGrab
+                    : OperatingSystem.IsLinux() ? DeviceInputFormat.X11Grab
+                    : OperatingSystem.IsMacOS() ? DeviceInputFormat.AVFoundation
+                    : throw new NotSupportedException(
+                        $"Cannot find adequate display input format for RID '{RuntimeInformation.RuntimeIdentifier}'.");
+            }
+        }
+
+        public DisplayManager(DeviceInputFormat? inputFormat = null) : base(inputFormat ?? DefaultInputFormat)
+        {
+        }
+
         public override Display GetDevice(DisplayInfo info) => new Display(info, InputFormat);
 
         /// <summary>
         /// Enumerates available devices.
         /// </summary>
-        private unsafe DisplayInfo[] enumerateDevices()
+        protected override DisplayInfo[] EnumerateDevices()
         {
             if (InputFormat == DeviceInputFormat.X11Grab)
             {
-                var display = XLib.XOpenDisplay(null);
-                var rootWindow = XLib.XDefaultRootWindow(display);
-                var monitors = getXRandrDisplays(display, rootWindow).ToList();
-                DisplayInfo[] info = new DisplayInfo[monitors.Count];
-                for (int i = 0; i < monitors.Count; i++)
+                unsafe
                 {
-                    info[i] = new DisplayInfo($"Display {i}", ":0", monitors[i].X,
-                        monitors[i].Y, monitors[i].Width, monitors[i].Height, monitors[i].Primary > 0);
+                    IntPtr display = XLib.XOpenDisplay(null);
+                    IntPtr rootWindow = XLib.XDefaultRootWindow(display);
+                    List<XRRMonitorInfo> monitors = getXRandrDisplays(display, rootWindow).ToList();
+
+                    DisplayInfo[] info = new DisplayInfo[monitors.Count];
+                    for (int i = 0; i < monitors.Count; i++)
+                    {
+                        info[i] = new DisplayInfo
+                        {
+                            Name = $"Display {i}",
+                            Path = ":0",
+                            X = monitors[i].X,
+                            Y = monitors[i].Y,
+                            Width = monitors[i].Width,
+                            Height = monitors[i].Height,
+                            Primary = monitors[i].Primary > 0,
+                        };
+                    }
+
+                    return info;
                 }
-
-                return info;
-            }
-            else
-            {
             }
 
-            return Array.Empty<DisplayInfo>();
+            return base.EnumerateDevices();
         }
 
         private unsafe IEnumerable<XRRMonitorInfo> getXRandrDisplays(IntPtr display, IntPtr rootWindow)
@@ -53,31 +76,6 @@ namespace SeeShark
             for (int i = 0; i < count; i++)
                 monitors.Add(xRandrMonitors[i]);
             return monitors;
-        }
-
-        public DisplayManager(DeviceInputFormat? inputFormat = null)
-        {
-            InputFormat = inputFormat ?? (
-                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? DeviceInputFormat.GdiGrab
-                : RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? DeviceInputFormat.X11Grab
-                : throw new NotSupportedException($"Cannot find adequate input format for RID '{RuntimeInformation.RuntimeIdentifier}'."));
-            SyncDevices();
-        }
-
-        public override void SyncDevices()
-        {
-            var newDevices = enumerateDevices().ToImmutableList();
-
-            if (Devices.SequenceEqual(newDevices))
-                return;
-
-            foreach (var device in newDevices.Except(Devices))
-                OnNewDevice?.Invoke(device);
-
-            foreach (var device in Devices.Except(newDevices))
-                OnLostDevice?.Invoke(device);
-
-            Devices = newDevices;
         }
     }
 }

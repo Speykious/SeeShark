@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using FFmpeg.AutoGen;
 using SeeShark.FFmpeg;
+using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark
 {
@@ -16,10 +17,11 @@ namespace SeeShark
     /// It can also watch for available devices, and fire up <see cref="OnNewDevice"/> and
     /// <see cref="OnLostDevice"/> events when it happens.
     /// </summary>
-    public abstract unsafe class VideoDeviceManager<TDeviceInfo, T> : Disposable where T : VideoDevice where TDeviceInfo : VideoDeviceInfo
+    public abstract unsafe class VideoDeviceManager<TDeviceInfo, T> : Disposable
+        where T : VideoDevice
+        where TDeviceInfo : VideoDeviceInfo, new()
     {
-        protected AVInputFormat* AvInputFormat;
-        protected AVFormatContext* AvFormatContext;
+        protected readonly AVInputFormat* AvInputFormat;
         protected Timer DeviceWatcher;
 
         /// <summary>
@@ -40,12 +42,28 @@ namespace SeeShark
         /// <summary>
         /// Invoked when a video device has been connected.
         /// </summary>
-        public abstract event Action<TDeviceInfo>? OnNewDevice;
+        public event Action<TDeviceInfo>? OnNewDevice;
 
         /// <summary>
         /// Invoked when a video device has been disconnected.
         /// </summary>
-        public abstract event Action<TDeviceInfo>? OnLostDevice;
+        public event Action<TDeviceInfo>? OnLostDevice;
+
+        protected VideoDeviceManager(DeviceInputFormat inputFormat)
+        {
+            SetupFFmpeg();
+
+            InputFormat = inputFormat;
+            AvInputFormat = ffmpeg.av_find_input_format(InputFormat.ToString());
+
+            SyncDevices();
+            DeviceWatcher = new Timer(
+                (object? _state) => SyncDevices(),
+                null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan
+            );
+
+            IsWatching = false;
+        }
 
         public abstract T GetDevice(TDeviceInfo info);
         public T GetDevice(int index = 0) => GetDevice(Devices[index]);
@@ -69,20 +87,56 @@ namespace SeeShark
             IsWatching = false;
         }
 
+        protected virtual TDeviceInfo[] EnumerateDevices()
+        {
+            AVDeviceInfoList* avDeviceInfoList = null;
+            ffmpeg.avdevice_list_input_sources(AvInputFormat, null, null, &avDeviceInfoList).ThrowExceptionIfError();
+            int nDevices = avDeviceInfoList->nb_devices;
+            var avDevices = avDeviceInfoList->devices;
+
+            var devices = new TDeviceInfo[nDevices];
+            for (int i = 0; i < nDevices; i++)
+            {
+                var avDevice = avDevices[i];
+                var name = new string((sbyte*)avDevice->device_description);
+                var path = new string((sbyte*)avDevice->device_name);
+
+                if (path == null)
+                    throw new InvalidOperationException($"Device at index {i} doesn't have a path!");
+
+                devices[i] = new TDeviceInfo
+                {
+                    Name = name,
+                    Path = path,
+                };
+            }
+
+            ffmpeg.avdevice_free_list_devices(&avDeviceInfoList);
+            return devices;
+        }
+
         /// <summary>
         /// Looks for available devices and triggers <see cref="OnNewDevice"/> and <see cref="OnLostDevice"/> events.
         /// </summary>
-        public abstract void SyncDevices();
+        public void SyncDevices()
+        {
+            var newDevices = EnumerateDevices().ToImmutableList();
 
+            if (Devices.SequenceEqual(newDevices))
+                return;
+
+            foreach (var device in newDevices.Except(Devices))
+                OnNewDevice?.Invoke(device);
+
+            foreach (var device in Devices.Except(newDevices))
+                OnLostDevice?.Invoke(device);
+
+            Devices = newDevices;
+        }
 
         protected override void DisposeManaged()
         {
             DeviceWatcher.Dispose();
-        }
-
-        protected override void DisposeUnmanaged()
-        {
-            ffmpeg.avformat_free_context(AvFormatContext);
         }
     }
 }

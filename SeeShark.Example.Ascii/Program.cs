@@ -11,8 +11,8 @@ namespace SeeShark.Example.Ascii
 {
     class Program
     {
-        static Camera? karen;
-        static CameraManager? manager;
+        static Display? karen;
+        static DisplayManager? manager;
         static FrameConverter? converter;
 
         static void Main(string[] args)
@@ -38,8 +38,7 @@ namespace SeeShark.Example.Ascii
             Console.WriteLine("Running in {0}-bit mode.", Environment.Is64BitProcess ? "64" : "32");
             Console.WriteLine($"FFmpeg version info: {FFmpegVersion}");
 
-            /*
-            manager = new CameraManager();
+            manager = new DisplayManager();
 
             string devicePath;
             if (args.Length < 1)
@@ -71,9 +70,7 @@ namespace SeeShark.Example.Ascii
             /// representing the device path, or a <see cref="CameraInfo">.
 
             // Unfortunately, she saw the manager
-            karen = manager.GetCamera(devicePath);
-            */
-            karen = new Camera(new CameraInfo("Just a screen", ":0"), FFmpeg.DeviceInputFormat.X11Grab);
+            karen = manager.GetDevice(devicePath);
 
             /// Attach our <see cref="OnNewFrame"/> method to the camera's frame event handler,
             /// so that we can process every coming frame the way we want.

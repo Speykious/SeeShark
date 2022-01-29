@@ -6,8 +6,5 @@ namespace SeeShark
 {
     public class CameraInfo : VideoDeviceInfo
     {
-        public CameraInfo(string? name, string path) : base(name, path)
-        {
-        }
     }
 }

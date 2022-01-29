@@ -14,25 +14,13 @@ namespace SeeShark
         /// <summary>
         /// Name of the camera. Can be null.
         /// </summary>
-        public string? Name { get; }
+        public string? Name { get; init; }
         /// <summary>
         /// Path of the camera device. It can be anything from a file on the system (on Linux for instance) or a UUID (on Windows for example).
         /// </summary>
-        public string Path { get; }
+        public string Path { get; init; } = "";
 
-        public VideoDeviceInfo(string path)
-        {
-            Name = null;
-            Path = path;
-        }
-
-        public VideoDeviceInfo(string? name, string path)
-        {
-            Name = name;
-            Path = path;
-        }
-
-        public bool Equals(VideoDeviceInfo other) => Path == other.Path;
+        public bool Equals(VideoDeviceInfo? other) => Path == other?.Path;
         public override bool Equals(object? obj) => obj is VideoDeviceInfo info && Equals(info);
         public override int GetHashCode() => Path.GetHashCode();
 

@@ -6,22 +6,9 @@ namespace SeeShark;
 
 public class DisplayInfo : VideoDeviceInfo
 {
-    public int X { get; }
-    public int Y { get; }
-    public int Width { get; }
-    public int Height { get; }
-    public bool Primary { get; }
-
-    public DisplayInfo(string? name, string path) : base(name, path)
-    {
-    }
-
-    public DisplayInfo(string? name, string path, int x, int y, int width, int height, bool primary) : base(name, path)
-    {
-        X = x;
-        Y = y;
-        Width = width;
-        Height = height;
-        Primary = primary;
-    }
+    public int X { get; init; }
+    public int Y { get; init; }
+    public int Width { get; init; }
+    public int Height { get; init; }
+    public bool Primary { get; init; }
 }

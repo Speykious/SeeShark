@@ -60,9 +60,5 @@ namespace SeeShark
             StopCapture();
             decoder.Dispose();
         }
-
-        protected override void DisposeUnmanaged()
-        {
-        }
     }
 }
