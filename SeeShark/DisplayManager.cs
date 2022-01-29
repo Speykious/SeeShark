@@ -33,7 +33,7 @@ namespace SeeShark
                 DisplayInfo[] info = new DisplayInfo[monitors.Count];
                 for (int i = 0; i < monitors.Count; i++)
                 {
-                    info[i] = new DisplayInfo(":0", $"Display {i}", monitors[i].X,
+                    info[i] = new DisplayInfo($"Display {i}", ":0", monitors[i].X,
                         monitors[i].Y, monitors[i].Width, monitors[i].Height, monitors[i].Primary > 0);
                 }
 
@@ -57,7 +57,10 @@ namespace SeeShark
 
         public DisplayManager(DeviceInputFormat? inputFormat = null)
         {
-            InputFormat = DeviceInputFormat.X11Grab;
+            InputFormat = inputFormat ?? (
+                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? DeviceInputFormat.GdiGrab
+                : RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? DeviceInputFormat.X11Grab
+                : throw new NotSupportedException($"Cannot find adequate input format for RID '{RuntimeInformation.RuntimeIdentifier}'."));
             SyncDevices();
         }
 
