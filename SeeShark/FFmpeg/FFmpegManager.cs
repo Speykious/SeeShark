@@ -118,7 +118,10 @@ namespace SeeShark.FFmpeg
             return libraries.ToStrings().All((lib) => canLoadLibrary(lib, path, validated));
         }
 
-        // Note: recurses in a very similar way to the LoadLibrary() method.
+        // Note: dependencies are not checked as they are optional in FFmpeg.AutoGen.
+        // See following links:
+        // - https://github.com/Ruslan-B/FFmpeg.AutoGen/commit/395dea80c642c85e089e3d7721f91d77594655c1
+        // - https://github.com/Ruslan-B/FFmpeg.AutoGen/blob/633c15d323785092561329ad4b5742b0189116d6/FFmpeg.AutoGen/FFmpeg.cs#L57-L82
         private static bool canLoadLibrary(string lib, string path, List<string> validated)
         {
             if (validated.Contains(lib))
@@ -129,9 +132,7 @@ namespace SeeShark.FFmpeg
                 return false;
 
             validated.Add(lib);
-
-            var dependencies = ffmpeg.LibraryDependenciesMap[lib];
-            return dependencies.Except(validated).All((dep) => canLoadLibrary(dep, path, validated));
+            return true;
         }
 
         /// <summary>
