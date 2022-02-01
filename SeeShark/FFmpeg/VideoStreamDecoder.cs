@@ -29,6 +29,11 @@ namespace SeeShark.FFmpeg
         public readonly int FrameHeight;
         public readonly PixelFormat PixelFormat;
 
+        public VideoStreamDecoder(string url, DeviceInputFormat inputFormat)
+            : this(url, ffmpeg.av_find_input_format(inputFormat.ToString()))
+        {
+        }
+
         public VideoStreamDecoder(string url, AVInputFormat* inputFormat = null)
         {
             SetupFFmpeg();

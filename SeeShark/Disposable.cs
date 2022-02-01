@@ -3,43 +3,59 @@
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
 using System;
+using System.Threading;
 
 namespace SeeShark
 {
+    /// <remarks>
+    /// based on <see href="https://github.com/shimat/opencvsharp/blob/9a5f9828a74cfa3995562a06716e177705cde038/src/OpenCvSharp/Fundamentals/DisposableObject.cs">OpenCvSharp</see>
+    /// </remarks>
     public abstract class Disposable : IDisposable
     {
-        public bool Disposed { get; private set; }
+        private volatile int disposeSignaled = 0;
 
-        public Disposable()
+        public bool IsDisposed { get; protected set; }
+        protected bool IsOwner { get; private set; }
+
+        protected Disposable(bool isOwner = true)
         {
-            Disposed = false;
+            IsDisposed = false;
+            IsOwner = isOwner;
         }
 
-        private void dispose(bool disposing)
+        public void Dispose()
         {
-            if (Disposed)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Interlocked.Exchange(ref disposeSignaled, 1) != 0)
                 return;
+
+            IsDisposed = true;
 
             if (disposing)
                 DisposeManaged();
 
             DisposeUnmanaged();
-
-            Disposed = true;
         }
-
-        public void Dispose()
-        {
-            dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected abstract void DisposeManaged();
-        protected abstract void DisposeUnmanaged();
 
         ~Disposable()
         {
-            dispose(false);
+            Dispose(false);
+        }
+
+        protected virtual void DisposeManaged() { }
+        protected virtual void DisposeUnmanaged() { }
+
+        public void TransferOwnership() => IsOwner = false;
+
+        public void ThrowIfDisposed()
+        {
+            if (IsDisposed)
+                throw new ObjectDisposedException(GetType().FullName);
         }
     }
 }
