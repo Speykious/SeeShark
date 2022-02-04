@@ -90,6 +90,7 @@ namespace SeeShark
             dstFrame->height = DstHeight;
             dstFrame->data.UpdateFrom(dstData);
             dstFrame->linesize.UpdateFrom(dstLinesize);
+            dstFrame->format = (int)dstPF;
             DstFrame = new Frame(dstFrame);
         }
 
