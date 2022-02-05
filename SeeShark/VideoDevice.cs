@@ -27,7 +27,7 @@ namespace SeeShark
         protected void DecodeLoop()
         {
             DecodeStatus status;
-            while ((status = decoder.TryDecodeNextFrame(out var frame)) != DecodeStatus.EndOfStream)
+            while ((status = TryGetFrame(out var frame)) != DecodeStatus.EndOfStream)
             {
                 OnFrame?.Invoke(this, new FrameEventArgs(frame, status));
 
@@ -40,7 +40,7 @@ namespace SeeShark
         {
             while (true)
             {
-                switch (decoder.TryDecodeNextFrame(out var frame))
+                switch (TryGetFrame(out var frame))
                 {
                     case DecodeStatus.NewFrame:
                         return frame;
@@ -49,6 +49,9 @@ namespace SeeShark
                 }
             }
         }
+
+        public DecodeStatus TryGetFrame(out Frame frame) =>
+            decoder.TryDecodeNextFrame(out frame);
 
         public void StopCapture()
         {
