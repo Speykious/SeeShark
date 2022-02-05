@@ -27,7 +27,7 @@ namespace SeeShark
         protected void DecodeLoop()
         {
             DecodeStatus status;
-            while ((status = decoder.TryDecodeNextFrame(out var frame)) != DecodeStatus.EndOfStream)
+            while ((status = TryGetFrame(out var frame)) != DecodeStatus.EndOfStream)
             {
                 OnFrame?.Invoke(this, new FrameEventArgs(frame, status));
 
@@ -35,6 +35,42 @@ namespace SeeShark
                     break;
             }
         }
+
+        /// <summary>
+        /// Decodes the next frame from the stream.
+        /// </summary>
+        /// <remarks>
+        /// This operation is blocking.
+        /// If you want a synchronous non-blocking solution, use <see cref="TryGetFrame" />.
+        /// If you want an asynchronous solution, use the <see cref="OnFrame" /> event instead
+        /// and toggle capture with <see cref="StartCapture" /> and <see cref="StopCapture" />.
+        /// </remarks>
+        /// <returns>The decoded frame.</returns>
+        public Frame GetFrame()
+        {
+            while (true)
+            {
+                switch (TryGetFrame(out var frame))
+                {
+                    case DecodeStatus.NewFrame:
+                        return frame;
+                    case DecodeStatus.EndOfStream:
+                        throw new InvalidOperationException("End of stream");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Tries to decode the next frame from the stream.
+        /// </summary>
+        /// <remarks>
+        /// This operation is non-blocking.
+        /// If you want a synchronous blocking solution, use <see cref="GetFrame" />.
+        /// If you want an asynchronous solution, use the <see cref="OnFrame" /> event instead
+        /// and toggle capture with <see cref="StartCapture" /> and <see cref="StopCapture" />.
+        /// </remarks>
+        public DecodeStatus TryGetFrame(out Frame frame) =>
+            decoder.TryDecodeNextFrame(out frame);
 
         public void StopCapture()
         {
