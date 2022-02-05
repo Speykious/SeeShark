@@ -36,6 +36,20 @@ namespace SeeShark
             }
         }
 
+        public Frame GetFrame()
+        {
+            while (true)
+            {
+                switch (decoder.TryDecodeNextFrame(out var frame))
+                {
+                    case DecodeStatus.NewFrame:
+                        return frame;
+                    case DecodeStatus.EndOfStream:
+                        throw new InvalidOperationException("End of stream");
+                }
+            }
+        }
+
         public void StopCapture()
         {
             if (!IsPlaying)
