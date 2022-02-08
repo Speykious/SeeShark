@@ -5,6 +5,8 @@
 using System;
 using System.Diagnostics;
 using System.Text;
+using SeeShark.Decode;
+using SeeShark.Device;
 using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark.Example.Ascii
@@ -122,7 +124,7 @@ namespace SeeShark.Example.Ascii
         public static void OnFrameEventHandler(object? _sender, FrameEventArgs e)
         {
             // Don't redraw the frame if it's not new, unless it's resized.
-            if (e.Status != FFmpeg.DecodeStatus.NewFrame)
+            if (e.Status != DecodeStatus.NewFrame)
                 return;
 
             var frame = e.Frame;

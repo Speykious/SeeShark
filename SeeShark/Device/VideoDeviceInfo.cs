@@ -4,7 +4,7 @@
 
 using System;
 
-namespace SeeShark
+namespace SeeShark.Device
 {
     /// <summary>
     /// Various information about the camera device.

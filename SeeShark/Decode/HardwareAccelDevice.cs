@@ -4,7 +4,7 @@
 
 using FFmpeg.AutoGen;
 
-namespace SeeShark
+namespace SeeShark.Decode
 {
     public enum HardwareAccelDevice : int
     {

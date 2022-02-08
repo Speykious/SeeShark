@@ -3,8 +3,9 @@
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
 using FFmpeg.AutoGen;
+using SeeShark.FFmpeg;
 
-namespace SeeShark.FFmpeg
+namespace SeeShark.Decode
 {
     /// <summary>
     /// Decodes a video stream using hardware acceleration.

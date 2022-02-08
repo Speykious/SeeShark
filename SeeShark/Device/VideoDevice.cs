@@ -4,9 +4,9 @@
 
 using System;
 using System.Threading;
-using SeeShark.FFmpeg;
+using SeeShark.Decode;
 
-namespace SeeShark
+namespace SeeShark.Device
 {
     public class VideoDevice : Disposable
     {

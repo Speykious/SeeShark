@@ -4,7 +4,7 @@
 
 using System;
 
-namespace SeeShark.FFmpeg
+namespace SeeShark.Device
 {
     /// <summary>
     /// Input format for camera devices.

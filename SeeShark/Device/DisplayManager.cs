@@ -3,16 +3,10 @@
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
 using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
-using FFmpeg.AutoGen;
-using SeeShark.FFmpeg;
 using SeeShark.Interop.X11;
 
-namespace SeeShark
+namespace SeeShark.Device
 {
     public class DisplayManager : VideoDeviceManager<DisplayInfo, Display>
     {

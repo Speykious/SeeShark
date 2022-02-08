@@ -2,7 +2,7 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
-namespace SeeShark.FFmpeg
+namespace SeeShark.Decode
 {
     /// <summary>
     /// Describes the decoding status of a given <see cref="VideoStreamDecoder"/>
