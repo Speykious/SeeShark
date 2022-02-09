@@ -1,9 +1,11 @@
-﻿// Copyright (c) The Vignette Authors
+// Copyright (c) The Vignette Authors
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
 using System;
 using System.Diagnostics;
+using SeeShark.Decode;
+using SeeShark.Device;
 using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark.Example.Stats
@@ -124,7 +126,7 @@ namespace SeeShark.Example.Stats
         public static void OnFrameEventHandler(object? _sender, FrameEventArgs e)
         {
             // Don't redraw the frame if it's not new.
-            if (e.Status != FFmpeg.DecodeStatus.NewFrame)
+            if (e.Status != DecodeStatus.NewFrame)
                 return;
 
             var frame = e.Frame;

@@ -10,7 +10,7 @@ using FFmpeg.AutoGen;
 using SeeShark.FFmpeg;
 using static SeeShark.FFmpeg.FFmpegManager;
 
-namespace SeeShark
+namespace SeeShark.Device
 {
     /// <summary>
     /// Manages your video devices. Is able to enumerate them and create new <see cref="T"/>s.
@@ -58,7 +58,7 @@ namespace SeeShark
 
             SyncDevices();
             DeviceWatcher = new Timer(
-                (object? _state) => SyncDevices(),
+                (_state) => SyncDevices(),
                 null, Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan
             );
 

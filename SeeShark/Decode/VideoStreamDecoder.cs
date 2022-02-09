@@ -7,9 +7,11 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
 using FFmpeg.AutoGen;
+using SeeShark.Device;
+using SeeShark.FFmpeg;
 using static SeeShark.FFmpeg.FFmpegManager;
 
-namespace SeeShark.FFmpeg
+namespace SeeShark.Decode
 {
     /// <summary>
     /// Decodes a video stream. <br/>
