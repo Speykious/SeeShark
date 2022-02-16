@@ -31,12 +31,12 @@ namespace SeeShark.Decode
         public readonly int FrameHeight;
         public readonly PixelFormat PixelFormat;
 
-        public VideoStreamDecoder(string url, DeviceInputFormat inputFormat)
-            : this(url, ffmpeg.av_find_input_format(inputFormat.ToString()))
+        public VideoStreamDecoder(string url, DeviceInputFormat inputFormat, IDictionary<string, string>? options = null)
+            : this(url, ffmpeg.av_find_input_format(inputFormat.ToString()), options)
         {
         }
 
-        public VideoStreamDecoder(string url, AVInputFormat* inputFormat = null)
+        public VideoStreamDecoder(string url, AVInputFormat* inputFormat = null, IDictionary<string, string>? options = null)
         {
             SetupFFmpeg();
 
@@ -45,9 +45,12 @@ namespace SeeShark.Decode
 
             var formatContext = FormatContext;
             AVDictionary* dict = null;
-            ffmpeg.av_dict_set(&dict, "video_size", "700x700", 0);
-            ffmpeg.av_dict_set(&dict, "input_format", "mjpeg", 0);
-            ffmpeg.av_dict_set(&dict, "framerate", "10", 0);
+
+            if (options != null)
+            {
+                foreach (KeyValuePair<string, string> pair in options)
+                    ffmpeg.av_dict_set(&dict, pair.Key, pair.Value, 0);
+            }
 
             ffmpeg.avformat_open_input(&formatContext, url, inputFormat, &dict).ThrowExceptionIfError();
 

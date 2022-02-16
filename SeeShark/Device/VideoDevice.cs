@@ -18,10 +18,10 @@ namespace SeeShark.Device
 
         public event EventHandler<FrameEventArgs>? OnFrame;
 
-        public VideoDevice(VideoDeviceInfo info, DeviceInputFormat inputFormat)
+        public VideoDevice(VideoDeviceInfo info, DeviceInputFormat inputFormat, VideoInputOptions? options = null)
         {
             Info = info;
-            decoder = new VideoStreamDecoder(info.Path, inputFormat);
+            decoder = new VideoStreamDecoder(info.Path, inputFormat, options?.ToAVDictOptions());
         }
 
         protected void DecodeLoop()
