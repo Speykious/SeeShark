@@ -46,7 +46,9 @@ namespace SeeShark.Decode
             var formatContext = FormatContext;
             AVDictionary* dict = null;
             ffmpeg.av_dict_set(&dict, "video_size", "700x700", 0);
-            ffmpeg.av_dict_set(&dict, "framerate", "2", 0);
+            ffmpeg.av_dict_set(&dict, "input_format", "mjpeg", 0);
+            ffmpeg.av_dict_set(&dict, "framerate", "10", 0);
+
             ffmpeg.avformat_open_input(&formatContext, url, inputFormat, &dict).ThrowExceptionIfError();
 
             AVCodec* codec = null;
