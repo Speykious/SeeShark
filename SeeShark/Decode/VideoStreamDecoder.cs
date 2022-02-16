@@ -44,7 +44,10 @@ namespace SeeShark.Decode
             FormatContext->flags = ffmpeg.AVFMT_FLAG_NONBLOCK;
 
             var formatContext = FormatContext;
-            ffmpeg.avformat_open_input(&formatContext, url, inputFormat, null).ThrowExceptionIfError();
+            AVDictionary* dict = null;
+            ffmpeg.av_dict_set(&dict, "video_size", "700x700", 0);
+            ffmpeg.av_dict_set(&dict, "framerate", "2", 0);
+            ffmpeg.avformat_open_input(&formatContext, url, inputFormat, &dict).ThrowExceptionIfError();
 
             AVCodec* codec = null;
             StreamIndex = ffmpeg
