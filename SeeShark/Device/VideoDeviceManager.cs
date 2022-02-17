@@ -65,9 +65,11 @@ namespace SeeShark.Device
             IsWatching = false;
         }
 
-        public abstract T GetDevice(TDeviceInfo info);
-        public T GetDevice(int index = 0) => GetDevice(Devices[index]);
-        public T GetDevice(string path) => GetDevice(Devices.First((ci) => ci.Path == path));
+        public abstract T GetDevice(TDeviceInfo info, VideoInputOptions? options = null);
+        public T GetDevice(int index = 0, VideoInputOptions? options = null) =>
+            GetDevice(Devices[index], options);
+        public T GetDevice(string path, VideoInputOptions? options = null) =>
+            GetDevice(Devices.First((ci) => ci.Path == path), options);
 
         /// <summary>
         /// Starts watching for available devices.

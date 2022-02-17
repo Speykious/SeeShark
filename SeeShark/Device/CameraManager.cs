@@ -41,7 +41,8 @@ namespace SeeShark.Device
         {
         }
 
-        public override Camera GetDevice(CameraInfo info) => new Camera(info, InputFormat);
+        public override Camera GetDevice(CameraInfo info, VideoInputOptions? options = null) =>
+            new Camera(info, InputFormat, options);
 
         /// <summary>
         /// Enumerates available devices.
