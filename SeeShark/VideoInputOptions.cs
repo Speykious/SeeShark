@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using FFmpeg.AutoGen;
 
-namespace SeeShark.Decode
+namespace SeeShark
 {
     public class VideoInputOptions
     {
