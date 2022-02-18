@@ -6,7 +6,8 @@ namespace SeeShark.Device
 {
     public class Camera : VideoDevice
     {
-        public Camera(VideoDeviceInfo info, DeviceInputFormat inputFormat) : base(info, inputFormat)
+        public Camera(VideoDeviceInfo info, DeviceInputFormat inputFormat, VideoInputOptions? options = null)
+            : base(info, inputFormat, options)
         {
         }
     }

@@ -2,6 +2,7 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
+using System;
 using FFmpeg.AutoGen;
 
 namespace SeeShark
@@ -69,16 +70,19 @@ namespace SeeShark
         /// planar YUV 4:2:0, 12bpp, full scale (JPEG), deprecated in favor of AV_PIX_FMT_YUV420P
         /// and setting color_range
         /// </summary>
+        [Obsolete("Deprecated in favor of AV_PIX_FMT_YUV420P")]
         Yuvj420P = AVPixelFormat.AV_PIX_FMT_YUVJ420P,
         /// <summary>
         /// planar YUV 4:2:2, 16bpp, full scale (JPEG), deprecated in favor of AV_PIX_FMT_YUV422P
         /// and setting color_range
         /// </summary>
+        [Obsolete("Deprecated in favor of AV_PIX_FMT_YUV422P")]
         Yuvj422P = AVPixelFormat.AV_PIX_FMT_YUVJ422P,
         /// <summary>
         /// planar YUV 4:4:4, 24bpp, full scale (JPEG), deprecated in favor of AV_PIX_FMT_YUV444P
         /// and setting color_range
         /// </summary>
+        [Obsolete("Deprecated in favor of AV_PIX_FMT_YUV444P")]
         Yuvj444P = AVPixelFormat.AV_PIX_FMT_YUVJ444P,
         /// <summary>
         /// packed YUV 4:2:2, 16bpp, Cb Y0 Cr Y1
@@ -155,6 +159,7 @@ namespace SeeShark
         /// planar YUV 4:4:0 full scale (JPEG), deprecated in favor of AV_PIX_FMT_YUV440P
         /// and setting color_range
         /// </summary>
+        [Obsolete("Deprecated in favor of AV_PIX_FMT_YUV440P")]
         Yuvj440P = AVPixelFormat.AV_PIX_FMT_YUVJ440P,
         /// <summary>
         /// planar YUV 4:2:0, 20bpp, (1 Cr &#38; Cb sample per 2x2 Y &#38; A samples)
@@ -620,6 +625,7 @@ namespace SeeShark
         /// planar YUV 4:1:1, 12bpp, (1 Cr &#38; Cb sample per 4x1 Y samples) full scale (JPEG),
         /// deprecated in favor of AV_PIX_FMT_YUV411P and setting color_range
         /// </summary>
+        [Obsolete("Deprecated in favor of AV_PIX_FMT_YUV411P and setting color_range")]
         Yuvj411P = AVPixelFormat.AV_PIX_FMT_YUVJ411P,
         /// <summary>
         /// bayer, BGBG..(odd line), GRGR..(even line), 8-bit samples
@@ -857,5 +863,23 @@ namespace SeeShark
         /// because the number of formats might differ between versions
         /// </summary>
         AvPixFmtNb = AVPixelFormat.AV_PIX_FMT_NB
+    }
+
+    public static class PixelFormatExtensions
+    {
+#pragma warning disable CS0618
+        public static PixelFormat RecycleDeprecated(this PixelFormat pixelFormat)
+        {
+            return pixelFormat switch
+            {
+                PixelFormat.Yuvj411P => PixelFormat.Yuv411P,
+                PixelFormat.Yuvj420P => PixelFormat.Yuv420P,
+                PixelFormat.Yuvj422P => PixelFormat.Yuv422P,
+                PixelFormat.Yuvj440P => PixelFormat.Yuv440P,
+                PixelFormat.Yuvj444P => PixelFormat.Yuv444P,
+                _ => pixelFormat
+            };
+        }
+#pragma warning restore CS0618
     }
 }

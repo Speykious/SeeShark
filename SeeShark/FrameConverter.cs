@@ -65,8 +65,8 @@ namespace SeeShark
             SrcPixelFormat = srcPixelFormat;
             DstPixelFormat = dstPixelFormat;
 
-            var srcPF = (AVPixelFormat)srcPixelFormat;
-            var dstPF = (AVPixelFormat)dstPixelFormat;
+            var srcPF = (AVPixelFormat)srcPixelFormat.RecycleDeprecated();
+            var dstPF = (AVPixelFormat)dstPixelFormat.RecycleDeprecated();
 
             convertContext = ffmpeg.sws_getContext(
                 srcWidth, srcHeight, srcPF,

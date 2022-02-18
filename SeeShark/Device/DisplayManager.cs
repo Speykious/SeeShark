@@ -26,7 +26,8 @@ namespace SeeShark.Device
         {
         }
 
-        public override Display GetDevice(DisplayInfo info) => new Display(info, InputFormat);
+        public override Display GetDevice(DisplayInfo info, VideoInputOptions? options = null) =>
+            new Display(info, InputFormat, options);
 
         /// <summary>
         /// Enumerates available devices.

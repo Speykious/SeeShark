@@ -31,6 +31,8 @@ namespace SeeShark.Example.Ascii
 
             // You can add your own path for FFmpeg libraries here!
             SetupFFmpeg(
+                FFmpeg.FFmpegLogLevel.Info,
+                ConsoleColor.Yellow,
                 AppDomain.CurrentDomain.BaseDirectory,
                 "/usr/lib",
                 "/usr/lib64"
