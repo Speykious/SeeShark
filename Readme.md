@@ -1,12 +1,12 @@
 # SeeShark
 
-> Simple C# camera library.
+> Simple C# camera and display library.
 
 [![Discord](https://img.shields.io/discord/871618277258960896?color=7289DA&label=%20&logo=discord&logoColor=white)](https://discord.gg/Tz96ZdKjSA) ![NuGet](https://img.shields.io/nuget/v/SeeShark)
 
 When you SeeShark, you C#!
 
-SeeShark is a simple cross-platform .NET library for handling camera inputs on Linux, Windows and MacOS.
+SeeShark is a simple cross-platform .NET library for handling camera and screen display inputs on Linux, Windows and MacOS.
 
 Using FFmpeg, it allows you to enumerate camera devices and decode raw frames in 199 different pixel formats (because that's how powerful FFmpeg is!).
 
@@ -14,18 +14,19 @@ Features include:
 - Zero-copy.
 - Memory-safe.
 - Cross platform (Tested on Windows and Linux, might work on more platforms like MacOS).
-- Managing camera devices.
+- Managing camera and display devices.
+- Control framerate, resolution and input format.
 - Notifies the application if devices get connected/disconnected.
-- Event-driven code flow.
-- Supports 199 different pixel formats.
+- Provides synchronous (method-driven) and asynchronous (event-driven) code flow.
+- Supports 206 different pixel formats.
 - Conversion of a frame from a pixel format to another.
 - Scaling frames.
 - Access to raw pixel data.
 
 Features **don't** include:
 - Saving a frame as an image (here's a [wiki page on how to do it](https://github.com/vignetteapp/SeeShark/wiki/Saving-images) using ImageSharp).
-- Recording a camera stream to a video file.
-- Manage audio devices.
+- Recording a video stream to a video file.
+- Managing audio devices.
 
 ***
 
