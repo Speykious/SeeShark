@@ -25,7 +25,7 @@
 
   <ItemGroup Label="Package References">
     <PackageReference Include="DirectShowLib.Standard" Version="2.1.0" />
-    <PackageReference Include="FFmpeg.AutoGen" Version="4.4.1" />
+    <PackageReference Include="FFmpeg.AutoGen" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup Label="Documents">
