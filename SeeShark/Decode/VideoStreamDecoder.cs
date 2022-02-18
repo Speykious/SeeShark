@@ -53,6 +53,7 @@ namespace SeeShark.Decode
             }
 
             ffmpeg.avformat_open_input(&formatContext, url, inputFormat, &dict).ThrowExceptionIfError();
+            ffmpeg.av_dict_free(&dict);
 
             AVCodec* codec = null;
             StreamIndex = ffmpeg
