@@ -8,7 +8,7 @@ When you SeeShark, you C#!
 
 SeeShark is a simple cross-platform .NET library for handling camera and screen display inputs on Linux, Windows and MacOS.
 
-Using FFmpeg, it allows you to enumerate camera devices and decode raw frames in 199 different pixel formats (because that's how powerful FFmpeg is!).
+Using FFmpeg, it allows you to enumerate camera and display devices and decode raw frames in 206 different pixel formats (because that's how powerful FFmpeg is!).
 
 Features include:
 - Zero-copy.
@@ -54,10 +54,10 @@ namespace YourProgram
             // Attach your callback to the camera's frame event handler
             camera.OnFrame += FrameEventHandler;
 
-            // Start decoding frames
+            // Start decoding frames asynchronously
             camera.StartCapture();
 
-            // The camera decodes frames asynchronously.
+            // Just wait a bit
             Thread.Sleep(TimeSpan.FromSeconds(10));
 
             // Stop decoding frames
@@ -79,7 +79,6 @@ namespace YourProgram
         }
     }
 }
-
 ```
 
 You can also look at our overcommented [`SeeShark.Example.Ascii`](./SeeShark.Example.Ascii/) program which displays your camera input with ASCII characters.
