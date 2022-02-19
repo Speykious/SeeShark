@@ -97,7 +97,7 @@ You can request a feature or fix a bug by reporting an issue.
 If you feel like fixing a bug or implementing a feature, you can fork this repository and make a pull request at any time!
 
 You can also join our discord server where we talk about our different projects.
-This one has a particular **#Project SeeShark** thread that can be found under the **#main** channel.
+We have a dedicated **#seeshark** channel for this one.
 
 ## License
 
