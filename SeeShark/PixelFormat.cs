@@ -70,19 +70,19 @@ namespace SeeShark
         /// planar YUV 4:2:0, 12bpp, full scale (JPEG), deprecated in favor of AV_PIX_FMT_YUV420P
         /// and setting color_range
         /// </summary>
-        [Obsolete("Deprecated in favor of AV_PIX_FMT_YUV420P")]
+        [Obsolete("Deprecated in favor of AV_PIX_FMT_YUV420P and setting color_range")]
         Yuvj420P = AVPixelFormat.AV_PIX_FMT_YUVJ420P,
         /// <summary>
         /// planar YUV 4:2:2, 16bpp, full scale (JPEG), deprecated in favor of AV_PIX_FMT_YUV422P
         /// and setting color_range
         /// </summary>
-        [Obsolete("Deprecated in favor of AV_PIX_FMT_YUV422P")]
+        [Obsolete("Deprecated in favor of AV_PIX_FMT_YUV422P and setting color_range")]
         Yuvj422P = AVPixelFormat.AV_PIX_FMT_YUVJ422P,
         /// <summary>
         /// planar YUV 4:4:4, 24bpp, full scale (JPEG), deprecated in favor of AV_PIX_FMT_YUV444P
         /// and setting color_range
         /// </summary>
-        [Obsolete("Deprecated in favor of AV_PIX_FMT_YUV444P")]
+        [Obsolete("Deprecated in favor of AV_PIX_FMT_YUV444P and setting color_range")]
         Yuvj444P = AVPixelFormat.AV_PIX_FMT_YUVJ444P,
         /// <summary>
         /// packed YUV 4:2:2, 16bpp, Cb Y0 Cr Y1
@@ -159,7 +159,7 @@ namespace SeeShark
         /// planar YUV 4:4:0 full scale (JPEG), deprecated in favor of AV_PIX_FMT_YUV440P
         /// and setting color_range
         /// </summary>
-        [Obsolete("Deprecated in favor of AV_PIX_FMT_YUV440P")]
+        [Obsolete("Deprecated in favor of AV_PIX_FMT_YUV440P and setting color range")]
         Yuvj440P = AVPixelFormat.AV_PIX_FMT_YUVJ440P,
         /// <summary>
         /// planar YUV 4:2:0, 20bpp, (1 Cr &#38; Cb sample per 2x2 Y &#38; A samples)
@@ -208,22 +208,7 @@ namespace SeeShark
         /// </summary>
         Bgr555Le = AVPixelFormat.AV_PIX_FMT_BGR555LE,
         /// <summary>
-        /// HW acceleration through VA API at motion compensation entry-point, Picture.data[3]
-        /// contains a vaapi_render_state struct which contains macroblocks as well as various
-        /// fields extracted from headers
-        /// </summary>
-        VaapiMoco = AVPixelFormat.AV_PIX_FMT_VAAPI_MOCO,
-        /// <summary>
-        /// HW acceleration through VA API at IDCT entry-point, Picture.data[3] contains
-        /// a vaapi_render_state struct which contains fields extracted from headers
-        /// </summary>
-        VaapiIdct = AVPixelFormat.AV_PIX_FMT_VAAPI_IDCT,
-        /// <summary>
-        /// HW decoding through VA API, Picture.data[3] contains a VASurfaceID
-        /// </summary>
-        VaapiVld = AVPixelFormat.AV_PIX_FMT_VAAPI_VLD,
-        /// <summary>
-        /// alias for VaapiVld
+        /// Hardware acceleration through VA-API, data[3] contains a VASurfaceID.
         /// </summary>
         Vaapi = AVPixelFormat.AV_PIX_FMT_VAAPI,
         /// <summary>
@@ -345,6 +330,7 @@ namespace SeeShark
         /// </summary>
         Gbrp = AVPixelFormat.AV_PIX_FMT_GBRP,
         /// <summary>
+        /// alias for GBRP
         /// </summary>
         Gbr24P = AVPixelFormat.AV_PIX_FMT_GBR24P,
         /// <summary>
@@ -544,7 +530,7 @@ namespace SeeShark
         /// <summary>
         /// packed RGB 8:8:8, 32bpp, XRGBXRGB... X=unused/undefined
         /// </summary>
-        ZeroRgb = AVPixelFormat.AV_PIX_FMT_0RGB,
+        Xrgb = AVPixelFormat.AV_PIX_FMT_0RGB,
         /// <summary>
         /// packed RGB 8:8:8, 32bpp, RGBXRGBX... X=unused/undefined
         /// </summary>
@@ -859,10 +845,50 @@ namespace SeeShark
         /// </summary>
         X2Rgb10Be = AVPixelFormat.AV_PIX_FMT_X2RGB10BE,
         /// <summary>
+        /// packed BGR 10:10:10, 30bpp, (msb)2X 10B 10G 10R(lsb), little-endian, X=unused/undefined
+        /// </summary>
+        X2Bgr10Le = AVPixelFormat.AV_PIX_FMT_X2BGR10LE,
+        /// <summary>
+        /// packed BGR 10:10:10, 30bpp, (msb)2X 10B 10G 10R(lsb), big-endian, X=unused/undefined
+        /// </summary>
+        X2Bgr10Be = AVPixelFormat.AV_PIX_FMT_X2BGR10BE,
+        /// <summary>
+        /// interleaved chroma YUV 4:2:2, 20bpp, data in the high bits, big-endian
+        /// </summary>
+        P210Be = AVPixelFormat.AV_PIX_FMT_P210BE,
+        /// <summary>
+        /// interleaved chroma YUV 4:2:2, 20bpp, data in the high bits, little-endian
+        /// </summary>
+        P210Le = AVPixelFormat.AV_PIX_FMT_P210LE,
+        /// <summary>
+        /// interleaved chroma YUV 4:4:4, 30bpp, data in the high bits, big-endian
+        /// </summary>
+        P410Be = AVPixelFormat.AV_PIX_FMT_P410BE,
+        /// <summary>
+        /// interleaved chroma YUV 4:4:4, 30bpp, data in the high bits, little-endian
+        /// </summary>
+        P410Le = AVPixelFormat.AV_PIX_FMT_P410LE,
+        /// <summary>
+        /// interleaved chroma YUV 4:2:2, 32bpp, big-endian
+        /// </summary>
+        P216Be = AVPixelFormat.AV_PIX_FMT_P216BE,
+        /// <summary>
+        /// interleaved chroma YUV 4:2:2, 32bpp, liddle-endian
+        /// </summary>
+        P216Le = AVPixelFormat.AV_PIX_FMT_P216LE,
+        /// <summary>
+        /// interleaved chroma YUV 4:4:4, 48bpp, big-endian
+        /// </summary>
+        P416Be = AVPixelFormat.AV_PIX_FMT_P416BE,
+        /// <summary>
+        /// interleaved chroma YUV 4:4:4, 48bpp, little-endian
+        /// </summary>
+        P416Le = AVPixelFormat.AV_PIX_FMT_P416LE,
+        /// <summary>
         /// number of pixel formats, DO NOT USE THIS if you want to link with shared libav*
         /// because the number of formats might differ between versions
         /// </summary>
-        AvPixFmtNb = AVPixelFormat.AV_PIX_FMT_NB
+        Nb = AVPixelFormat.AV_PIX_FMT_NB
     }
 
     public static class PixelFormatExtensions
