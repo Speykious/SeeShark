@@ -21,6 +21,21 @@ namespace SeeShark.FFmpeg
         public static bool IsFFmpegSetup { get; private set; } = false;
 
         /// <summary>
+        /// Set that to true if you're struggling to setup FFmpeg properly.
+        /// </summary>
+        public static bool LogLibrarySearch { get; set; } = false;
+
+        private static void llsLog(string message)
+        {
+            if (LogLibrarySearch)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkCyan;
+                Console.Error.WriteLine(message);
+                Console.ResetColor();
+            }
+        }
+
+        /// <summary>
         /// Informative version string. It is usually the actual release version number or a git commit description. It has no fixed format and can change any time. It should never be parsed by code.
         /// <br/>
         /// Note: fetching this value will setup FFmpeg if it hasn't been done before.
@@ -64,6 +79,12 @@ namespace SeeShark.FFmpeg
             if (IsFFmpegSetup)
                 return;
 
+            llsLog("Setting up FFmpeg\nRequired libraries:" +
+                $"\n  - avcodec (v{ffmpeg.LIBAVCODEC_VERSION_MAJOR})" +
+                $"\n  - avdevice (v{ffmpeg.LIBAVDEVICE_VERSION_MAJOR})" +
+                $"\n  - avformat (v{ffmpeg.LIBAVFORMAT_VERSION_MAJOR})" +
+                $"\n  - swscale (v{ffmpeg.LIBSWSCALE_VERSION_MAJOR})");
+
             var requiredLibs = LF.AVCodec | LF.AVDevice | LF.AVFormat | LF.SWScale;
 
             if (paths.Length == 0)
@@ -105,38 +126,6 @@ namespace SeeShark.FFmpeg
         }
 
         /// <summary>
-        ///     Tries to load the native libraries from the set root path. <br/>
-        ///     You can specify which libraries need to be loaded with LibraryFlags.
-        ///     It will try to load all librares by default. <br/>
-        ///     Ideally, you would want to only call this function once, before doing anything with FFmpeg.
-        ///     If you try to do that later, it might unload all of your already loaded libraries and fail to provide them again.
-        /// </summary>
-        /// <returns>Whether it succeeded in loading all the requested libraries.</returns>
-        public static bool CanLoadLibraries(LibraryFlags libraries = LibraryFlags.All, string path = "")
-        {
-            var validated = new List<string>();
-            return libraries.ToStrings().All((lib) => canLoadLibrary(lib, path, validated));
-        }
-
-        /// <remarks>
-        /// Note: dependencies are not checked as they are optional in FFmpeg.AutoGen.
-        /// See <see href="https://github.com/Ruslan-B/FFmpeg.AutoGen/commit/395dea80c642c85e089e3d7721f91d77594655c1">the following commit</see>
-        /// and <see href="https://github.com/Ruslan-B/FFmpeg.AutoGen/blob/633c15d323785092561329ad4b5742b0189116d6/FFmpeg.AutoGen/FFmpeg.cs#L57-L82">this function</see>
-        /// </remarks>
-        private static bool canLoadLibrary(string lib, string path, List<string> validated)
-        {
-            if (validated.Contains(lib))
-                return true;
-
-            var version = ffmpeg.LibraryVersionMap[lib];
-            if (!canLoadNativeLibrary(path, lib, version))
-                return false;
-
-            validated.Add(lib);
-            return true;
-        }
-
-        /// <summary>
         ///     Tries to set the RootPath to the first path in which it can find all the native libraries.
         ///     Ideally, you would want to only call this function once, before doing anything with FFmpeg.
         /// </summary>
@@ -155,7 +144,7 @@ namespace SeeShark.FFmpeg
         /// </remarks>
         /// <param name="requiredLibraries">The required libraries. If you don't need all of them, you can specify them here.</param>
         /// <param name="paths">Every path to try out. It will set the RootPath to the first one that works.</param>
-        public static void TrySetRootPath(LibraryFlags requiredLibraries, params string[] paths)
+        public static void TrySetRootPath(LF requiredLibraries, params string[] paths)
         {
             try
             {
@@ -163,9 +152,44 @@ namespace SeeShark.FFmpeg
             }
             catch (InvalidOperationException)
             {
-                var pathList = paths.Aggregate((a, b) => $"'{a}', '{b}'");
-                throw new InvalidOperationException($"Couldn't find native libraries in the following paths: {pathList}");
+                string pathList = "\n  - " + string.Join("\n  - ", paths);
+                throw new InvalidOperationException(
+                    $"Couldn't find native libraries in the following paths:{pathList}" +
+                    "\nMake sure you installed the correct versions of the native libraries.");
             }
+        }
+
+        /// <summary>
+        ///     Tries to load the native libraries from the set root path. <br/>
+        ///     You can specify which libraries need to be loaded with LibraryFlags.
+        ///     It will try to load all librares by default. <br/>
+        ///     Ideally, you would want to only call this function once, before doing anything with FFmpeg.
+        ///     If you try to do that later, it might unload all of your already loaded libraries and fail to provide them again.
+        /// </summary>
+        /// <returns>Whether it succeeded in loading all the requested libraries.</returns>
+        public static bool CanLoadLibraries(LF libraries = LF.All, string path = "")
+        {
+            var validated = new List<string>();
+            llsLog($"Searching for libraries in {path}");
+            return libraries.ToStrings().All((lib) => canLoadLibrary(lib, path, validated));
+        }
+
+        /// <remarks>
+        /// Note: dependencies are not checked as they are optional in FFmpeg.AutoGen.
+        /// See <see href="https://github.com/Ruslan-B/FFmpeg.AutoGen/commit/395dea80c642c85e089e3d7721f91d77594655c1">the following commit</see>
+        /// and <see href="https://github.com/Ruslan-B/FFmpeg.AutoGen/blob/633c15d323785092561329ad4b5742b0189116d6/FFmpeg.AutoGen/FFmpeg.cs#L57-L82">this function</see>
+        /// </remarks>
+        private static bool canLoadLibrary(string lib, string path, List<string> validated)
+        {
+            if (validated.Contains(lib))
+                return true;
+
+            int version = ffmpeg.LibraryVersionMap[lib];
+            if (!canLoadNativeLibrary(path, lib, version))
+                return false;
+
+            validated.Add(lib);
+            return true;
         }
 
         /// <summary>
@@ -177,9 +201,11 @@ namespace SeeShark.FFmpeg
         /// <returns>Whether it found the native library in the path.</returns>
         private static bool canLoadNativeLibrary(string path, string libraryName, int version)
         {
-            var nativeLibraryName = LibraryLoader.GetNativeLibraryName(libraryName, version);
-            var fullName = Path.Combine(path, nativeLibraryName);
-            return File.Exists(fullName);
+            string nativeLibraryName = LibraryLoader.GetNativeLibraryName(libraryName, version);
+            string fullName = Path.Combine(path, nativeLibraryName);
+            bool exists = File.Exists(fullName);
+            llsLog($"  {(exists ? "Found" : "Couldn't find")} library {nativeLibraryName}");
+            return exists;
         }
     }
 }
