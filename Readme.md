@@ -2,7 +2,7 @@
 
 > Simple C# camera and display library.
 
-[![Discord](https://img.shields.io/discord/871618277258960896?color=7289DA&label=%20&logo=discord&logoColor=white)](https://discord.gg/Tz96ZdKjSA) ![NuGet](https://img.shields.io/nuget/v/SeeShark)
+[![Discord](https://img.shields.io/discord/871618277258960896?color=7289DA&label=%20&logo=discord&logoColor=white)](https://go.vignetteapp.org/discord) ![NuGet](https://img.shields.io/nuget/v/SeeShark)
 
 When you SeeShark, you C#!
 
