@@ -30,6 +30,7 @@ namespace SeeShark.Decode
         public readonly int FrameWidth;
         public readonly int FrameHeight;
         public readonly PixelFormat PixelFormat;
+        public AVRational Framerate => Stream->r_frame_rate;
 
         public VideoStreamDecoder(string url, DeviceInputFormat inputFormat, IDictionary<string, string>? options = null)
             : this(url, ffmpeg.av_find_input_format(inputFormat.ToString()), options)
