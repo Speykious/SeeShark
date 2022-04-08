@@ -69,8 +69,19 @@ namespace SeeShark.Device
         /// If you want an asynchronous solution, use the <see cref="OnFrame" /> event instead
         /// and toggle capture with <see cref="StartCapture" /> and <see cref="StopCapture" />.
         /// </remarks>
-        public DecodeStatus TryGetFrame(out Frame frame) =>
-            decoder.TryDecodeNextFrame(out frame);
+        public DecodeStatus TryGetFrame(out Frame frame)
+        {
+            DecodeStatus status = decoder.TryDecodeNextFrame(out frame);
+
+            // Big brain move to avoid overloading the CPU \o/
+            // Decide whether we wait longer during a Thread.Sleep() when there are no frames available.
+            // Waiting longer would mean a full frame interval (for example ~16ms when 60 fps), 1ms otherwise.
+            // Always wait longer just after receiving a new frame.
+            bool waitLonger = status == DecodeStatus.NewFrame;
+            Thread.Sleep(waitLonger ? 1000 * decoder.Framerate.den / (decoder.Framerate.num + 5) : 1);
+
+            return status;
+        }
 
         public void StopCapture()
         {
