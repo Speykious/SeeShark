@@ -76,13 +76,6 @@ namespace SeeShark.Decode
             Frame = new Frame();
         }
 
-        /// <summary>
-        /// Trigger field, used to decide whether we wait longer during a Thread.Sleep()
-        /// when there are no frames available.
-        /// </summary>
-        /// <remarks>
-        /// Waiting longer would mean a full frame interval (for example ~16ms when 60 fps), 1ms otherwise.
-        private bool waitLonger = false;
         public DecodeStatus TryDecodeNextFrame(out Frame nextFrame)
         {
             int eagain = ffmpeg.AVERROR(ffmpeg.EAGAIN);
@@ -100,12 +93,7 @@ namespace SeeShark.Decode
                     nextFrame = Frame;
                     GC.Collect();
 
-                    // Big brain move to avoid overloading the CPU \o/
-                    AVRational fps = Stream->r_frame_rate;
-                    Thread.Sleep(waitLonger ? 1000 * fps.den / (fps.num + 5) : 1);
-
                     // We only wait longer once to make sure we catch the frame on time.
-                    waitLonger = false;
                     return error == eagain
                         ? DecodeStatus.NoFrameAvailable
                         : DecodeStatus.EndOfStream;
@@ -128,8 +116,6 @@ namespace SeeShark.Decode
             error.ThrowExceptionIfError();
 
             nextFrame = Frame;
-            // Always wait longer just after receiving a new frame.
-            waitLonger = true;
             GC.Collect();
             return DecodeStatus.NewFrame;
         }
