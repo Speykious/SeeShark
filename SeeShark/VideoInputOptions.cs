@@ -13,9 +13,11 @@ namespace SeeShark
     /// </summary>
     /// <remarks>
     /// Some examples of input options are:
-    /// https://ffmpeg.org/ffmpeg-devices.html#video4linux2_002c-v4l2
-    /// https://ffmpeg.org/ffmpeg-devices.html#dshow
-    /// https://ffmpeg.org/ffmpeg-devices.html#avfoundation
+    /// <list type="bullet">
+    /// <item>https://ffmpeg.org/ffmpeg-devices.html#video4linux2_002c-v4l2</item>
+    /// <item>https://ffmpeg.org/ffmpeg-devices.html#dshow</item>
+    /// <item>https://ffmpeg.org/ffmpeg-devices.html#avfoundation</item>
+    /// </list>
     /// </remarks>
     public class VideoInputOptions
     {
@@ -36,6 +38,7 @@ namespace SeeShark
         public AVRational? Framerate { get; set; }
         /// <summary>
         /// To request a specific input format for the video stream.
+        /// If the video stream is raw, it is the name of its pixel format, otherwise it is the name of its codec.
         /// </summary>
         public string? InputFormat { get; set; }
 
