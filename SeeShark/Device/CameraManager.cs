@@ -57,7 +57,7 @@ namespace SeeShark.Device
                 CameraInfo[] devices = new CameraInfo[dsDevices.Length];
                 for (int i = 0; i < dsDevices.Length; i++)
                 {
-                    var dsDevice = dsDevices[i];
+                    DsDevice dsDevice = dsDevices[i];
                     devices[i] = new CameraInfo
                     {
                         Name = dsDevice.Name,
