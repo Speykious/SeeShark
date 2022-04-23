@@ -4,9 +4,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using DirectShowLib;
 using FFmpeg.AutoGen;
+using SeeShark.Device;
 using SeeShark.Utils.PrivateFFmpeg;
 
 namespace SeeShark.Utils.DShow
@@ -28,6 +30,23 @@ namespace SeeShark.Utils.DShow
             Cmyk = 0x0B,
             Cmykrle8 = 0x0C,
             Cmykrle4 = 0x0D,
+        }
+
+        public static CameraInfo[] EnumerateDevices()
+        {
+            DsDevice[] dsDevices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
+            CameraInfo[] devices = new CameraInfo[dsDevices.Length];
+            for (int i = 0; i < dsDevices.Length; i++)
+            {
+                DsDevice dsDevice = dsDevices[i];
+                devices[i] = new CameraInfo
+                {
+                    Name = dsDevice.Name,
+                    Path = $"video={dsDevice.Name}",
+                    AvailableVideoInputOptions = GetAvailableOptions(dsDevice).ToArray(),
+                };
+            }
+            return devices;
         }
 
         /// <summary>
