@@ -4,7 +4,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-using SeeShark.Utils.DShow;
+using SeeShark.Utils;
 
 namespace SeeShark.Device
 {
@@ -51,10 +51,15 @@ namespace SeeShark.Device
         {
             // FFmpeg doesn't implement avdevice_list_input_sources() for the DShow input format yet.
             // See first SeeShark issue: https://github.com/vignetteapp/SeeShark/issues/1
-            if (InputFormat == DeviceInputFormat.DShow)
-                return DShowUtils.EnumerateDevices();
-            else
-                return base.EnumerateDevices();
+
+            // Supported formats won't use the default method to allow better video input options handling.
+            switch (InputFormat)
+            {
+                case DeviceInputFormat.DShow:
+                    return DShowUtils.EnumerateDevices();
+                default:
+                    return base.EnumerateDevices();
+            }
         }
     }
 }
