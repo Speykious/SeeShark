@@ -4,14 +4,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using DirectShowLib;
 using FFmpeg.AutoGen;
 using SeeShark.Device;
 using SeeShark.Utils.PrivateFFmpeg;
 
-namespace SeeShark.Utils.DShow
+namespace SeeShark.Utils
 {
     internal static class DShowUtils
     {
