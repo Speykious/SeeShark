@@ -53,8 +53,8 @@ namespace SeeShark.Device
             // See first SeeShark issue: https://github.com/vignetteapp/SeeShark/issues/1
             if (InputFormat == DeviceInputFormat.DShow)
             {
-                var dsDevices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
-                var devices = new CameraInfo[dsDevices.Length];
+                DsDevice[] dsDevices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
+                CameraInfo[] devices = new CameraInfo[dsDevices.Length];
                 for (int i = 0; i < dsDevices.Length; i++)
                 {
                     var dsDevice = dsDevices[i];
