@@ -42,7 +42,7 @@ namespace SeeShark.Utils
                 {
                     Name = dsDevice.Name,
                     Path = $"video={dsDevice.Name}",
-                    AvailableVideoInputOptions = GetAvailableOptions(dsDevice).ToArray(),
+                    AvailableVideoInputOptions = getAvailableOptions(dsDevice).ToArray(),
                 };
             }
             return devices;
@@ -52,7 +52,7 @@ namespace SeeShark.Utils
         /// Get available video input options of a DirectShow device.
         /// Inspired from https://github.com/eldhosekpaul18/WebCam-Capture-Opencvsharp/blob/master/Camera%20Configuration/Camera.cs
         /// </summary>
-        public unsafe static List<VideoInputOptions> GetAvailableOptions(DsDevice dsDevice)
+        private unsafe static List<VideoInputOptions> getAvailableOptions(DsDevice dsDevice)
         {
             List<VideoInputOptions> options = new List<VideoInputOptions>();
 
