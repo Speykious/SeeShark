@@ -157,13 +157,24 @@ namespace SeeShark.Decode
 
         protected override void DisposeUnmanaged()
         {
-            ffmpeg.avcodec_close(CodecContext);
+            // Constructor initialization can fail at some points,
+            // so we need to null check everything.
+            // See https://github.com/vignetteapp/SeeShark/issues/27
 
-            var formatContext = FormatContext;
-            ffmpeg.avformat_close_input(&formatContext);
+            if (CodecContext != null)
+                ffmpeg.avcodec_close(CodecContext);
 
-            var packet = Packet;
-            ffmpeg.av_packet_free(&packet);
+            if (FormatContext != null)
+            {
+                AVFormatContext* formatContext = FormatContext;
+                ffmpeg.avformat_close_input(&formatContext);
+            }
+
+            if (Packet != null)
+            {
+                AVPacket* packet = Packet;
+                ffmpeg.av_packet_free(&packet);
+            }
         }
     }
 }

@@ -112,8 +112,15 @@ namespace SeeShark
 
         protected override void DisposeUnmanaged()
         {
-            Marshal.FreeHGlobal(convertedFrameBufferPtr);
-            ffmpeg.sws_freeContext(convertContext);
+            // Constructor initialization can fail at some points,
+            // so we need to null check everything.
+            // See https://github.com/vignetteapp/SeeShark/issues/27
+
+            if (convertedFrameBufferPtr != null)
+                Marshal.FreeHGlobal(convertedFrameBufferPtr);
+
+            if (convertContext != null)
+                ffmpeg.sws_freeContext(convertContext);
         }
     }
 }

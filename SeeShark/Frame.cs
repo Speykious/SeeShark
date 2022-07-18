@@ -79,8 +79,11 @@ namespace SeeShark
 
         protected override void DisposeUnmanaged()
         {
-            var frame = AVFrame;
-            ffmpeg.av_frame_free(&frame);
+            if (AVFrame != null)
+            {
+                AVFrame* frame = AVFrame;
+                ffmpeg.av_frame_free(&frame);
+            }
         }
     }
 }

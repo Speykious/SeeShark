@@ -19,18 +19,18 @@ namespace SeeShark.Decode
             HardwareAccelDevice hwAccelDevice, AVInputFormat* inputFormat = null)
         : base(url, inputFormat)
         {
+            HwFrame = new Frame();
+
             ffmpeg.av_hwdevice_ctx_create(
                 &CodecContext->hw_device_ctx,
                 (AVHWDeviceType)hwAccelDevice,
                 null, null, 0
             ).ThrowExceptionIfError();
-
-            HwFrame = new Frame();
         }
 
         public new DecodeStatus TryDecodeNextFrame(out Frame nextFrame)
         {
-            var ret = base.TryDecodeNextFrame(out var frame);
+            DecodeStatus ret = base.TryDecodeNextFrame(out var frame);
 
             frame.HardwareAccelCopyTo(HwFrame).ThrowExceptionIfError();
             nextFrame = HwFrame;
