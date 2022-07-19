@@ -57,6 +57,10 @@ namespace SeeShark.Device
             {
                 case DeviceInputFormat.DShow:
                     return DShowUtils.EnumerateDevices();
+                case DeviceInputFormat.V4l2:
+                    CameraInfo[] devices = base.EnumerateDevices();
+                    V4l2Utils.FillDeviceOptions(devices);
+                    return devices;
                 default:
                     return base.EnumerateDevices();
             }
