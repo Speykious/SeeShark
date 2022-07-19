@@ -31,6 +31,8 @@ namespace SeeShark.Decode
         public readonly int FrameHeight;
         public readonly PixelFormat PixelFormat;
 
+        private bool isFormatContextOpen = false;
+
         public VideoStreamDecoder(string url, DeviceInputFormat inputFormat, IDictionary<string, string>? options = null)
             : this(url, ffmpeg.av_find_input_format(inputFormat.ToString()), options)
         {
@@ -118,6 +120,7 @@ namespace SeeShark.Decode
                     throw new InvalidOperationException("Packet does not belong to the decoder's video stream");
 
                 ffmpeg.avcodec_send_packet(CodecContext, Packet).ThrowExceptionIfError();
+                isFormatContextOpen = true;
 
                 Frame.Unref();
                 error = Frame.Receive(CodecContext);
@@ -164,7 +167,7 @@ namespace SeeShark.Decode
             if (CodecContext != null && ffmpeg.avcodec_is_open(CodecContext) > 0)
                 ffmpeg.avcodec_close(CodecContext);
 
-            if (FormatContext != null)
+            if (FormatContext != null && isFormatContextOpen)
             {
                 AVFormatContext* formatContext = FormatContext;
                 ffmpeg.avformat_close_input(&formatContext);
