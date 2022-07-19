@@ -71,7 +71,7 @@ namespace SeeShark.Utils
                 IntPtr fetched = IntPtr.Zero;
                 mediaTypeEnum.Next(1, mediaTypes, fetched);
 
-                while (fetched != null && mediaTypes[0] != null)
+                while (fetched != IntPtr.Zero && mediaTypes[0] != null)
                 {
                     Marshal.PtrToStructure(mediaTypes[0].formatPtr, v);
 
