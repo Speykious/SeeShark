@@ -161,7 +161,7 @@ namespace SeeShark.Decode
             // so we need to null check everything.
             // See https://github.com/vignetteapp/SeeShark/issues/27
 
-            if (CodecContext != null)
+            if (CodecContext != null && ffmpeg.avcodec_is_open(CodecContext) > 0)
                 ffmpeg.avcodec_close(CodecContext);
 
             if (FormatContext != null)
