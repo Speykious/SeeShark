@@ -236,6 +236,49 @@ namespace SeeShark.Interop.Libc
     }
 
     [StructLayout(LayoutKind.Sequential)]
+    internal struct v4l2_captureparm
+    {
+        public uint capability;
+        public uint capturemode;
+        public v4l2_fract timeperframe;
+        public uint extendedmode;
+        public uint readbuffers;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public uint[] reserved;
+    }
+
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct v4l2_outputparm
+    {
+        public uint capability;
+        public uint outputmode;
+        public v4l2_fract timeperframe;
+        public uint extendedmode;
+        public uint writebuffers;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
+        public uint[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct v4l2_streamparm
+    {
+        public v4l2_buf_type type;
+        [StructLayout(LayoutKind.Explicit)]
+        internal struct parm_union
+        {
+            [FieldOffset(0)]
+            public v4l2_captureparm capture;
+            [FieldOffset(0)]
+            public v4l2_outputparm output;
+            [FieldOffset(0)]
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 200)]
+            public byte[] raw;
+        }
+        public parm_union parm;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
     internal struct v4l2_fract
     {
         public uint numerator;
@@ -337,7 +380,7 @@ namespace SeeShark.Interop.Libc
     {
         public uint index;
         public V4l2InputFormat pixel_format;
-        public v4l2_frmsizetypes type;
+        public v4l2_frmsizetype type;
         public v4l2_frmsize_discrete discrete;
         public v4l2_frmsize_stepwise stepwise;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
@@ -362,10 +405,39 @@ namespace SeeShark.Interop.Libc
         public uint step_height;
     };
 
-    internal enum v4l2_frmsizetypes : uint
+    internal enum v4l2_frmsizetype : uint
     {
         V4L2_FRMSIZE_TYPE_DISCRETE = 1,
         V4L2_FRMSIZE_TYPE_CONTINUOUS = 2,
         V4L2_FRMSIZE_TYPE_STEPWISE = 3,
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct v4l2_frmivalenum
+    {
+        public uint index;
+        public V4l2InputFormat pixel_format;
+        public uint width;
+        public uint height;
+        public v4l2_frmivaltype type;
+        public v4l2_fract discrete;
+        public v4l2_frmival_stepwise stepwise;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+        public uint[] reserved;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct v4l2_frmival_stepwise
+    {
+        public v4l2_fract min;
+        public v4l2_fract max;
+        public v4l2_fract step;
+    }
+
+    internal enum v4l2_frmivaltype : uint
+    {
+        V4L2_FRMIVAL_TYPE_DISCRETE = 1,
+        V4L2_FRMIVAL_TYPE_CONTINUOUS = 2,
+        V4L2_FRMIVAL_TYPE_STEPWISE = 3,
     }
 }
