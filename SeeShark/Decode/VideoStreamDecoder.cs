@@ -54,8 +54,10 @@ namespace SeeShark.Decode
                     ffmpeg.av_dict_set(&dict, pair.Key, pair.Value, 0);
             }
 
-            ffmpeg.avformat_open_input(&formatContext, url, inputFormat, &dict).ThrowExceptionIfError();
+            int openInputErr = ffmpeg.avformat_open_input(&formatContext, url, inputFormat, &dict);
             ffmpeg.av_dict_free(&dict);
+            openInputErr.ThrowExceptionIfError();
+            isFormatContextOpen = true;
 
             AVCodec* codec = null;
             StreamIndex = ffmpeg
@@ -120,7 +122,6 @@ namespace SeeShark.Decode
                     throw new InvalidOperationException("Packet does not belong to the decoder's video stream");
 
                 ffmpeg.avcodec_send_packet(CodecContext, Packet).ThrowExceptionIfError();
-                isFormatContextOpen = true;
 
                 Frame.Unref();
                 error = Frame.Receive(CodecContext);
