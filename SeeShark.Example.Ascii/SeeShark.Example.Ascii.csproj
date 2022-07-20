@@ -8,10 +8,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="FFmpeg.AutoGen" Version="5.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\SeeShark\SeeShark.csproj" />
     </ItemGroup>
 
