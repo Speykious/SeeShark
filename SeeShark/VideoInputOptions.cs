@@ -54,12 +54,26 @@ namespace SeeShark
                 (int width, int height) = VideoSize.Value;
                 dict.Add("video_size", $"{width}x{height}");
             }
+
             if (Framerate != null)
                 dict.Add("framerate", $"{Framerate.Value.num}/{Framerate.Value.den}");
+
+            // I have no idea why "YUYV" specifically is like this...
             if (InputFormat != null)
-                dict.Add("input_format", InputFormat);
+                dict.Add("input_format", InputFormat == "YUYV" ? "yuv422p" : InputFormat.ToLower());
 
             return dict;
+        }
+
+        public override string ToString()
+        {
+            string s = $"{InputFormat} {VideoSize}";
+            if (Framerate != null)
+            {
+                float fps = (float)Framerate.Value.num / Framerate.Value.den;
+                s += $" - {fps:0.000} fps";
+            }
+            return s;
         }
     }
 }
