@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using SeeShark.Decode;
 using SeeShark.Device;
@@ -44,7 +45,7 @@ namespace SeeShark.Example.Ascii
 
             manager = new CameraManager();
 
-            string devicePath;
+            CameraInfo device;
             if (args.Length < 1)
             {
                 /// Select an available camera device.
@@ -60,21 +61,41 @@ namespace SeeShark.Example.Ascii
                     Console.Out.Flush();
                     if (int.TryParse(Console.ReadLine(), out int index) && index < manager.Devices.Count && index >= 0)
                     {
-                        devicePath = manager.Devices[index].Path;
+                        device = manager.Devices[index];
                         break;
                     }
                 }
             }
             else
             {
-                devicePath = args[0];
+                device = manager.Devices.First((ci) => ci.Path == args[0]);
+            }
+
+            /// Select video input options for the given device path.
+            VideoInputOptions? vios = null;
+            if (device.AvailableVideoInputOptions != null)
+            {
+                while (true)
+                {
+                    Console.WriteLine("\nVideo input options available:");
+                    for (int i = 0; i < device.AvailableVideoInputOptions.Length; i++)
+                        Console.WriteLine($"| #{i}: {device.AvailableVideoInputOptions[i]}");
+
+                    Console.Write("\nChoose an input option by index: ");
+                    Console.Out.Flush();
+                    if (int.TryParse(Console.ReadLine(), out int index) && index < device.AvailableVideoInputOptions.Length && index >= 0)
+                    {
+                        vios = device.AvailableVideoInputOptions[index];
+                        break;
+                    }
+                }
             }
 
             /// You can get a <see cref="Camera"/> from either a string
             /// representing the device path, or a <see cref="CameraInfo">.
 
             // Unfortunately, she saw the manager
-            karen = manager.GetDevice(devicePath);
+            karen = manager.GetDevice(device, vios);
 
             /// Attach our <see cref="OnNewFrame"/> method to the camera's frame event handler,
             /// so that we can process every coming frame the way we want.
