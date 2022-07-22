@@ -7,11 +7,11 @@ using System.Runtime.InteropServices;
 
 namespace SeeShark.Interop.Libc
 {
-    internal struct V4l2FrameBuffer
-    {
-        public IntPtr Start;
-        public uint Length;
-    }
+    // internal struct V4l2FrameBuffer
+    // {
+    //     public IntPtr Start;
+    //     public uint Length;
+    // }
 
 #pragma warning disable IDE1006
     [StructLayout(LayoutKind.Sequential)]
@@ -380,7 +380,7 @@ namespace SeeShark.Interop.Libc
     {
         public uint index;
         public V4l2InputFormat pixel_format;
-        public v4l2_frmsizetype type;
+        public v4l2_frmsizetypes type;
         public v4l2_frmsize_discrete discrete;
         public v4l2_frmsize_stepwise stepwise;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
@@ -405,7 +405,7 @@ namespace SeeShark.Interop.Libc
         public uint step_height;
     };
 
-    internal enum v4l2_frmsizetype : uint
+    internal enum v4l2_frmsizetypes : uint
     {
         V4L2_FRMSIZE_TYPE_DISCRETE = 1,
         V4L2_FRMSIZE_TYPE_CONTINUOUS = 2,
@@ -419,7 +419,7 @@ namespace SeeShark.Interop.Libc
         public V4l2InputFormat pixel_format;
         public uint width;
         public uint height;
-        public v4l2_frmivaltype type;
+        public v4l2_frmivaltypes type;
         public v4l2_fract discrete;
         public v4l2_frmival_stepwise stepwise;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
@@ -434,7 +434,7 @@ namespace SeeShark.Interop.Libc
         public v4l2_fract step;
     }
 
-    internal enum v4l2_frmivaltype : uint
+    internal enum v4l2_frmivaltypes : uint
     {
         V4L2_FRMIVAL_TYPE_DISCRETE = 1,
         V4L2_FRMIVAL_TYPE_CONTINUOUS = 2,

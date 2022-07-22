@@ -50,21 +50,21 @@ namespace SeeShark.Utils
                 v4l2_frmsizeenum frmsize = new v4l2_frmsizeenum
                 {
                     index = 0,
-                    pixel_format = inputFormat
+                    pixel_format = inputFormat,
                 };
 
                 while (v4l2Struct(deviceFd, VideoSettings.VIDIOC_ENUM_FRAMESIZES, ref frmsize) != -1)
                 {
-                    if (frmsize.type == v4l2_frmsizetype.V4L2_FRMSIZE_TYPE_DISCRETE)
+                    if (frmsize.type == v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_DISCRETE)
                     {
-                        fillFrameIntervalOptions(options, deviceFd, frmsize.pixel_format, frmsize.discrete.width, frmsize.discrete.height);
+                        fillFrameIntervalOptions(options, deviceFd, inputFormat, frmsize.discrete.width, frmsize.discrete.height);
                     }
                     else
                     {
                         for (uint width = frmsize.stepwise.min_width; width < frmsize.stepwise.max_width; width += frmsize.stepwise.step_width)
                         {
                             for (uint height = frmsize.stepwise.min_height; height < frmsize.stepwise.max_height; height += frmsize.stepwise.step_height)
-                                fillFrameIntervalOptions(options, deviceFd, frmsize.pixel_format, width, height);
+                                fillFrameIntervalOptions(options, deviceFd, inputFormat, width, height);
                         }
                     }
                     frmsize.index++;
@@ -87,7 +87,7 @@ namespace SeeShark.Utils
 
             while (v4l2Struct(deviceFd, VideoSettings.VIDIOC_ENUM_FRAMEINTERVALS, ref frmival) != -1)
             {
-                if (frmival.type == v4l2_frmivaltype.V4L2_FRMIVAL_TYPE_DISCRETE)
+                if (frmival.type == v4l2_frmivaltypes.V4L2_FRMIVAL_TYPE_DISCRETE)
                 {
                     options.Add(new VideoInputOptions
                     {
@@ -111,15 +111,22 @@ namespace SeeShark.Utils
         /// <param name="request">V4L2 request value</param>
         /// <param name="struct">The struct need to be read or set</param>
         /// <returns>The ioctl result</returns>
-        private static int v4l2Struct<T>(int deviceFd, VideoSettings request, ref T @struct)
+        private static unsafe int v4l2Struct<T>(int deviceFd, VideoSettings request, ref T @struct)
             where T : struct
         {
             IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(@struct));
             Marshal.StructureToPtr(@struct, ptr, true);
 
             int result = Libc.ioctl(deviceFd, (int)request, ptr);
-            @struct = Marshal.PtrToStructure<T>(ptr);
+            // if (result < 0)
+            // {
+            //     int errno = Marshal.GetLastPInvokeError();
+            //     Console.Error.WriteLine($"Error: {errno}");
+            //     sbyte* explanation = Libc.explain_errno_ioctl(errno, deviceFd, (int)request, ptr);
+            //     Console.Error.WriteLine($"- {new string(explanation)}");
+            // }
 
+            @struct = Marshal.PtrToStructure<T>(ptr);
             return result;
         }
     }
