@@ -116,7 +116,7 @@ namespace SeeShark
             // so we need to null check everything.
             // See https://github.com/vignetteapp/SeeShark/issues/27
 
-            if (convertedFrameBufferPtr != null)
+            if (convertedFrameBufferPtr != IntPtr.Zero)
                 Marshal.FreeHGlobal(convertedFrameBufferPtr);
 
             if (convertContext != null)
