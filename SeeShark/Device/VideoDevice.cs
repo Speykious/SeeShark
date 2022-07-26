@@ -17,6 +17,7 @@ namespace SeeShark.Device
         public bool IsPlaying { get; private set; }
 
         public event EventHandler<FrameEventArgs>? OnFrame;
+        public event EventHandler<DecodeStatus>? OnEndOfStream;
 
         public VideoDevice(VideoDeviceInfo info, DeviceInputFormat inputFormat, VideoInputOptions? options = null)
         {
@@ -34,6 +35,10 @@ namespace SeeShark.Device
                 if (!IsPlaying)
                     break;
             }
+
+            // End of stream happened
+            OnEndOfStream?.Invoke(this, status);
+            IsPlaying = false;
         }
 
         /// <summary>
