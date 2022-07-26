@@ -73,12 +73,14 @@ namespace SeeShark.Device
         {
             DecodeStatus status = decoder.TryDecodeNextFrame(out frame);
 
-            // Big brain move to avoid overloading the CPU \o/
-            // Decide whether we wait longer during a Thread.Sleep() when there are no frames available.
-            // Waiting longer would mean a full frame interval (for example ~16ms when 60 fps), 1ms otherwise.
-            // Always wait longer just after receiving a new frame.
-            bool waitLonger = status == DecodeStatus.NewFrame;
-            Thread.Sleep(waitLonger ? 1000 * decoder.Framerate.den / (decoder.Framerate.num + 5) : 1);
+            // Wait 1/4 of configured FPS only if no frame is available.
+            // This circumvents possible camera buffering issues.
+            // Some cameras have adaptive FPS, so the previous solution isn't adapted.
+            // See https://github.com/vignetteapp/SeeShark/issues/29
+
+            // (RIP big brain move to avoid overloading the CPU...)
+            if (status == DecodeStatus.NoFrameAvailable)
+                Thread.Sleep(1000 * decoder.Framerate.den / (decoder.Framerate.num * 4));
 
             return status;
         }
