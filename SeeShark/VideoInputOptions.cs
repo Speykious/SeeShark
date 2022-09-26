@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using FFmpeg.AutoGen;
+using SeeShark.Device;
 
 namespace SeeShark
 {
@@ -45,7 +46,7 @@ namespace SeeShark
         /// <summary>
         /// Combines all properties into a dictionary of options that FFmpeg can use.
         /// </summary>
-        public virtual IDictionary<string, string> ToAVDictOptions()
+        public virtual IDictionary<string, string> ToAVDictOptions(DeviceInputFormat deviceFormat)
         {
             Dictionary<string, string> dict = new();
 
@@ -60,7 +61,10 @@ namespace SeeShark
 
             // I have no idea why "YUYV" specifically is like this...
             if (InputFormat != null)
-                dict.Add("input_format", InputFormat == "YUYV" ? "yuv422p" : InputFormat.ToLower());
+            {
+                string key = deviceFormat == DeviceInputFormat.DShow ? "vcodec" : "input_format";
+                dict.Add(key, InputFormat == "YUYV" ? "yuv422p" : InputFormat.ToLower());
+            }
 
             return dict;
         }
