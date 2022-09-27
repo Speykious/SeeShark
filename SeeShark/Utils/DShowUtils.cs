@@ -71,7 +71,7 @@ namespace SeeShark.Utils
                 IntPtr fetched = IntPtr.Zero;
                 mediaTypeEnum.Next(1, mediaTypes, fetched);
 
-                while (fetched != IntPtr.Zero && mediaTypes[0] != null)
+                while (mediaTypes[0] != null)
                 {
                     Marshal.PtrToStructure(mediaTypes[0].formatPtr, v);
 
@@ -79,7 +79,6 @@ namespace SeeShark.Utils
                     {
                         if (v.BmiHeader.BitCount > bitCount)
                         {
-                            options.Clear();
                             bitCount = (uint)v.BmiHeader.BitCount;
                         }
 
@@ -105,23 +104,52 @@ namespace SeeShark.Utils
                         {
                             codecId = AVCodecID.AV_CODEC_ID_RAWVIDEO;
                         }
-                        AVCodec* codec = ffmpeg.avcodec_find_decoder(codecId);
 
-                        options.Add(new VideoInputOptions
+                        var vio = new VideoInputOptions
                         {
-                            InputFormat = new string((sbyte*)codec->name),
                             VideoSize = (v.BmiHeader.Width, v.BmiHeader.Height),
-                            Framerate = new AVRational
+                            // https://docs.microsoft.com/en-us/windows/win32/directshow/configure-the-video-output-format
+                            // "frames per second = 10,000,000 / frame duration"
+                            Framerate = ffmpeg.av_d2q((double)10_000_000L / v.AvgTimePerFrame, (int)10_000_000L),
+                        };
+
+                        if ((codecId != AVCodecID.AV_CODEC_ID_NONE) && (codecId != AVCodecID.AV_CODEC_ID_RAWVIDEO))
+                        {
+                            AVCodec* codec = ffmpeg.avcodec_find_decoder(codecId);
+                            vio.VCodec = new string((sbyte*)codec->name);
+                        }
+                        else
+                        {
+                            if (pixelFormat == PixelFormat.None)
                             {
-                                // I literally had to find that information from yet another random DirectShowLib project on GitHub...
-                                // https://github.com/pbalint/Playground/blob/fb3ef1b9e197369ab576aea561dbe872e7e7d05b/DirectShowCapture/Capture/VideoOutPinConfiguration.cs#L32
-                                // Though it's also mentioned in official Microsoft documentation, but it wasn't quite clear to me.
-                                // https://docs.microsoft.com/en-us/windows/win32/directshow/configure-the-video-output-format
-                                // "frames per second = 10,000,000 / frame duration"
-                                num = (int)(10_000_000L / v.AvgTimePerFrame),
-                                den = 1,
-                            },
-                        });
+                                // https://learn.microsoft.com/en-us/windows/win32/directshow/h-264-video-types:
+                                if (Guid.Equals(mediaTypes[0].subType, MediaSubType.Video.H264)
+                                    || Guid.Equals(mediaTypes[0].subType, MediaSubType.Video.h264)
+                                    || Guid.Equals(mediaTypes[0].subType, MediaSubType.Video.X264)
+                                    || Guid.Equals(mediaTypes[0].subType, MediaSubType.Video.x264)
+                                    || Guid.Equals(mediaTypes[0].subType, MediaSubType.Video.Avc1)
+                                    || Guid.Equals(mediaTypes[0].subType, MediaSubType.Video.avc1)
+                                    )
+                                {
+                                    vio.VCodec = "h264";
+                                }
+                                else if (Guid.Equals(mediaTypes[0].subType, MediaSubType.MJPG))
+                                {
+                                    vio.VCodec = "mjpeg";
+                                }
+                                else
+                                {
+                                    Console.WriteLine(mediaTypes[0].subType);
+                                }
+                            }
+                        }
+
+                        if (pixelFormat != PixelFormat.None)
+                        {
+                            vio.InputFormat = pixelFormat.ToString().ToLower();
+                        }
+
+                        options.Add(vio);
                     }
                     mediaTypeEnum.Next(1, mediaTypes, fetched);
                 }

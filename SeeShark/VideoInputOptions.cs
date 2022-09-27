@@ -39,9 +39,15 @@ namespace SeeShark
         public AVRational? Framerate { get; set; }
         /// <summary>
         /// To request a specific input format for the video stream.
-        /// If the video stream is raw, it is the name of its pixel format, otherwise it is the name of its codec.
+        /// On all platform (except Windows), if the video stream is raw, it is the name of its pixel format, otherwise it is the name of its codec.
+        /// On Windows, contains only the pixel format. (can be null/empty)
         /// </summary>
         public string? InputFormat { get; set; }
+        /// <summary>
+        /// Used on Windows only, contains the codec (can be null/empty)
+        /// If VCodec is not null/empty, InputFormat is null/empty (and the opposite)
+        /// </summary>
+        public string? VCodec { get; set; }
 
         /// <summary>
         /// Combines all properties into a dictionary of options that FFmpeg can use.
@@ -62,8 +68,13 @@ namespace SeeShark
             // I have no idea why "YUYV" specifically is like this...
             if (InputFormat != null)
             {
-                string key = deviceFormat == DeviceInputFormat.DShow ? "vcodec" : "input_format";
+                string key = deviceFormat == DeviceInputFormat.DShow ? "pixel_format" : "input_format";
                 dict.Add(key, InputFormat == "YUYV" ? "yuv422p" : InputFormat.ToLower());
+            }
+
+            if ((VCodec != null) && (deviceFormat == DeviceInputFormat.DShow))
+            {
+                dict.Add("vcodec", VCodec);
             }
 
             return dict;
@@ -71,10 +82,19 @@ namespace SeeShark
 
         public override string ToString()
         {
-            string s = $"{InputFormat} {VideoSize}";
+            string s;
+            if (VCodec != null)
+            {
+                s = $"VCodec:{VCodec} {VideoSize}";
+            }
+            else
+            {
+                s = $"InputFormat:{InputFormat} {VideoSize}";
+            }
+
             if (Framerate != null)
             {
-                float fps = (float)Framerate.Value.num / Framerate.Value.den;
+                double fps = ffmpeg.av_q2d(Framerate.Value);
                 s += $" - {fps:0.000} fps";
             }
             return s;
