@@ -44,9 +44,9 @@ namespace SeeShark.Device
 
                     DisplayInfo[] info = new DisplayInfo[monitors.Length + 1];
 
-                    int compositeLeft = Int32.MaxValue;
+                    int compositeLeft = int.MaxValue;
                     int compositeRight = 0;
-                    int compositeTop = Int32.MaxValue;
+                    int compositeTop = int.MaxValue;
                     int compositeBottom = 0;
 
                     for (int i = 0; i < monitors.Length; i++)
@@ -66,14 +66,14 @@ namespace SeeShark.Device
                         if (monitor.X < compositeLeft)
                             compositeLeft = monitor.X;
 
-                        if ((monitor.X + monitor.Width) > compositeRight)
-                            compositeRight = (monitor.X + monitor.Width);
+                        if (monitor.X + monitor.Width > compositeRight)
+                            compositeRight = monitor.X + monitor.Width;
 
                         if (monitor.Y < compositeTop)
                             compositeTop = monitor.Y;
 
-                        if ((monitor.Y + monitor.Height) > compositeBottom)
-                            compositeBottom = (monitor.Y + monitor.Height);
+                        if (monitor.Y + monitor.Height > compositeBottom)
+                            compositeBottom = monitor.Y + monitor.Height;
                     }
 
                     info[0] = new DisplayInfo
