@@ -9,6 +9,7 @@ namespace SeeShark.Interop.X11
 {
     using Display = IntPtr;
     using Window = IntPtr;
+    using Atom = Int64;
 
     internal class XLib
     {
@@ -34,5 +35,8 @@ namespace SeeShark.Interop.X11
 
         [DllImport(lib_x11, EntryPoint = "XDisplayHeight")]
         public static extern int XDisplayHeight(Display display, int screenNumber);
+
+        [DllImport(lib_x11, EntryPoint = "XGetAtomName")]
+        public static extern IntPtr XGetAtomName(Display display, Atom atom);
     }
 }
