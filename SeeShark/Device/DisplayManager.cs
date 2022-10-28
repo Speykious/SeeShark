@@ -171,8 +171,8 @@ namespace SeeShark.Device
                 IsComposite = true
             });
 
+            // TODO: using a list and converting to array is ugly, try to find alternative
             return displayInfo.ToArray();
-            //return CollectionsMarshal.AsSpan(displayInfo);
         }
 
         private unsafe XRRMonitorInfo[] getXRandrDisplays(IntPtr display, IntPtr rootWindow)
