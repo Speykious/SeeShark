@@ -49,13 +49,12 @@ namespace SeeShark.Device
                     int compositeTop = Int32.MaxValue;
                     int compositeBottom = 0;
 
-                    for (int i = 0; i < info.Length - 1; i++)
+                    for (int i = 0; i < monitors.Length; i++)
                     {
                         XRRMonitorInfo monitor = monitors[i];
-                        string nameAddition = monitor.Name == null ? "" : $" ({new string(monitor.Name)})";
                         info[i + 1] = new DisplayInfo
                         {
-                            Name = $"Display {i}{nameAddition}",
+                            Name = $"Display {i}",
                             Path = ":0",
                             X = monitor.X,
                             Y = monitor.Y,
