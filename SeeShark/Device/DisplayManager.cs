@@ -154,22 +154,23 @@ namespace SeeShark.Device
                         compositeBottom = (info.dmPositionY + info.dmPelsHeight);
 
                 }
-
-                displayInfo.Insert(0, new DisplayInfo
-                {
-                    Name = $"Composite GDI Display",
-                    Path = "desktop",
-                    X = compositeLeft,
-                    Y = compositeTop,
-                    Width = compositeRight - compositeLeft,
-                    Height = compositeBottom - compositeTop,
-                    Primary = false,
-                    IsComposite = true
-                });
                 return true;
             }
 
             User32.EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, MonitorDelegate, IntPtr.Zero);
+
+            displayInfo.Insert(0, new DisplayInfo
+            {
+                Name = $"Composite GDI Display",
+                Path = "desktop",
+                X = compositeLeft,
+                Y = compositeTop,
+                Width = compositeRight - compositeLeft,
+                Height = compositeBottom - compositeTop,
+                Primary = false,
+                IsComposite = true
+            });
+
             return displayInfo.ToArray();
             //return CollectionsMarshal.AsSpan(displayInfo);
         }
