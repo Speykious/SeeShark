@@ -83,9 +83,13 @@ namespace SeeShark.Device
                 for (int i = 0; i < monitors.Length; i++)
                 {
                     XRRMonitorInfo monitor = monitors[i];
+                    var monitorNamePtr = XLib.XGetAtomName(display, monitor.Name);
+                    var monitorName = Marshal.PtrToStringAnsi(monitorNamePtr)!;
+
+                    string nameAddition = string.IsNullOrEmpty(monitorName) ? "" : $" ({monitorName})";
                     info[i + 1] = new DisplayInfo
                     {
-                        Name = $"Display {i}",
+                        Name = $"Display {i}{nameAddition}",
                         Path = ":0",
                         X = monitor.X,
                         Y = monitor.Y,
@@ -147,9 +151,10 @@ namespace SeeShark.Device
                     d.cb = Marshal.SizeOf(d);
                     User32.EnumDisplayDevices(monitorInfo.deviceName, 0, ref d, 0);
 
+                    string nameAddition = string.IsNullOrEmpty(d.DeviceString) ? "" : $" ({d.DeviceString})";
                     displayInfo.Add(new DisplayInfo
                     {
-                        Name = d.DeviceString,
+                        Name = $"Display {count}{nameAddition}",
                         Path = "desktop",
                         X = info.dmPositionX,
                         Y = info.dmPositionY,

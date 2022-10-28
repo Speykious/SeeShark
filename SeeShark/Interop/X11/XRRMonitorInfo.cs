@@ -7,10 +7,12 @@ using System.Runtime.InteropServices;
 
 namespace SeeShark.Interop.X11
 {
+    using Atom = Int64;
+
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct XRRMonitorInfo
     {
-        public ulong Name;
+        public Atom Name;
         public int Primary;
         public int Automatic;
         public int NOutput;
