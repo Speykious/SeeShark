@@ -22,7 +22,7 @@ namespace SeeShark.Device
         public VideoDevice(VideoDeviceInfo info, DeviceInputFormat inputFormat, VideoInputOptions? options = null)
         {
             Info = info;
-            decoder = new VideoStreamDecoder(info.Path, inputFormat, options?.ToAVDictOptions());
+            decoder = new VideoStreamDecoder(info.Path, inputFormat, options?.ToAVDictOptions(inputFormat));
         }
 
         protected void DecodeLoop()
