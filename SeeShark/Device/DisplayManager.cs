@@ -110,10 +110,10 @@ namespace SeeShark.Device
 
             int count = 0;
 
-            int compositeLeft = Int32.MaxValue;
-            int compositeRight = Int32.MinValue;
-            int compositeTop = Int32.MaxValue;
-            int compositeBottom = Int32.MinValue;
+            int compositeLeft = int.MaxValue;
+            int compositeRight = int.MinValue;
+            int compositeTop = int.MaxValue;
+            int compositeBottom = int.MinValue;
 
             bool MonitorDelegate(IntPtr hMonitor, IntPtr hdcMonitor, ref Rect lprcMonitor, IntPtr dwData)
             {
@@ -144,13 +144,13 @@ namespace SeeShark.Device
                     if (info.dmPositionX < compositeLeft)
                         compositeLeft = info.dmPositionX;
 
-                    if ((info.dmPositionX + info.dmPelsWidth) > compositeRight)
+                    if (info.dmPositionX + info.dmPelsWidth > compositeRight)
                         compositeRight = (info.dmPositionX + info.dmPelsWidth);
 
                     if (info.dmPositionY < compositeTop)
                         compositeTop = info.dmPositionY;
 
-                    if ((info.dmPositionY + info.dmPelsHeight) > compositeBottom)
+                    if (info.dmPositionY + info.dmPelsHeight > compositeBottom)
                         compositeBottom = (info.dmPositionY + info.dmPelsHeight);
 
                 }
