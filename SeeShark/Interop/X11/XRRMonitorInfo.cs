@@ -10,7 +10,7 @@ namespace SeeShark.Interop.X11
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct XRRMonitorInfo
     {
-        public sbyte* Name;
+        public ulong Name;
         public int Primary;
         public int Automatic;
         public int NOutput;
