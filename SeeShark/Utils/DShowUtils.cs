@@ -78,9 +78,7 @@ namespace SeeShark.Utils
                     if (v.BmiHeader.Size != 0 && v.BmiHeader.BitCount != 0)
                     {
                         if (v.BmiHeader.BitCount > bitCount)
-                        {
                             bitCount = (uint)v.BmiHeader.BitCount;
-                        }
 
                         // Part of code inspired from dshow_get_format_info in dshow.c
                         // https://github.com/FFmpeg/FFmpeg/blob/a64e250680fbc7296eff714b81b54b1c0e2d185f/libavdevice/dshow.c#L692-L759
@@ -118,36 +116,31 @@ namespace SeeShark.Utils
                             AVCodec* codec = ffmpeg.avcodec_find_decoder(codecId);
                             vio.VCodec = new string((sbyte*)codec->name);
                         }
-                        else
+                        else if (pixelFormat == PixelFormat.None)
                         {
-                            if (pixelFormat == PixelFormat.None)
+                            // https://learn.microsoft.com/en-us/windows/win32/directshow/h-264-video-types:
+                            if (mediaTypes[0].subType.Equals(MediaSubType.Video.H264)
+                                || mediaTypes[0].subType.Equals(MediaSubType.Video.h264)
+                                || mediaTypes[0].subType.Equals(MediaSubType.Video.X264)
+                                || mediaTypes[0].subType.Equals(MediaSubType.Video.x264)
+                                || mediaTypes[0].subType.Equals(MediaSubType.Video.Avc1)
+                                || mediaTypes[0].subType.Equals(MediaSubType.Video.avc1))
                             {
-                                // https://learn.microsoft.com/en-us/windows/win32/directshow/h-264-video-types:
-                                if (Guid.Equals(mediaTypes[0].subType, MediaSubType.Video.H264)
-                                    || Guid.Equals(mediaTypes[0].subType, MediaSubType.Video.h264)
-                                    || Guid.Equals(mediaTypes[0].subType, MediaSubType.Video.X264)
-                                    || Guid.Equals(mediaTypes[0].subType, MediaSubType.Video.x264)
-                                    || Guid.Equals(mediaTypes[0].subType, MediaSubType.Video.Avc1)
-                                    || Guid.Equals(mediaTypes[0].subType, MediaSubType.Video.avc1)
-                                    )
-                                {
-                                    vio.VCodec = "h264";
-                                }
-                                else if (Guid.Equals(mediaTypes[0].subType, MediaSubType.MJPG))
-                                {
-                                    vio.VCodec = "mjpeg";
-                                }
-                                else
-                                {
-                                    Console.WriteLine(mediaTypes[0].subType);
-                                }
+                                vio.VCodec = "h264";
+                            }
+                            else if (Equals(mediaTypes[0].subType, MediaSubType.MJPG))
+                            {
+                                vio.VCodec = "mjpeg";
+                            }
+                            else
+                            {
+                                // TODO: remove? maybe? idk
+                                Console.Error.WriteLine($"Warning: could not handle media type {mediaTypes[0].subType}");
                             }
                         }
 
                         if (pixelFormat != PixelFormat.None)
-                        {
                             vio.InputFormat = pixelFormat.ToString().ToLower();
-                        }
 
                         options.Add(vio);
                     }
