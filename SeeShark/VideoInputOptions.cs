@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using FFmpeg.AutoGen;
+using SeeShark.Device;
 
 namespace SeeShark
 {
@@ -27,6 +28,12 @@ namespace SeeShark
         /// </remarks>
         /// <value>(width, height)</value>
         public (int, int)? VideoSize { get; set; }
+
+        /// <summary>
+        /// To request the capture to start from a specific point
+        /// </summary>
+        /// <value>(x, y)</value>
+        public (int, int)? VideoPosition { get; set; }
         /// <summary>
         /// To request a specific framerate for the video stream.
         /// </summary>
@@ -42,7 +49,7 @@ namespace SeeShark
         /// <summary>
         /// Combines all properties into a dictionary of options that FFmpeg can use.
         /// </summary>
-        public virtual IDictionary<string, string> ToAVDictOptions()
+        public virtual IDictionary<string, string> ToAVDictOptions(DeviceInputFormat? inputFormat = null)
         {
             Dictionary<string, string> dict = new();
 
@@ -56,6 +63,24 @@ namespace SeeShark
             if (InputFormat != null)
                 dict.Add("input_format", InputFormat);
 
+            if (VideoPosition != null)
+            {
+                switch (inputFormat)
+                {
+                    case DeviceInputFormat.X11Grab:
+                        {
+                            dict.Add("grab_x", VideoPosition.Value.Item1.ToString());
+                            dict.Add("grab_y", VideoPosition.Value.Item2.ToString());
+                            break;
+                        }
+                    case DeviceInputFormat.GdiGrab:
+                        {
+                            dict.Add("offset_x", VideoPosition.Value.Item1.ToString());
+                            dict.Add("offset_y", VideoPosition.Value.Item2.ToString());
+                            break;
+                        }
+                }
+            }
             return dict;
         }
     }
