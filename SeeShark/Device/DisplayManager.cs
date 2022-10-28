@@ -3,7 +3,9 @@
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using SeeShark.Interop.Windows;
 using SeeShark.Interop.X11;
 
 namespace SeeShark.Device
@@ -104,7 +106,72 @@ namespace SeeShark.Device
 
         private DisplayInfo[] enumerateDevicesGdi()
         {
-            return Array.Empty<DisplayInfo>();
+            var displayInfo = new List<DisplayInfo>();
+
+            int count = 0;
+
+            int compositeLeft = Int32.MaxValue;
+            int compositeRight = Int32.MinValue;
+            int compositeTop = Int32.MaxValue;
+            int compositeBottom = Int32.MinValue;
+
+            bool MonitorDelegate(IntPtr hMonitor, IntPtr hdcMonitor, ref Rect lprcMonitor, IntPtr dwData)
+            {
+                var monitorInfo = new MonitorInfoEx();
+                monitorInfo.size = (uint)Marshal.SizeOf(monitorInfo);
+
+                if (User32.GetMonitorInfo(hMonitor, ref monitorInfo))
+                {
+                    var info = new DevMode();
+                    User32.EnumDisplaySettings(monitorInfo.deviceName, -1, ref info);
+
+                    var d = new DISPLAY_DEVICE();
+                    d.cb = Marshal.SizeOf(d);
+                    User32.EnumDisplayDevices(monitorInfo.deviceName, 0, ref d, 0);
+
+                    displayInfo.Add(new DisplayInfo
+                    {
+                        Name = d.DeviceString,
+                        Path = "desktop",
+                        X = info.dmPositionX,
+                        Y = info.dmPositionY,
+                        Width = info.dmPelsWidth,
+                        Height = info.dmPelsHeight,
+                        Primary = count == 0
+                    });
+                    count++;
+
+                    if (info.dmPositionX < compositeLeft)
+                        compositeLeft = info.dmPositionX;
+
+                    if ((info.dmPositionX + info.dmPelsWidth) > compositeRight)
+                        compositeRight = (info.dmPositionX + info.dmPelsWidth);
+
+                    if (info.dmPositionY < compositeTop)
+                        compositeTop = info.dmPositionY;
+
+                    if ((info.dmPositionY + info.dmPelsHeight) > compositeBottom)
+                        compositeBottom = (info.dmPositionY + info.dmPelsHeight);
+
+                }
+
+                displayInfo.Insert(0, new DisplayInfo
+                {
+                    Name = $"Composite GDI Display",
+                    Path = "desktop",
+                    X = compositeLeft,
+                    Y = compositeTop,
+                    Width = compositeRight - compositeLeft,
+                    Height = compositeBottom - compositeTop,
+                    Primary = false,
+                    IsComposite = true
+                });
+                return true;
+            }
+
+            User32.EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, MonitorDelegate, IntPtr.Zero);
+            return displayInfo.ToArray();
+            //return CollectionsMarshal.AsSpan(displayInfo);
         }
 
         private unsafe XRRMonitorInfo[] getXRandrDisplays(IntPtr display, IntPtr rootWindow)
