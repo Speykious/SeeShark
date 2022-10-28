@@ -34,64 +34,77 @@ namespace SeeShark.Device
         /// </summary>
         protected override DisplayInfo[] EnumerateDevices()
         {
-            if (InputFormat == DeviceInputFormat.X11Grab)
+            switch (InputFormat)
             {
-                unsafe
-                {
-                    IntPtr display = XLib.XOpenDisplay(null);
-                    IntPtr rootWindow = XLib.XDefaultRootWindow(display);
-                    XRRMonitorInfo[] monitors = getXRandrDisplays(display, rootWindow);
-
-                    DisplayInfo[] info = new DisplayInfo[monitors.Length + 1];
-
-                    int compositeLeft = int.MaxValue;
-                    int compositeRight = 0;
-                    int compositeTop = int.MaxValue;
-                    int compositeBottom = 0;
-
-                    for (int i = 0; i < monitors.Length; i++)
-                    {
-                        XRRMonitorInfo monitor = monitors[i];
-                        info[i + 1] = new DisplayInfo
-                        {
-                            Name = $"Display {i}",
-                            Path = ":0",
-                            X = monitor.X,
-                            Y = monitor.Y,
-                            Width = monitor.Width,
-                            Height = monitor.Height,
-                            Primary = monitor.Primary > 0,
-                        };
-
-                        if (monitor.X < compositeLeft)
-                            compositeLeft = monitor.X;
-
-                        if (monitor.X + monitor.Width > compositeRight)
-                            compositeRight = monitor.X + monitor.Width;
-
-                        if (monitor.Y < compositeTop)
-                            compositeTop = monitor.Y;
-
-                        if (monitor.Y + monitor.Height > compositeBottom)
-                            compositeBottom = monitor.Y + monitor.Height;
-                    }
-
-                    info[0] = new DisplayInfo
-                    {
-                        Name = $"Composite X11 Display",
-                        Path = ":0",
-                        X = compositeLeft,
-                        Y = compositeTop,
-                        Width = compositeRight - compositeLeft,
-                        Height = compositeBottom - compositeTop,
-                        Primary = false,
-                        IsComposite = true
-                    };
-                    return info;
-                }
+                case DeviceInputFormat.X11Grab:
+                    return enumerateDevicesX11();
+                case DeviceInputFormat.GdiGrab:
+                    return enumerateDevicesGdi();
+                default:
+                    return base.EnumerateDevices();
             }
+        }
 
-            return base.EnumerateDevices();
+        private DisplayInfo[] enumerateDevicesX11()
+        {
+            unsafe
+            {
+                IntPtr display = XLib.XOpenDisplay(null);
+                IntPtr rootWindow = XLib.XDefaultRootWindow(display);
+                XRRMonitorInfo[] monitors = getXRandrDisplays(display, rootWindow);
+
+                DisplayInfo[] info = new DisplayInfo[monitors.Length + 1];
+
+                int compositeLeft = int.MaxValue;
+                int compositeRight = int.MinValue;
+                int compositeTop = int.MaxValue;
+                int compositeBottom = int.MinValue;
+
+                for (int i = 0; i < monitors.Length; i++)
+                {
+                    XRRMonitorInfo monitor = monitors[i];
+                    info[i + 1] = new DisplayInfo
+                    {
+                        Name = $"Display {i}",
+                        Path = ":0",
+                        X = monitor.X,
+                        Y = monitor.Y,
+                        Width = monitor.Width,
+                        Height = monitor.Height,
+                        Primary = monitor.Primary > 0,
+                    };
+
+                    if (monitor.X < compositeLeft)
+                        compositeLeft = monitor.X;
+
+                    if (monitor.X + monitor.Width > compositeRight)
+                        compositeRight = monitor.X + monitor.Width;
+
+                    if (monitor.Y < compositeTop)
+                        compositeTop = monitor.Y;
+
+                    if (monitor.Y + monitor.Height > compositeBottom)
+                        compositeBottom = monitor.Y + monitor.Height;
+                }
+
+                info[0] = new DisplayInfo
+                {
+                    Name = $"Composite X11 Display",
+                    Path = ":0",
+                    X = compositeLeft,
+                    Y = compositeTop,
+                    Width = compositeRight - compositeLeft,
+                    Height = compositeBottom - compositeTop,
+                    Primary = false,
+                    IsComposite = true
+                };
+                return info;
+            }
+        }
+
+        private DisplayInfo[] enumerateDevicesGdi()
+        {
+            return Array.Empty<DisplayInfo>();
         }
 
         private unsafe XRRMonitorInfo[] getXRandrDisplays(IntPtr display, IntPtr rootWindow)
