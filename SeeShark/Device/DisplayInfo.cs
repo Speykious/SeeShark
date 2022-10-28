@@ -11,5 +11,7 @@ namespace SeeShark.Device
         public int Width { get; init; }
         public int Height { get; init; }
         public bool Primary { get; init; }
+
+        public bool IsComposite { get; init; }
     }
 }

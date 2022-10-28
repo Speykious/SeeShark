@@ -42,12 +42,18 @@ namespace SeeShark.Device
                     IntPtr rootWindow = XLib.XDefaultRootWindow(display);
                     XRRMonitorInfo[] monitors = getXRandrDisplays(display, rootWindow);
 
-                    DisplayInfo[] info = new DisplayInfo[monitors.Length];
-                    for (int i = 0; i < info.Length; i++)
+                    DisplayInfo[] info = new DisplayInfo[monitors.Length + 1];
+
+                    int compositeLeft = Int32.MaxValue;
+                    int compositeRight = 0;
+                    int compositeTop = Int32.MaxValue;
+                    int compositeBottom = 0;
+
+                    for (int i = 0; i < info.Length - 1; i++)
                     {
                         XRRMonitorInfo monitor = monitors[i];
                         string nameAddition = monitor.Name == null ? "" : $" ({new string(monitor.Name)})";
-                        info[i] = new DisplayInfo
+                        info[i + 1] = new DisplayInfo
                         {
                             Name = $"Display {i}{nameAddition}",
                             Path = ":0",
@@ -57,8 +63,31 @@ namespace SeeShark.Device
                             Height = monitor.Height,
                             Primary = monitor.Primary > 0,
                         };
+
+                        if (monitor.X < compositeLeft)
+                            compositeLeft = monitor.X;
+
+                        if ((monitor.X + monitor.Width) > compositeRight)
+                            compositeRight = (monitor.X + monitor.Width);
+
+                        if (monitor.Y < compositeTop)
+                            compositeTop = monitor.Y;
+
+                        if ((monitor.Y + monitor.Height) > compositeBottom)
+                            compositeBottom = (monitor.Y + monitor.Height);
                     }
 
+                    info[0] = new DisplayInfo
+                    {
+                        Name = $"Composite X11 Display",
+                        Path = ":0",
+                        X = compositeLeft,
+                        Y = compositeTop,
+                        Width = compositeRight - compositeLeft,
+                        Height = compositeBottom - compositeTop,
+                        Primary = false,
+                        IsComposite = true
+                    };
                     return info;
                 }
             }
