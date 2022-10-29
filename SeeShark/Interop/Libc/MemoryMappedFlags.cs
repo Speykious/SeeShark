@@ -4,13 +4,12 @@
 
 using System;
 
-namespace SeeShark.Interop.Libc
+namespace SeeShark.Interop.Libc;
+
+[Flags]
+internal enum MemoryMappedFlags
 {
-    [Flags]
-    internal enum MemoryMappedFlags
-    {
-        MAP_SHARED = 0x01,
-        MAP_PRIVATE = 0x02,
-        MAP_FIXED = 0x10
-    }
+    MAP_SHARED = 0x01,
+    MAP_PRIVATE = 0x02,
+    MAP_FIXED = 0x10
 }

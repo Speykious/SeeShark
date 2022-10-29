@@ -5,38 +5,37 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace SeeShark.Interop.X11
+namespace SeeShark.Interop.X11;
+
+using Atom = Int64;
+using Display = IntPtr;
+using Window = IntPtr;
+
+internal class XLib
 {
-    using Display = IntPtr;
-    using Window = IntPtr;
-    using Atom = Int64;
+    private const string lib_x11 = "libX11";
+    private static readonly object displayLock = new object();
 
-    internal class XLib
+    [DllImport(lib_x11, EntryPoint = "XOpenDisplay")]
+    private static extern unsafe Display sys_XOpenDisplay(sbyte* display);
+    public static unsafe Display XOpenDisplay(sbyte* display)
     {
-        private const string lib_x11 = "libX11";
-        private static readonly object displayLock = new object();
-
-        [DllImport(lib_x11, EntryPoint = "XOpenDisplay")]
-        private static extern unsafe Display sys_XOpenDisplay(sbyte* display);
-        public static unsafe Display XOpenDisplay(sbyte* display)
-        {
-            lock (displayLock)
-                return sys_XOpenDisplay(display);
-        }
-
-        [DllImport(lib_x11, EntryPoint = "XCloseDisplay")]
-        public static extern int XCloseDisplay(Display display);
-
-        [DllImport(lib_x11, EntryPoint = "XDefaultRootWindow")]
-        public static extern Window XDefaultRootWindow(Display display);
-
-        [DllImport(lib_x11, EntryPoint = "XDisplayWidth")]
-        public static extern int XDisplayWidth(Display display, int screenNumber);
-
-        [DllImport(lib_x11, EntryPoint = "XDisplayHeight")]
-        public static extern int XDisplayHeight(Display display, int screenNumber);
-
-        [DllImport(lib_x11, EntryPoint = "XGetAtomName")]
-        public static extern IntPtr XGetAtomName(Display display, Atom atom);
+        lock (displayLock)
+            return sys_XOpenDisplay(display);
     }
+
+    [DllImport(lib_x11, EntryPoint = "XCloseDisplay")]
+    public static extern int XCloseDisplay(Display display);
+
+    [DllImport(lib_x11, EntryPoint = "XDefaultRootWindow")]
+    public static extern Window XDefaultRootWindow(Display display);
+
+    [DllImport(lib_x11, EntryPoint = "XDisplayWidth")]
+    public static extern int XDisplayWidth(Display display, int screenNumber);
+
+    [DllImport(lib_x11, EntryPoint = "XDisplayHeight")]
+    public static extern int XDisplayHeight(Display display, int screenNumber);
+
+    [DllImport(lib_x11, EntryPoint = "XGetAtomName")]
+    public static extern IntPtr XGetAtomName(Display display, Atom atom);
 }

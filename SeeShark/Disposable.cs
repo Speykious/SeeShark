@@ -5,57 +5,56 @@
 using System;
 using System.Threading;
 
-namespace SeeShark
+namespace SeeShark;
+
+/// <remarks>
+/// based on <see href="https://github.com/shimat/opencvsharp/blob/9a5f9828a74cfa3995562a06716e177705cde038/src/OpenCvSharp/Fundamentals/DisposableObject.cs">OpenCvSharp</see>
+/// </remarks>
+public abstract class Disposable : IDisposable
 {
-    /// <remarks>
-    /// based on <see href="https://github.com/shimat/opencvsharp/blob/9a5f9828a74cfa3995562a06716e177705cde038/src/OpenCvSharp/Fundamentals/DisposableObject.cs">OpenCvSharp</see>
-    /// </remarks>
-    public abstract class Disposable : IDisposable
+    private volatile int disposeSignaled = 0;
+
+    public bool IsDisposed { get; protected set; }
+    protected bool IsOwner { get; private set; }
+
+    protected Disposable(bool isOwner = true)
     {
-        private volatile int disposeSignaled = 0;
+        IsDisposed = false;
+        IsOwner = isOwner;
+    }
 
-        public bool IsDisposed { get; protected set; }
-        protected bool IsOwner { get; private set; }
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
-        protected Disposable(bool isOwner = true)
-        {
-            IsDisposed = false;
-            IsOwner = isOwner;
-        }
+    protected virtual void Dispose(bool disposing)
+    {
+        if (Interlocked.Exchange(ref disposeSignaled, 1) != 0)
+            return;
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+        IsDisposed = true;
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (Interlocked.Exchange(ref disposeSignaled, 1) != 0)
-                return;
+        if (disposing)
+            DisposeManaged();
 
-            IsDisposed = true;
+        DisposeUnmanaged();
+    }
 
-            if (disposing)
-                DisposeManaged();
+    ~Disposable()
+    {
+        Dispose(false);
+    }
 
-            DisposeUnmanaged();
-        }
+    protected virtual void DisposeManaged() { }
+    protected virtual void DisposeUnmanaged() { }
 
-        ~Disposable()
-        {
-            Dispose(false);
-        }
+    public void TransferOwnership() => IsOwner = false;
 
-        protected virtual void DisposeManaged() { }
-        protected virtual void DisposeUnmanaged() { }
-
-        public void TransferOwnership() => IsOwner = false;
-
-        public void ThrowIfDisposed()
-        {
-            if (IsDisposed)
-                throw new ObjectDisposedException(GetType().FullName);
-        }
+    public void ThrowIfDisposed()
+    {
+        if (IsDisposed)
+            throw new ObjectDisposedException(GetType().FullName);
     }
 }
