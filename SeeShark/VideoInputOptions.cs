@@ -70,14 +70,20 @@ namespace SeeShark
             if (Framerate != null)
                 dict.Add("framerate", $"{Framerate.Value.num}/{Framerate.Value.den}");
 
-            // I have no idea why "YUYV" specifically is like this...
             if (InputFormat != null)
             {
                 string key = "input_format";
                 if (deviceFormat == DeviceInputFormat.DShow)
                     key = IsRaw ? "pixel_format" : "vcodec";
 
-                dict.Add(key, InputFormat == "YUYV" ? "yuv422p" : InputFormat.ToLower());
+                // I have no idea why there is an inconsistency but here we are...
+                string inputFormat = InputFormat switch
+                {
+                    "YUYV" => "yuv422p",
+                    "YUV420" => "yuv420p",
+                    _ => InputFormat.ToLower(),
+                };
+                dict.Add(key, inputFormat);
             }
 
             if (VideoPosition != null)
