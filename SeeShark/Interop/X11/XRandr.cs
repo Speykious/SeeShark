@@ -5,16 +5,15 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace SeeShark.Interop.X11
+namespace SeeShark.Interop.X11;
+
+using Display = IntPtr;
+using Window = IntPtr;
+
+internal static class XRandr
 {
-    using Display = IntPtr;
-    using Window = IntPtr;
+    private const string lib_x_randr = "libXrandr";
 
-    internal static class XRandr
-    {
-        private const string lib_x_randr = "libXrandr";
-
-        [DllImport(lib_x_randr, EntryPoint = "XRRGetMonitors")]
-        public static extern unsafe XRRMonitorInfo* XRRGetMonitors(Display dpy, Window window, bool getActive, out int nmonitors);
-    }
+    [DllImport(lib_x_randr, EntryPoint = "XRRGetMonitors")]
+    public static extern unsafe XRRMonitorInfo* XRRGetMonitors(Display dpy, Window window, bool getActive, out int nmonitors);
 }
