@@ -114,7 +114,8 @@ namespace SeeShark.Utils
                         if ((codecId != AVCodecID.AV_CODEC_ID_NONE) && (codecId != AVCodecID.AV_CODEC_ID_RAWVIDEO))
                         {
                             AVCodec* codec = ffmpeg.avcodec_find_decoder(codecId);
-                            vio.VCodec = new string((sbyte*)codec->name);
+                            vio.InputFormat = new string((sbyte*)codec->name);
+                            vio.IsRaw = true;
                         }
                         else if (pixelFormat == PixelFormat.None)
                         {
@@ -126,11 +127,13 @@ namespace SeeShark.Utils
                                 || mediaTypes[0].subType.Equals(MediaSubType.Video.Avc1)
                                 || mediaTypes[0].subType.Equals(MediaSubType.Video.avc1))
                             {
-                                vio.VCodec = "h264";
+                                vio.InputFormat = "h264";
+                                vio.IsRaw = true;
                             }
                             else if (Equals(mediaTypes[0].subType, MediaSubType.MJPG))
                             {
-                                vio.VCodec = "mjpeg";
+                                vio.InputFormat = "mjpeg";
+                                vio.IsRaw = true;
                             }
                             else
                             {

@@ -39,15 +39,14 @@ namespace SeeShark
         public AVRational? Framerate { get; set; }
         /// <summary>
         /// To request a specific input format for the video stream.
-        /// On all platform (except Windows), if the video stream is raw, it is the name of its pixel format, otherwise it is the name of its codec.
-        /// On Windows, contains only the pixel format. (can be null/empty)
+        /// If the video stream is raw, it is the name of its pixel format, otherwise it is the name of its codec.
         /// </summary>
         public string? InputFormat { get; set; }
         /// <summary>
-        /// Used on Windows only, contains the codec (can be null/empty)
-        /// If VCodec is not null/empty, InputFormat is null/empty (and the opposite)
+        /// Used on Windows only - tells us if the video stream is raw or not.
+        /// If the video stream is raw, it is a pixel format, otherwise it is a codec.
         /// </summary>
-        public string? VCodec { get; set; }
+        public bool IsRaw { get; set; }
 
         /// <summary>
         /// Combines all properties into a dictionary of options that FFmpeg can use.
@@ -68,13 +67,11 @@ namespace SeeShark
             // I have no idea why "YUYV" specifically is like this...
             if (InputFormat != null)
             {
-                string key = deviceFormat == DeviceInputFormat.DShow ? "pixel_format" : "input_format";
-                dict.Add(key, InputFormat == "YUYV" ? "yuv422p" : InputFormat.ToLower());
-            }
+                string key = "input_format";
+                if (deviceFormat == DeviceInputFormat.DShow)
+                    key = IsRaw ? "pixel_format" : "vcodec";
 
-            if ((VCodec != null) && (deviceFormat == DeviceInputFormat.DShow))
-            {
-                dict.Add("vcodec", VCodec);
+                dict.Add(key, InputFormat == "YUYV" ? "yuv422p" : InputFormat.ToLower());
             }
 
             return dict;
@@ -82,16 +79,7 @@ namespace SeeShark
 
         public override string ToString()
         {
-            string s;
-            if (VCodec != null)
-            {
-                s = $"VCodec:{VCodec} {VideoSize}";
-            }
-            else
-            {
-                s = $"InputFormat:{InputFormat} {VideoSize}";
-            }
-
+            string s = $"{InputFormat} {VideoSize}";
             if (Framerate != null)
             {
                 double fps = ffmpeg.av_q2d(Framerate.Value);
