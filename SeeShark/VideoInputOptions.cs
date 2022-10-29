@@ -14,9 +14,11 @@ namespace SeeShark
     /// </summary>
     /// <remarks>
     /// Some examples of input options are:
-    /// https://ffmpeg.org/ffmpeg-devices.html#video4linux2_002c-v4l2
-    /// https://ffmpeg.org/ffmpeg-devices.html#dshow
-    /// https://ffmpeg.org/ffmpeg-devices.html#avfoundation
+    /// <list type="bullet">
+    /// <item>https://ffmpeg.org/ffmpeg-devices.html#video4linux2_002c-v4l2</item>
+    /// <item>https://ffmpeg.org/ffmpeg-devices.html#dshow</item>
+    /// <item>https://ffmpeg.org/ffmpeg-devices.html#avfoundation</item>
+    /// </list>
     /// </remarks>
     public class VideoInputOptions
     {
@@ -43,13 +45,19 @@ namespace SeeShark
         public AVRational? Framerate { get; set; }
         /// <summary>
         /// To request a specific input format for the video stream.
+        /// If the video stream is raw, it is the name of its pixel format, otherwise it is the name of its codec.
         /// </summary>
         public string? InputFormat { get; set; }
+        /// <summary>
+        /// Used on Windows only - tells us if the video stream is raw or not.
+        /// If the video stream is raw, it is a pixel format, otherwise it is a codec.
+        /// </summary>
+        public bool IsRaw { get; set; }
 
         /// <summary>
         /// Combines all properties into a dictionary of options that FFmpeg can use.
         /// </summary>
-        public virtual IDictionary<string, string> ToAVDictOptions(DeviceInputFormat? inputFormat = null)
+        public virtual IDictionary<string, string> ToAVDictOptions(DeviceInputFormat deviceFormat)
         {
             Dictionary<string, string> dict = new();
 
@@ -58,14 +66,29 @@ namespace SeeShark
                 (int width, int height) = VideoSize.Value;
                 dict.Add("video_size", $"{width}x{height}");
             }
+
             if (Framerate != null)
                 dict.Add("framerate", $"{Framerate.Value.num}/{Framerate.Value.den}");
+
             if (InputFormat != null)
-                dict.Add("input_format", InputFormat);
+            {
+                string key = "input_format";
+                if (deviceFormat == DeviceInputFormat.DShow)
+                    key = IsRaw ? "pixel_format" : "vcodec";
+
+                // I have no idea why there is an inconsistency but here we are...
+                string inputFormat = InputFormat switch
+                {
+                    "YUYV" => "yuv422p",
+                    "YUV420" => "yuv420p",
+                    _ => InputFormat.ToLower(),
+                };
+                dict.Add(key, inputFormat);
+            }
 
             if (VideoPosition != null)
             {
-                switch (inputFormat)
+                switch (deviceFormat)
                 {
                     case DeviceInputFormat.X11Grab:
                         {
@@ -81,7 +104,19 @@ namespace SeeShark
                         }
                 }
             }
+
             return dict;
+        }
+
+        public override string ToString()
+        {
+            string s = $"{InputFormat} {VideoSize}";
+            if (Framerate != null)
+            {
+                double fps = ffmpeg.av_q2d(Framerate.Value);
+                s += $" - {fps:0.000} fps";
+            }
+            return s;
         }
     }
 }

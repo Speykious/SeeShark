@@ -4,7 +4,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-using DirectShowLib;
+using SeeShark.Utils;
 
 namespace SeeShark.Device
 {
@@ -51,24 +51,18 @@ namespace SeeShark.Device
         {
             // FFmpeg doesn't implement avdevice_list_input_sources() for the DShow input format yet.
             // See first SeeShark issue: https://github.com/vignetteapp/SeeShark/issues/1
-            if (InputFormat == DeviceInputFormat.DShow)
+
+            // Supported formats won't use the default method to allow better video input options handling.
+            switch (InputFormat)
             {
-                var dsDevices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
-                var devices = new CameraInfo[dsDevices.Length];
-                for (int i = 0; i < dsDevices.Length; i++)
-                {
-                    var dsDevice = dsDevices[i];
-                    devices[i] = new CameraInfo
-                    {
-                        Name = dsDevice.Name,
-                        Path = $"video={dsDevice.Name}",
-                    };
-                }
-                return devices;
-            }
-            else
-            {
-                return base.EnumerateDevices();
+                case DeviceInputFormat.DShow:
+                    return DShowUtils.EnumerateDevices();
+                case DeviceInputFormat.V4l2:
+                    CameraInfo[] devices = base.EnumerateDevices();
+                    V4l2Utils.FillDeviceOptions(devices);
+                    return devices;
+                default:
+                    return base.EnumerateDevices();
             }
         }
     }

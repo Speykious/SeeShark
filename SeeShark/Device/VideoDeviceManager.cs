@@ -94,14 +94,14 @@ namespace SeeShark.Device
             AVDeviceInfoList* avDeviceInfoList = null;
             ffmpeg.avdevice_list_input_sources(AvInputFormat, null, null, &avDeviceInfoList).ThrowExceptionIfError();
             int nDevices = avDeviceInfoList->nb_devices;
-            var avDevices = avDeviceInfoList->devices;
+            AVDeviceInfo** avDevices = avDeviceInfoList->devices;
 
-            var devices = new TDeviceInfo[nDevices];
+            TDeviceInfo[] devices = new TDeviceInfo[nDevices];
             for (int i = 0; i < nDevices; i++)
             {
-                var avDevice = avDevices[i];
-                var name = new string((sbyte*)avDevice->device_description);
-                var path = new string((sbyte*)avDevice->device_name);
+                AVDeviceInfo* avDevice = avDevices[i];
+                string name = new string((sbyte*)avDevice->device_description);
+                string path = new string((sbyte*)avDevice->device_name);
 
                 if (path == null)
                     throw new InvalidOperationException($"Device at index {i} doesn't have a path!");
@@ -122,15 +122,15 @@ namespace SeeShark.Device
         /// </summary>
         public void SyncDevices()
         {
-            var newDevices = EnumerateDevices().ToImmutableList();
+            ImmutableList<TDeviceInfo> newDevices = EnumerateDevices().ToImmutableList();
 
             if (Devices.SequenceEqual(newDevices))
                 return;
 
-            foreach (var device in newDevices.Except(Devices))
+            foreach (TDeviceInfo device in newDevices.Except(Devices))
                 OnNewDevice?.Invoke(device);
 
-            foreach (var device in Devices.Except(newDevices))
+            foreach (TDeviceInfo device in Devices.Except(newDevices))
                 OnLostDevice?.Invoke(device);
 
             Devices = newDevices;
