@@ -96,37 +96,29 @@ public class VideoInputOptions
             switch (deviceFormat)
             {
                 case DeviceInputFormat.X11Grab:
-                    {
-                        dict.Add("grab_x", VideoPosition.Value.Item1.ToString());
-                        dict.Add("grab_y", VideoPosition.Value.Item2.ToString());
-                        break;
-                    }
+                    dict.Add("grab_x", VideoPosition.Value.Item1.ToString());
+                    dict.Add("grab_y", VideoPosition.Value.Item2.ToString());
+                    break;
                 case DeviceInputFormat.GdiGrab:
-                    {
-                        dict.Add("offset_x", VideoPosition.Value.Item1.ToString());
-                        dict.Add("offset_y", VideoPosition.Value.Item2.ToString());
-                        break;
-                    }
+                    dict.Add("offset_x", VideoPosition.Value.Item1.ToString());
+                    dict.Add("offset_y", VideoPosition.Value.Item2.ToString());
+                    break;
+
             }
         }
-
 
         switch (deviceFormat)
         {
             case DeviceInputFormat.X11Grab:
             case DeviceInputFormat.GdiGrab:
-                {
-                    dict.Add("draw_mouse", DrawMouse ? "1" : "0");
-                    break;
-                }
+                dict.Add("draw_mouse", DrawMouse ? "1" : "0");
+                break;
             case DeviceInputFormat.AVFoundation:
-                {
-                    dict.Add("capture_cursor", DrawMouse ? "1" : "0");
-                    break;
-                }
+                dict.Add("capture_cursor", DrawMouse ? "1" : "0");
+                break;
         }
 
-            return dict;
+        return dict;
     }
 
     public override string ToString()
