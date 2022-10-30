@@ -110,12 +110,23 @@ public class VideoInputOptions
             }
         }
 
-        if (!DrawMouse)
+
+        switch (deviceFormat)
         {
-            dict.Add("draw_mouse", "0");
+            case DeviceInputFormat.X11Grab:
+            case DeviceInputFormat.GdiGrab:
+                {
+                    dict.Add("draw_mouse", DrawMouse ? "1" : "0");
+                    break;
+                }
+            case DeviceInputFormat.AVFoundation:
+                {
+                    dict.Add("capture_cursor", DrawMouse ? "1" : "0");
+                    break;
+                }
         }
 
-        return dict;
+            return dict;
     }
 
     public override string ToString()
