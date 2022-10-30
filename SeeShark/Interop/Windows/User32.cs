@@ -4,6 +4,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace SeeShark.Interop.Windows;
 
@@ -145,4 +146,15 @@ internal static partial class User32
 
     [DllImport("Shcore.dll")]
     internal static extern int SetProcessDpiAwareness(int awareness);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    internal static extern int GetWindowText(IntPtr hWnd, StringBuilder strText, int maxCount);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    internal static extern int GetWindowTextLength(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    internal static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
+
+    internal delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 }
