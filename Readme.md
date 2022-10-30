@@ -38,45 +38,44 @@ using System.Threading;
 using SeeShark;
 using SeeShark.FFmpeg;
 
-namespace YourProgram
+namespace YourProgram;
+
+// This program will display camera frames info for 10 seconds.
+class Program
 {
-    // This program will display camera frames info for 10 seconds.
-    class Program
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
-        {
-            // Create a CameraManager to manage camera devices
-            using var manager = new CameraManager();
+        // Create a CameraManager to manage camera devices
+        using var manager = new CameraManager();
 
-            // Get the first camera available
-            using var camera = manager.GetCamera(0);
+        // Get the first camera available
+        using var camera = manager.GetCamera(0);
 
-            // Attach your callback to the camera's frame event handler
-            camera.OnFrame += FrameEventHandler;
+        // Attach your callback to the camera's frame event handler
+        camera.OnFrame += frameEventHandler;
 
-            // Start decoding frames asynchronously
-            camera.StartCapture();
+        // Start decoding frames asynchronously
+        camera.StartCapture();
 
-            // Just wait a bit
-            Thread.Sleep(TimeSpan.FromSeconds(10));
+        // Just wait a bit
+        Thread.Sleep(TimeSpan.FromSeconds(10));
 
-            // Stop decoding frames
-            camera.StopCapture();
-        }
+        // Stop decoding frames
+        camera.StopCapture();
+    }
 
-        // Create a callback for decoded camera frames
-        public static void FrameEventHandler(object? _sender, FrameEventArgs e)
-        {
-            // Only care about new frames
-            if (e.Status != DecodeStatus.NewFrame)
-                return;
+    // Create a callback for decoded camera frames
+    private static void frameEventHandler(object? _sender, FrameEventArgs e)
+    {
+        // Only care about new frames
+        if (e.Status != DecodeStatus.NewFrame)
+            return;
 
-            Frame frame = e.Frame;
+        Frame frame = e.Frame;
 
-            // Get information and raw data from a frame
-            Console.WriteLine($"New frame ({frame.Width}x{frame.Height} | {frame.PixelFormat})");
-            Console.WriteLine($"Length of raw data: {frame.RawData.Length} bytes");
-        }
+        // Get information and raw data from a frame
+        Console.WriteLine($"New frame ({frame.Width}x{frame.Height} | {frame.PixelFormat})");
+        Console.WriteLine($"Length of raw data: {frame.RawData.Length} bytes");
     }
 }
 ```
@@ -96,7 +95,7 @@ You can request a feature or fix a bug by reporting an issue.
 If you feel like fixing a bug or implementing a feature, you can fork this repository and make a pull request at any time!
 
 You can also join our discord server where we talk about our different projects.
-We have a dedicated **#seeshark** channel for this one.
+We have a dedicated **#tracking** channel where we talk about SeeShark, MediaPipe.NET and other related repositories.
 
 ## License
 
