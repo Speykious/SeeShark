@@ -14,8 +14,8 @@ namespace SeeShark.Example.Ascii;
 
 class Program
 {
-    static Camera? karen;
-    static CameraManager? manager;
+    static Window? karen;
+    static WindowManager? manager;
     static FrameConverter? converter;
 
     static void Main(string[] args)
@@ -43,9 +43,9 @@ class Program
         Console.WriteLine("Running in {0}-bit mode.", Environment.Is64BitProcess ? "64" : "32");
         Console.WriteLine($"FFmpeg version info: {FFmpegVersion}");
 
-        manager = new CameraManager();
+        manager = new WindowManager();
 
-        CameraInfo device;
+        WindowInfo device;
         if (args.Length < 1)
         {
             /// Select an available camera device.

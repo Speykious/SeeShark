@@ -139,7 +139,7 @@ public class WindowManager : VideoDeviceManager<WindowInfo, Window>
     {
         return new VideoInputOptions
         {
-            WindowId = info.Id.ToString()
+            WindowId = $"0x{new IntPtr(0x3600003).ToString("X2")}"
         };
     }
 }

@@ -112,6 +112,12 @@ public class VideoInputOptions
             }
         }
 
+        if (WindowId != null)
+        {
+            if (deviceFormat == DeviceInputFormat.X11Grab)
+                dict.Add("window_id", WindowId);
+        }
+
         switch (deviceFormat)
         {
             case DeviceInputFormat.X11Grab:
