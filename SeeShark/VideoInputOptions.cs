@@ -55,6 +55,11 @@ public class VideoInputOptions
     public bool IsRaw { get; set; }
 
     /// <summary>
+    /// Whether or not to draw the mouse cursor in display captures.
+    /// </summary>
+    public bool DrawMouse { get; set; } = true;
+
+    /// <summary>
     /// Combines all properties into a dictionary of options that FFmpeg can use.
     /// </summary>
     public virtual IDictionary<string, string> ToAVDictOptions(DeviceInputFormat deviceFormat)
@@ -103,6 +108,11 @@ public class VideoInputOptions
                         break;
                     }
             }
+        }
+
+        if (!DrawMouse)
+        {
+            dict.Add("draw_mouse", "0");
         }
 
         return dict;
