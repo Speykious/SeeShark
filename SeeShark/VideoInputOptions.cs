@@ -55,6 +55,11 @@ public class VideoInputOptions
     public bool IsRaw { get; set; }
 
     /// <summary>
+    /// Whether or not to draw the mouse cursor in display captures.
+    /// </summary>
+    public bool DrawMouse { get; set; } = true;
+
+    /// <summary>
     /// Combines all properties into a dictionary of options that FFmpeg can use.
     /// </summary>
     public virtual IDictionary<string, string> ToAVDictOptions(DeviceInputFormat deviceFormat)
@@ -91,18 +96,26 @@ public class VideoInputOptions
             switch (deviceFormat)
             {
                 case DeviceInputFormat.X11Grab:
-                    {
-                        dict.Add("grab_x", VideoPosition.Value.Item1.ToString());
-                        dict.Add("grab_y", VideoPosition.Value.Item2.ToString());
-                        break;
-                    }
+                    dict.Add("grab_x", VideoPosition.Value.Item1.ToString());
+                    dict.Add("grab_y", VideoPosition.Value.Item2.ToString());
+                    break;
                 case DeviceInputFormat.GdiGrab:
-                    {
-                        dict.Add("offset_x", VideoPosition.Value.Item1.ToString());
-                        dict.Add("offset_y", VideoPosition.Value.Item2.ToString());
-                        break;
-                    }
+                    dict.Add("offset_x", VideoPosition.Value.Item1.ToString());
+                    dict.Add("offset_y", VideoPosition.Value.Item2.ToString());
+                    break;
+
             }
+        }
+
+        switch (deviceFormat)
+        {
+            case DeviceInputFormat.X11Grab:
+            case DeviceInputFormat.GdiGrab:
+                dict.Add("draw_mouse", DrawMouse ? "1" : "0");
+                break;
+            case DeviceInputFormat.AVFoundation:
+                dict.Add("capture_cursor", DrawMouse ? "1" : "0");
+                break;
         }
 
         return dict;
