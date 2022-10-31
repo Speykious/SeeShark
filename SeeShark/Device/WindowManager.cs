@@ -112,9 +112,18 @@ public class WindowManager : VideoDeviceManager<WindowInfo, Window>
     private WindowInfo[] enumerateDevicesGdi()
     {
         List<WindowInfo> windows = new List<WindowInfo>();
-        User32.EnumWindows(delegate(IntPtr wnd, IntPtr param)
+
+        IntPtr shellWindow = User32.GetShellWindow();
+
+        User32.EnumDesktopWindows(IntPtr.Zero, delegate(IntPtr wnd, IntPtr param)
         {
+            if (wnd == shellWindow || !User32.IsWindowVisible(wnd))
+                return true;
+
             int size = User32.GetWindowTextLength(wnd);
+
+            if (size <= 1) return true;
+
             string title = string.Empty;
             if (size > 0)
             {

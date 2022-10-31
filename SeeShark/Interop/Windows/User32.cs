@@ -154,7 +154,13 @@ internal static partial class User32
     internal static extern int GetWindowTextLength(IntPtr hWnd);
 
     [DllImport("user32.dll")]
-    internal static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
+    internal static extern bool EnumDesktopWindows(IntPtr hDesktop, EnumWindowsProc enumProc, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    internal static extern bool IsWindowVisible(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    internal static extern IntPtr GetShellWindow();
 
     internal delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 }
