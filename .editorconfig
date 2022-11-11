@@ -15,7 +15,7 @@ indent_size = 2
 
 [*.cs]
 indent_size = 4
-file_header_template = Copyright (c) The Vignette Authors\nThis file is part of SeeShark.\nSeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
+file_header_template = Copyright (c) Speykious\nThis file is part of SeeShark.\nSeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
 # Require File Header
 dotnet_diagnostic.IDE0073.severity = error

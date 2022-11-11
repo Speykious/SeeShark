@@ -2,8 +2,6 @@
 
 > Simple C# camera and display library.
 
-[![Discord](https://img.shields.io/discord/871618277258960896?color=7289DA&label=%20&logo=discord&logoColor=white)](https://go.vignetteapp.org/discord) ![NuGet](https://img.shields.io/nuget/v/SeeShark)
-
 When you SeeShark, you C#!
 
 SeeShark is a simple cross-platform .NET library for handling camera and screen display inputs on Linux, Windows and MacOS.
@@ -24,7 +22,7 @@ Features include:
 - Access to raw pixel data.
 
 Features **don't** include:
-- Saving a frame as an image (here's a [wiki page on how to do it](https://github.com/vignetteapp/SeeShark/wiki/Saving-images) using ImageSharp).
+- Saving a frame as an image (here's a [wiki page on how to do it](https://github.com/Speykious/SeeShark/wiki/Saving-images) using ImageSharp).
 - Recording a video stream to a video file.
 - Managing audio devices.
 
@@ -94,8 +92,9 @@ You can request a feature or fix a bug by reporting an issue.
 
 If you feel like fixing a bug or implementing a feature, you can fork this repository and make a pull request at any time!
 
-You can also join our discord server where we talk about our different projects.
-We have a dedicated **#tracking** channel where we talk about SeeShark, MediaPipe.NET and other related repositories.
+## Vignette
+
+This library was previously hosted on https://github.com/vignetteapp/SeeShark. It was first made to be used in Vignette's vtuber application. Now, it is its own self-contained library!
 
 ## License
 
