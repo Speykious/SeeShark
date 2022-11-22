@@ -18,24 +18,30 @@ internal class XLib
 
     [DllImport(lib_x11, EntryPoint = "XOpenDisplay")]
     private static extern unsafe Display sys_XOpenDisplay(sbyte* display);
-    public static unsafe Display XOpenDisplay(sbyte* display)
+    internal static unsafe Display XOpenDisplay(sbyte* display)
     {
         lock (displayLock)
             return sys_XOpenDisplay(display);
     }
 
     [DllImport(lib_x11, EntryPoint = "XCloseDisplay")]
-    public static extern int XCloseDisplay(Display display);
+    internal static extern int XCloseDisplay(Display display);
 
     [DllImport(lib_x11, EntryPoint = "XDefaultRootWindow")]
-    public static extern Window XDefaultRootWindow(Display display);
+    internal static extern Window XDefaultRootWindow(Display display);
 
     [DllImport(lib_x11, EntryPoint = "XDisplayWidth")]
-    public static extern int XDisplayWidth(Display display, int screenNumber);
+    internal static extern int XDisplayWidth(Display display, int screenNumber);
 
     [DllImport(lib_x11, EntryPoint = "XDisplayHeight")]
-    public static extern int XDisplayHeight(Display display, int screenNumber);
+    internal static extern int XDisplayHeight(Display display, int screenNumber);
 
     [DllImport(lib_x11, EntryPoint = "XGetAtomName")]
-    public static extern IntPtr XGetAtomName(Display display, Atom atom);
+    internal static extern IntPtr XGetAtomName(Display display, Atom atom);
+
+    [DllImport(lib_x11, EntryPoint = "XQueryTree")]
+    internal static extern int XQueryTree(IntPtr display, IntPtr w, out IntPtr rootReturn, out IntPtr parentReturn, out IntPtr[] childrenReturn, out int nChildrenReturn);
+
+    [DllImport(lib_x11, EntryPoint = "XFetchName")]
+    internal static extern int XFetchName(IntPtr display, IntPtr w, out string windowNameReturn);
 }

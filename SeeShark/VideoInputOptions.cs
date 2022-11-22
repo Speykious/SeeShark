@@ -60,6 +60,11 @@ public class VideoInputOptions
     public bool DrawMouse { get; set; } = true;
 
     /// <summary>
+    /// Used in Linux only - The ID of the window to capture
+    /// </summary>
+    public string? WindowId { get; set; }
+
+    /// <summary>
     /// Combines all properties into a dictionary of options that FFmpeg can use.
     /// </summary>
     public virtual IDictionary<string, string> ToAVDictOptions(DeviceInputFormat deviceFormat)
@@ -105,6 +110,12 @@ public class VideoInputOptions
                     break;
 
             }
+        }
+
+        if (WindowId != null)
+        {
+            if (deviceFormat == DeviceInputFormat.X11Grab)
+                dict.Add("window_id", WindowId);
         }
 
         switch (deviceFormat)

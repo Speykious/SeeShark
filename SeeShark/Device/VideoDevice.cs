@@ -84,8 +84,14 @@ public class VideoDevice : Disposable
         // See https://github.com/vignetteapp/SeeShark/issues/29
 
         // (RIP big brain move to avoid overloading the CPU...)
+
+        // The decoder frame rate is just a guess from FFmpeg, so when there is no guess, we go to
+        // a fallback value (60fps) to avoid dividing by zero.
+        int den = decoder.Framerate.den == 0 ? 1 : decoder.Framerate.den;
+        int num = decoder.Framerate.num == 0 ? 60 : decoder.Framerate.num;
+
         if (status == DecodeStatus.NoFrameAvailable)
-            Thread.Sleep(1000 * decoder.Framerate.den / (decoder.Framerate.num * 4));
+            Thread.Sleep(1000 * den / (num * 4));
 
         return status;
     }
