@@ -63,7 +63,7 @@ public static class FFmpegManager
     /// <summary>
     /// Setup FFmpeg: root path and logging.
     /// <br/>
-    /// It will only setup FFmpeg once. Any non-first call will do nothing.
+    /// It will only setup FFmpeg once. Any non-first call to this method will do nothing.
     /// <br/>
     /// SeeShark is designed such that this method is called whenever it is
     /// necessary to have FFmpeg ready.
@@ -71,10 +71,30 @@ public static class FFmpegManager
     /// However, if you want to, you can still call it at the beginning of
     /// your program to customize your FFmpeg setup.
     /// </summary>
-    /// <param name="rootPath">Root path for loading FFmpeg libraries.</param>
     /// <param name="logLevel">Log level for FFmpeg.</param>
     /// <param name="logColor">Color of the FFmpeg logs.</param>
+    /// <param name="paths">List of valid paths for loading FFmpeg libraries.</param>
     public static void SetupFFmpeg(FFmpegLogLevel logLevel, ConsoleColor logColor, params string[] paths)
+    {
+        SetupFFmpeg(logLevel, logColor, null, paths);
+    }
+
+    /// <summary>
+    /// Setup FFmpeg: root path and logging, with custom log delegate.
+    /// <br/>
+    /// It will only setup FFmpeg once. Any non-first call to this method will do nothing.
+    /// <br/>
+    /// SeeShark is designed such that this method is called whenever it is
+    /// necessary to have FFmpeg ready.
+    /// <br/>
+    /// However, if you want to, you can still call it at the beginning of
+    /// your program to customize your FFmpeg setup.
+    /// </summary>
+    /// <param name="logLevel">Log level for FFmpeg.</param>
+    /// <param name="logColor">Color of the FFmpeg logs.</param>
+    /// <param name="ffmpegLog">Custom delegate to redirect FFmpeg logs.</param>
+    /// <param name="paths">List of valid paths for loading FFmpeg libraries.</param>
+    public static void SetupFFmpeg(FFmpegLogLevel logLevel, ConsoleColor logColor, FFmpegLog? ffmpegLog, params string[] paths)
     {
         if (IsFFmpegSetup)
             return;
@@ -91,7 +111,7 @@ public static class FFmpegManager
             TrySetRootPath(requiredLibs, AppDomain.CurrentDomain.BaseDirectory);
         else
             TrySetRootPath(requiredLibs, paths);
-        SetupFFmpegLogging(logLevel, logColor);
+        SetupFFmpegLogging(logLevel, logColor, ffmpegLog);
         ffmpeg.avdevice_register_all();
 
         IsFFmpegSetup = true;
@@ -99,9 +119,20 @@ public static class FFmpegManager
 
     public static void SetupFFmpeg(params string[] paths) => SetupFFmpeg(FFmpegLogLevel.Panic, ConsoleColor.Yellow, paths);
 
-    internal static unsafe void SetupFFmpegLogging(FFmpegLogLevel logLevel, ConsoleColor logColor)
+    public delegate void FFmpegLog(FFmpegLogLevel logLevel, ConsoleColor logColor, string? message);
+
+    private static void defaultFFmpegLog(FFmpegLogLevel logLevel, ConsoleColor logColor, string? message)
+    {
+        Console.ForegroundColor = logColor;
+        Console.Write(message);
+        Console.ResetColor();
+    }
+
+    internal static unsafe void SetupFFmpegLogging(FFmpegLogLevel logLevel, ConsoleColor logColor, FFmpegLog? ffmpegLog = null)
     {
         ffmpeg.av_log_set_level((int)logLevel);
+
+        ffmpegLog ??= new FFmpegLog(defaultFFmpegLog);
 
         // Do not convert to local function!
         logCallback = (p0, level, format, vl) =>
@@ -109,17 +140,15 @@ public static class FFmpegManager
             if (level > ffmpeg.av_log_get_level())
                 return;
 
-            var lineSize = 1024;
-            var lineBuffer = stackalloc byte[lineSize];
-            var printPrefix = 1;
+            int lineSize = 1024;
+            byte* lineBuffer = stackalloc byte[lineSize];
+            int printPrefix = 1;
 
             ffmpeg.av_log_format_line(p0, level, format, vl, lineBuffer, lineSize, &printPrefix);
-            var line = Marshal.PtrToStringAnsi((IntPtr)lineBuffer);
+            string? message = Marshal.PtrToStringAnsi((IntPtr)lineBuffer);
 
             // TODO: maybe make it possible to log this in any stream?
-            Console.ForegroundColor = logColor;
-            Console.Write(line);
-            Console.ResetColor();
+            ffmpegLog(logLevel, logColor, message);
         };
 
         ffmpeg.av_log_set_callback(logCallback);
