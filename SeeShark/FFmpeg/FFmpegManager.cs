@@ -124,7 +124,7 @@ public static class FFmpegManager
     private static void defaultFFmpegLog(FFmpegLogLevel logLevel, ConsoleColor logColor, string? message)
     {
         Console.ForegroundColor = logColor;
-        Console.Write(message);
+        Console.Error.Write(message);
         Console.ResetColor();
     }
 
