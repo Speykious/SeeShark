@@ -31,14 +31,14 @@ internal static class DShowUtils
         Cmykrle4 = 0x0D,
     }
 
-    public static CameraInfo[] EnumerateDevices()
+    public static VideoDeviceInfo[] EnumerateDevices()
     {
         DsDevice[] dsDevices = DsDevice.GetDevicesOfCat(FilterCategory.VideoInputDevice);
-        CameraInfo[] devices = new CameraInfo[dsDevices.Length];
+        VideoDeviceInfo[] devices = new VideoDeviceInfo[dsDevices.Length];
         for (int i = 0; i < dsDevices.Length; i++)
         {
             DsDevice dsDevice = dsDevices[i];
-            devices[i] = new CameraInfo
+            devices[i] = new VideoDeviceInfo
             {
                 Name = dsDevice.Name,
                 Path = $"video={dsDevice.Name}",

@@ -14,9 +14,9 @@ namespace SeeShark.Utils;
 
 internal static class V4l2Utils
 {
-    public static void FillDeviceOptions(CameraInfo[] devices)
+    public static void FillDeviceOptions(VideoDeviceInfo[] devices)
     {
-        foreach (CameraInfo device in devices)
+        foreach (VideoDeviceInfo device in devices)
             device.AvailableVideoInputOptions = getAvailableOptions(device).ToArray();
     }
 
@@ -24,7 +24,7 @@ internal static class V4l2Utils
     /// Get available video input options of a V4l2 device.
     /// Inspired from https://github.com/ZhangGaoxing/v4l2.net
     /// </summary>
-    private unsafe static List<VideoInputOptions> getAvailableOptions(CameraInfo device)
+    private unsafe static List<VideoInputOptions> getAvailableOptions(VideoDeviceInfo device)
     {
         List<VideoInputOptions> options = new List<VideoInputOptions>();
 

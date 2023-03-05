@@ -13,7 +13,7 @@ namespace SeeShark.Device;
 /// It can also watch for available devices, and fire up <see cref="OnNewDevice"/> and
 /// <see cref="OnLostDevice"/> events when it happens.
 /// </summary>
-public sealed unsafe class CameraManager : VideoDeviceManager<CameraInfo, Camera>
+public sealed unsafe class XPlatformVideoDeviceManager : VideoDeviceManager<VideoDeviceInfo, VideoDevice>
 {
     public static DeviceInputFormat DefaultInputFormat
     {
@@ -37,17 +37,17 @@ public sealed unsafe class CameraManager : VideoDeviceManager<CameraInfo, Camera
     /// <param name="inputFormat">
     /// Input format used to enumerate devices and create cameras.
     /// </param>
-    public CameraManager(DeviceInputFormat? inputFormat = null) : base(inputFormat ?? DefaultInputFormat)
+    public XPlatformVideoDeviceManager(DeviceInputFormat? inputFormat = null) : base(inputFormat ?? DefaultInputFormat)
     {
     }
 
-    public override Camera GetDevice(CameraInfo info, VideoInputOptions? options = null) =>
-        new Camera(info, InputFormat, options);
+    public override VideoDevice GetDevice(VideoDeviceInfo info, VideoInputOptions? options = null) =>
+        new(info, InputFormat, options);
 
     /// <summary>
     /// Enumerates available devices.
     /// </summary>
-    protected override CameraInfo[] EnumerateDevices()
+    protected override VideoDeviceInfo[] EnumerateDevices()
     {
         // FFmpeg doesn't implement avdevice_list_input_sources() for the DShow input format yet.
         // See first SeeShark issue: https://github.com/vignetteapp/SeeShark/issues/1
@@ -58,7 +58,7 @@ public sealed unsafe class CameraManager : VideoDeviceManager<CameraInfo, Camera
             case DeviceInputFormat.DShow:
                 return DShowUtils.EnumerateDevices();
             case DeviceInputFormat.V4l2:
-                CameraInfo[] devices = base.EnumerateDevices();
+                VideoDeviceInfo[] devices = base.EnumerateDevices();
                 V4l2Utils.FillDeviceOptions(devices);
                 return devices;
             default:
