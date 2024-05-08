@@ -10,7 +10,7 @@ namespace SeeShark.Interop.Libc;
 /// The pixel format or codec of a v4l2 video device.
 /// </summary>
 [SupportedOSPlatform("Linux")]
-public enum V4l2InputFormat : uint
+internal enum V4l2InputFormat : uint
 {
     RGB332 = 826427218,
     RGB444 = 875836498,

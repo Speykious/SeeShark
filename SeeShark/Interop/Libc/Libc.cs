@@ -37,10 +37,10 @@ internal enum MmapProtFlags
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public unsafe struct timeval_t
+internal unsafe struct timeval_t
 {
-    public long tv_sec;
-    public long tv_usec;
+    internal long tv_sec;
+    internal long tv_usec;
 }
 
 [SupportedOSPlatform("Linux")]

@@ -14,7 +14,7 @@ public class Frame
     public uint Height { get; set; }
 
     [SupportedOSPlatform("Linux")]
-    public V4l2InputFormat InputFormat { get; set; }
+    internal V4l2InputFormat InputFormat { get; set; }
 
     public byte[] Data { get; set; } = Array.Empty<byte>();
 

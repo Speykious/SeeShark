@@ -36,7 +36,7 @@ public struct VideoFormat
     public FramerateRatio Framerate { get; init; }
 
     [SupportedOSPlatform("Linux")]
-    public V4l2InputFormat InputFormat { get; init; }
+    internal V4l2InputFormat InputFormat { get; init; }
 
     /// <summary>
     /// Whether or not to draw the mouse cursor in display captures.

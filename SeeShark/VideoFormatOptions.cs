@@ -38,7 +38,7 @@ public class VideoFormatOptions
     public FramerateRatio? Framerate { get; set; }
 
     [SupportedOSPlatform("Linux")]
-    public V4l2InputFormat? InputFormat { get; set; }
+    internal V4l2InputFormat? InputFormat { get; set; }
 
     /// <summary>
     /// Whether or not to draw the mouse cursor in display captures.

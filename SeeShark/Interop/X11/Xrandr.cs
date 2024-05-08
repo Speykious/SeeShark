@@ -18,21 +18,21 @@ internal static class Xrandr
     private const string lib_x_randr = "libXrandr";
 
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct XRRMonitorInfo
+    internal unsafe struct XRRMonitorInfo
     {
-        public Atom Name;
-        public int Primary;
-        public int Automatic;
-        public int NOutput;
-        public int X;
-        public int Y;
-        public int Width;
-        public int Height;
-        public int MWidth;
-        public int MHeight;
-        public nint Outputs;
+        internal Atom Name;
+        internal int Primary;
+        internal int Automatic;
+        internal int NOutput;
+        internal int X;
+        internal int Y;
+        internal int Width;
+        internal int Height;
+        internal int MWidth;
+        internal int MHeight;
+        internal nint Outputs;
     }
 
     [DllImport(lib_x_randr, EntryPoint = "XRRGetMonitors")]
-    public static extern unsafe XRRMonitorInfo* XRRGetMonitors(Display dpy, Window window, bool getActive, out int nmonitors);
+    internal static extern unsafe XRRMonitorInfo* XRRGetMonitors(Display dpy, Window window, bool getActive, out int nmonitors);
 }

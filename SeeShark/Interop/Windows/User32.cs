@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace SeeShark.Interop.Windows;
 
+#pragma warning disable IDE1006
 [StructLayout(LayoutKind.Sequential)]
 internal struct DevMode
 {

@@ -10,9 +10,9 @@ namespace SeeShark.Interop.Libc;
 [SupportedOSPlatform("Linux")]
 internal static class Ioctl
 {
-    const int ioc_nrbits = 8;
-    const int ioc_typebits = 8;
-    const int ioc_sizebits = 14;
+    private const int ioc_nrbits = 8;
+    private const int ioc_typebits = 8;
+    private const int ioc_sizebits = 14;
 
     // const int ioc_dirbits = 2;
 
@@ -21,44 +21,44 @@ internal static class Ioctl
     // const int ioc_sizemask = (1 << ioc_sizebits) - 1;
     // const int ioc_dirmask = (1 << ioc_dirbits) - 1;
 
-    const int ioc_nrshift = 0;
-    const int ioc_typeshift = ioc_nrshift + ioc_nrbits;
-    const int ioc_sizeshift = ioc_typeshift + ioc_typebits;
-    const int ioc_dirshift = ioc_sizeshift + ioc_sizebits;
+    private const int ioc_nrshift = 0;
+    private const int ioc_typeshift = ioc_nrshift + ioc_nrbits;
+    private const int ioc_sizeshift = ioc_typeshift + ioc_typebits;
+    private const int ioc_dirshift = ioc_sizeshift + ioc_sizebits;
 
-    const int ioc_none = 0;
-    const int ioc_write = 1;
-    const int ioc_read = 2;
+    private const int ioc_none = 0;
+    private const int ioc_write = 1;
+    private const int ioc_read = 2;
 
-    public static readonly int VIDIOC_QUERYCAP = IOR<v4l2_capability>('V', 0);
-    public static readonly int VIDIOC_ENUM_FMT = IOWR<v4l2_fmtdesc>('V', 2);
-    public static readonly int VIDIOC_G_FMT = IOWR<v4l2_format>('V', 4);
-    public static readonly int VIDIOC_S_FMT = IOWR<v4l2_format>('V', 5);
-    public static readonly int VIDIOC_REQBUFS = IOWR<v4l2_requestbuffers>('V', 8);
-    public static readonly int VIDIOC_QUERYBUF = IOWR<v4l2_buffer>('V', 9);
-    public static readonly int VIDIOC_OVERLAY = IOW<int>('V', 14);
-    public static readonly int VIDIOC_QBUF = IOWR<v4l2_buffer>('V', 15);
-    public static readonly int VIDIOC_DQBUF = IOWR<v4l2_buffer>('V', 17);
-    public static readonly int VIDIOC_STREAMON = IOW<int>('V', 18);
-    public static readonly int VIDIOC_STREAMOFF = IOW<int>('V', 19);
-    public static readonly int VIDIOC_G_PARM = IOWR<v4l2_streamparm>('V', 21);
-    public static readonly int VIDIOC_S_PARM = IOWR<v4l2_streamparm>('V', 22);
-    public static readonly int VIDIOC_G_CTRL = IOWR<v4l2_control>('V', 27);
-    public static readonly int VIDIOC_S_CTRL = IOWR<v4l2_control>('V', 28);
-    public static readonly int VIDIOC_QUERYCTRL = IOWR<v4l2_queryctrl>('V', 36);
-    public static readonly int VIDIOC_G_INPUT = IOR<int>('V', 38);
-    public static readonly int VIDIOC_S_INPUT = IOWR<int>('V', 39);
-    public static readonly int VIDIOC_G_OUTPUT = IOR<int>('V', 46);
-    public static readonly int VIDIOC_S_OUTPUT = IOWR<int>('V', 47);
-    public static readonly int VIDIOC_CROPCAP = IOWR<v4l2_cropcap>('V', 58);
-    public static readonly int VIDIOC_G_CROP = IOWR<v4l2_crop>('V', 59);
-    public static readonly int VIDIOC_S_CROP = IOW<v4l2_crop>('V', 60);
-    public static readonly int VIDIOC_TRY_FMT = IOWR<v4l2_format>('V', 64);
-    public static readonly int VIDIOC_G_PRIORITY = IOR<uint>('V', 67);
-    public static readonly int VIDIOC_S_PRIORITY = IOW<uint>('V', 68);
-    public static readonly int VIDIOC_ENUM_FRAMESIZES = IOWR<v4l2_frmsizeenum>('V', 74);
-    public static readonly int VIDIOC_ENUM_FRAMEINTERVALS = IOWR<v4l2_frmivalenum>('V', 75);
-    public static readonly int VIDIOC_PREPARE_BUF = IOWR<v4l2_buffer>('V', 93);
+    internal static readonly int VIDIOC_QUERYCAP = IOR<v4l2_capability>('V', 0);
+    internal static readonly int VIDIOC_ENUM_FMT = IOWR<v4l2_fmtdesc>('V', 2);
+    internal static readonly int VIDIOC_G_FMT = IOWR<v4l2_format>('V', 4);
+    internal static readonly int VIDIOC_S_FMT = IOWR<v4l2_format>('V', 5);
+    internal static readonly int VIDIOC_REQBUFS = IOWR<v4l2_requestbuffers>('V', 8);
+    internal static readonly int VIDIOC_QUERYBUF = IOWR<v4l2_buffer>('V', 9);
+    internal static readonly int VIDIOC_OVERLAY = IOW<int>('V', 14);
+    internal static readonly int VIDIOC_QBUF = IOWR<v4l2_buffer>('V', 15);
+    internal static readonly int VIDIOC_DQBUF = IOWR<v4l2_buffer>('V', 17);
+    internal static readonly int VIDIOC_STREAMON = IOW<int>('V', 18);
+    internal static readonly int VIDIOC_STREAMOFF = IOW<int>('V', 19);
+    internal static readonly int VIDIOC_G_PARM = IOWR<v4l2_streamparm>('V', 21);
+    internal static readonly int VIDIOC_S_PARM = IOWR<v4l2_streamparm>('V', 22);
+    internal static readonly int VIDIOC_G_CTRL = IOWR<v4l2_control>('V', 27);
+    internal static readonly int VIDIOC_S_CTRL = IOWR<v4l2_control>('V', 28);
+    internal static readonly int VIDIOC_QUERYCTRL = IOWR<v4l2_queryctrl>('V', 36);
+    internal static readonly int VIDIOC_G_INPUT = IOR<int>('V', 38);
+    internal static readonly int VIDIOC_S_INPUT = IOWR<int>('V', 39);
+    internal static readonly int VIDIOC_G_OUTPUT = IOR<int>('V', 46);
+    internal static readonly int VIDIOC_S_OUTPUT = IOWR<int>('V', 47);
+    internal static readonly int VIDIOC_CROPCAP = IOWR<v4l2_cropcap>('V', 58);
+    internal static readonly int VIDIOC_G_CROP = IOWR<v4l2_crop>('V', 59);
+    internal static readonly int VIDIOC_S_CROP = IOW<v4l2_crop>('V', 60);
+    internal static readonly int VIDIOC_TRY_FMT = IOWR<v4l2_format>('V', 64);
+    internal static readonly int VIDIOC_G_PRIORITY = IOR<uint>('V', 67);
+    internal static readonly int VIDIOC_S_PRIORITY = IOW<uint>('V', 68);
+    internal static readonly int VIDIOC_ENUM_FRAMESIZES = IOWR<v4l2_frmsizeenum>('V', 74);
+    internal static readonly int VIDIOC_ENUM_FRAMEINTERVALS = IOWR<v4l2_frmivalenum>('V', 75);
+    internal static readonly int VIDIOC_PREPARE_BUF = IOWR<v4l2_buffer>('V', 93);
 
     internal enum VidIOC : int
     {
