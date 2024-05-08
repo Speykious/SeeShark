@@ -9,7 +9,15 @@ namespace SeeShark;
 /// </summary>
 public struct FramerateRatio
 {
+    /// <summary>
+    /// Frames per second
+    /// </summary>
     public double Value => Denominator == 0 ? 0 : (double)Numerator / Denominator;
+
+    /// <summary>
+    /// Seconds per frame
+    /// </summary>
+    public double Interval => Numerator == 0 ? 0 : (double)Denominator / Numerator;
 
     public uint Numerator;
     public uint Denominator;
