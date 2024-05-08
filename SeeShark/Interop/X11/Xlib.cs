@@ -4,6 +4,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace SeeShark.Interop.X11;
 
@@ -11,7 +12,8 @@ using Atom = Int64;
 using Display = nint;
 using Window = nint;
 
-internal class XLib
+[SupportedOSPlatform("Linux")]
+internal static class Xlib
 {
     private const string lib_x11 = "libX11";
     private static readonly object displayLock = new object();

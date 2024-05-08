@@ -2,9 +2,12 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
+using System.Runtime.Versioning;
+
 namespace SeeShark.Interop.Libc;
 
-internal partial class Ioctl
+[SupportedOSPlatform("Linux")]
+internal static class Ioctl
 {
     const int ioc_nrbits = 8;
     const int ioc_typebits = 8;

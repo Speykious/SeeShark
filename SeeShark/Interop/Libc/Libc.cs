@@ -4,10 +4,12 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace SeeShark.Interop.Libc;
 
-internal class Libc
+[SupportedOSPlatform("Linux")]
+internal static class Libc
 {
     private const string libc_library = "libc";
     private const string explain_library = "explain";

@@ -9,16 +9,18 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using SeeShark.Interop.Libc;
 using static SeeShark.Interop.Libc.Libc;
 
+[SupportedOSPlatform("Linux")]
 public static class V4l2
 {
     // Helpful resource and reference: https://github.com/kmdouglass/v4l2-examples
 
-    internal static unsafe List<CameraInfo> AvailableCameras()
+    internal static unsafe List<CameraPath> AvailableCameras()
     {
-        var captureDevices = new List<CameraInfo>();
+        var captureDevices = new List<CameraPath>();
 
         v4l2_capability capability;
 
@@ -29,7 +31,7 @@ public static class V4l2
                 continue;
 
             if (xioctl(deviceFd, Ioctl.VidIOC.QUERYCAP, &capability))
-                captureDevices.Add(new CameraInfo { Path = path });
+                captureDevices.Add(new CameraPath { Path = path });
 
             close(deviceFd);
         }
@@ -41,60 +43,62 @@ public static class V4l2
     /// Get available video input options of a V4l2 device.
     /// Inspired from https://github.com/ZhangGaoxing/v4l2.net
     /// </summary>
-    internal static unsafe List<VideoInputOptions> AvailableInputOptions(CameraInfo device)
+    internal static unsafe List<VideoFormat> AvailableFormats(CameraPath device)
     {
-        List<VideoInputOptions> options = new List<VideoInputOptions>();
+        List<VideoFormat> formats = new List<VideoFormat>();
 
         int deviceFd = open(device.Path, FileOpenFlags.O_RDWR);
         if (deviceFd < 0)
             throw new IOException($"Error {Marshal.GetLastWin32Error()}: Cannot open video device {device}");
 
-        v4l2_fmtdesc fmtdesc = new v4l2_fmtdesc
+        v4l2_fmtdesc formatDesc = new v4l2_fmtdesc
         {
             index = 0,
             type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE
         };
 
         List<V4l2InputFormat> supportedInputFormats = new List<V4l2InputFormat>();
-        while (xioctl(deviceFd, Ioctl.VidIOC.ENUM_FMT, &fmtdesc) == false)
+        while (xioctl(deviceFd, Ioctl.VidIOC.ENUM_FMT, &formatDesc))
         {
-            supportedInputFormats.Add(fmtdesc.pixelformat);
-            fmtdesc.index++;
+            supportedInputFormats.Add(formatDesc.pixelformat);
+            formatDesc.index++;
         }
 
         foreach (V4l2InputFormat inputFormat in supportedInputFormats)
         {
-            v4l2_frmsizeenum frmsize = new v4l2_frmsizeenum
+            v4l2_frmsizeenum frameSize = new v4l2_frmsizeenum
             {
                 index = 0,
                 pixel_format = inputFormat,
             };
 
-            while (xioctl(deviceFd, Ioctl.VidIOC.ENUM_FRAMESIZES, &frmsize) == false)
+            while (xioctl(deviceFd, Ioctl.VidIOC.ENUM_FRAMESIZES, &frameSize))
             {
-                if (frmsize.type == v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_DISCRETE)
+                if (frameSize.type == v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_DISCRETE)
                 {
-                    fillFrameIntervalOptions(options, deviceFd, inputFormat, frmsize.discrete.width, frmsize.discrete.height);
+                    v4l2_frmsize_discrete discrete = frameSize.discrete;
+                    fillFrameIntervalFormats(formats, deviceFd, inputFormat, discrete.width, discrete.height);
                 }
                 else
                 {
-                    for (uint width = frmsize.stepwise.min_width; width < frmsize.stepwise.max_width; width += frmsize.stepwise.step_width)
+                    v4l2_frmsize_stepwise stepwise = frameSize.stepwise;
+                    for (uint width = stepwise.min_width; width < stepwise.max_width; width += stepwise.step_width)
                     {
-                        for (uint height = frmsize.stepwise.min_height; height < frmsize.stepwise.max_height; height += frmsize.stepwise.step_height)
-                            fillFrameIntervalOptions(options, deviceFd, inputFormat, width, height);
+                        for (uint height = stepwise.min_height; height < stepwise.max_height; height += stepwise.step_height)
+                            fillFrameIntervalFormats(formats, deviceFd, inputFormat, width, height);
                     }
                 }
-                frmsize.index++;
+                frameSize.index++;
             }
         }
 
         close(deviceFd);
-        return options;
+        return formats;
     }
 
-    private static unsafe void fillFrameIntervalOptions(List<VideoInputOptions> options, int deviceFd, V4l2InputFormat inputFormat, uint width, uint height)
+    private static unsafe void fillFrameIntervalFormats(List<VideoFormat> formats, int deviceFd, V4l2InputFormat inputFormat, uint width, uint height)
     {
-        v4l2_frmivalenum frmival = new v4l2_frmivalenum
+        v4l2_frmivalenum frameInterval = new v4l2_frmivalenum
         {
             index = 0,
             pixel_format = inputFormat,
@@ -102,39 +106,54 @@ public static class V4l2
             height = height,
         };
 
-        while (xioctl(deviceFd, Ioctl.VidIOC.ENUM_FRAMEINTERVALS, &frmival) == false)
+        while (xioctl(deviceFd, Ioctl.VidIOC.ENUM_FRAMEINTERVALS, &frameInterval))
         {
-            if (frmival.type == v4l2_frmivaltypes.V4L2_FRMIVAL_TYPE_DISCRETE)
+            if (frameInterval.type == v4l2_frmivaltypes.V4L2_FRMIVAL_TYPE_DISCRETE)
             {
-                options.Add(new VideoInputOptions
+                v4l2_fract intervalRatio = frameInterval.discrete;
+                formats.Add(new VideoFormat
                 {
                     InputFormat = inputFormat,
-                    VideoSize = ((int)width, (int)height),
-                    Framerate = new VideoInputOptions.FramerateRatio
+                    VideoSize = (width, height),
+                    VideoPosition = (0, 0),
+                    Framerate = new FramerateRatio
                     {
-                        Numerator = frmival.discrete.denominator,
-                        Denominator = frmival.discrete.numerator,
+                        Numerator = intervalRatio.denominator,
+                        Denominator = intervalRatio.numerator,
                     },
                 });
             }
-            frmival.index++;
+            frameInterval.index++;
         }
     }
 
-    internal class Camera
+    internal class Camera : IDisposable
     {
-        internal CameraInfo Info { get; init; }
-        internal int DeviceFd;
-        internal v4l2_requestbuffers RequestBuffers { get; init; }
+        internal int DeviceFd { get; set; }
+        internal CameraPath Path { get; init; }
+        public VideoFormat CurrentFormat { get; set; }
 
+        internal v4l2_requestbuffers RequestBuffers { get; init; }
         internal ReqBuffer[] Buffers { get; init; } = Array.Empty<ReqBuffer>();
 
-        ~Camera()
-        {
-            foreach (ReqBuffer buffer in Buffers)
-                buffer.Free();
+        ~Camera() => dispose();
 
-            close(DeviceFd);
+        public void Dispose()
+        {
+            dispose();
+            GC.SuppressFinalize(this);
+        }
+
+        private void dispose()
+        {
+            if (DeviceFd != -1)
+            {
+                foreach (ReqBuffer buffer in Buffers)
+                    buffer.Free();
+
+                close(DeviceFd);
+                DeviceFd = -1;
+            }
         }
     }
 
@@ -168,23 +187,37 @@ public static class V4l2
         }
     }
 
-    internal static unsafe Camera OpenCamera(CameraInfo cameraInfo)
+    internal static unsafe Camera OpenCamera(CameraPath cameraInfo) => OpenCamera(cameraInfo, new VideoFormatOptions());
+
+    internal static unsafe Camera OpenCamera(CameraPath cameraInfo, VideoFormatOptions options)
     {
         int deviceFd = open(cameraInfo.Path, FileOpenFlags.O_RDWR);
         if (deviceFd < 0)
             throw new IOException($"Cannot open camera {cameraInfo.Path}");
 
-        // get video format
-        v4l2_fmtdesc formatDesc = new v4l2_fmtdesc
-        {
-            type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
-            index = 0,
-            flags = 0,
-            pixelformat = 0,
-        };
+        // get a suited pixel format
+        V4l2InputFormat pixelFormat;
 
-        if (xioctl(deviceFd, Ioctl.VidIOC.ENUM_FMT, &formatDesc) == false)
-            throw new IOException($"Cannot get video format for camera {cameraInfo.Path}: {Marshal.GetLastWin32Error()}");
+        if (options.InputFormat is V4l2InputFormat inputFormatOption)
+        {
+            pixelFormat = inputFormatOption;
+        }
+        else
+        {
+            // default to the first pixel format when not specified
+            v4l2_fmtdesc formatDesc = new v4l2_fmtdesc
+            {
+                type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
+                index = 0,
+                flags = 0,
+                pixelformat = 0,
+            };
+
+            if (xioctl(deviceFd, Ioctl.VidIOC.ENUM_FMT, &formatDesc) == false)
+                throw new IOException($"Cannot get video format for camera {cameraInfo.Path}: {Marshal.GetLastWin32Error()}");
+
+            pixelFormat = formatDesc.pixelformat;
+        }
 
         // set video format
         v4l2_format format = new v4l2_format
@@ -196,7 +229,7 @@ public static class V4l2
                 {
                     width = 1280,
                     height = 720,
-                    pixelformat = formatDesc.pixelformat,
+                    pixelformat = pixelFormat,
                     field = v4l2_field.V4L2_FIELD_NONE,
                 }
             }
@@ -205,11 +238,75 @@ public static class V4l2
         if (xioctl(deviceFd, Ioctl.VidIOC.S_FMT, &format) == false)
             throw new IOException($"Cannot set video format for camera {cameraInfo.Path}");
 
+        // get a suited framerate
+        FramerateRatio framerate;
+
+        // Helpful documentation on G_PARM and S_PARM:
+        // https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/vidioc-g-parm.html
+        if (options.Framerate is FramerateRatio framerateOption)
+        {
+            // set framerate
+            v4l2_streamparm parameter = new v4l2_streamparm
+            {
+                type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
+                parm = new v4l2_streamparm.parm_union
+                {
+                    capture = new v4l2_captureparm
+                    {
+                        timeperframe = new v4l2_fract
+                        {
+                            numerator = framerateOption.Denominator,
+                            denominator = framerateOption.Numerator,
+                        }
+                    }
+                }
+            };
+
+            if (xioctl(deviceFd, Ioctl.VidIOC.S_PARM, &parameter) == false)
+                throw new IOException($"Cannot set video format for camera {cameraInfo.Path}");
+
+            v4l2_fract timeperframe = parameter.parm.capture.timeperframe;
+            framerate = new FramerateRatio
+            {
+                Numerator = timeperframe.denominator,
+                Denominator = timeperframe.numerator,
+            };
+        }
+        else
+        {
+            // get framerate
+            v4l2_streamparm parameter = new v4l2_streamparm
+            {
+                type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
+            };
+
+            if (xioctl(deviceFd, Ioctl.VidIOC.G_PARM, &parameter) == false)
+                throw new IOException($"Cannot set video format for camera {cameraInfo.Path}");
+
+            v4l2_fract timeperframe = parameter.parm.capture.timeperframe;
+            framerate = new FramerateRatio
+            {
+                Numerator = timeperframe.denominator,
+                Denominator = timeperframe.numerator,
+            };
+        }
+
+        v4l2_pix_format pix = format.fmt.pix;
         Console.WriteLine("Format:");
-        Console.WriteLine($"| width  : {format.fmt.pix.width}");
-        Console.WriteLine($"| height : {format.fmt.pix.height}");
-        Console.WriteLine($"| format : {format.fmt.pix.pixelformat}");
-        Console.WriteLine($"| field  : {format.fmt.pix.field}");
+        Console.WriteLine($"| width     : {pix.width}");
+        Console.WriteLine($"| height    : {pix.height}");
+        Console.WriteLine($"| format    : {pix.pixelformat}");
+        Console.WriteLine($"| field     : {pix.field}");
+        Console.WriteLine($"| framerate : {framerate.Value}");
+
+        VideoFormat videoFormat = new VideoFormat
+        {
+            VideoSize = (pix.width, pix.height),
+            VideoPosition = (0, 0),
+            Framerate = framerate,
+            InputFormat = pix.pixelformat,
+            DrawMouse = false,
+        };
 
         // request buffers
         v4l2_requestbuffers requestBuffers = new v4l2_requestbuffers
@@ -243,8 +340,9 @@ public static class V4l2
 
         return new Camera
         {
-            Info = cameraInfo,
+            Path = cameraInfo,
             DeviceFd = deviceFd,
+            CurrentFormat = videoFormat,
             RequestBuffers = requestBuffers,
             Buffers = buffers,
         };
@@ -264,13 +362,13 @@ public static class V4l2
             };
 
             if (xioctl(camera.DeviceFd, Ioctl.VidIOC.QBUF, &vbuf) == false)
-                throw new IOException($"Could not enqueue buffer for camera {camera.Info.Path}");
+                throw new IOException($"Could not enqueue buffer for camera {camera.Path.Path}");
         }
 
         v4l2_buf_type type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
         if (xioctl(camera.DeviceFd, Ioctl.VidIOC.STREAMON, &type) == false)
-            throw new IOException($"Could not enable data streaming for camera {camera.Info.Path}");
+            throw new IOException($"Could not enable data streaming for camera {camera.Path.Path}");
     }
 
     internal static unsafe void StopCapture(Camera camera)
@@ -278,7 +376,7 @@ public static class V4l2
         v4l2_buf_type type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
         if (xioctl(camera.DeviceFd, Ioctl.VidIOC.STREAMOFF, &type) == false)
-            throw new Exception($"Could not disable data streaming for camera {camera.Info.Path}");
+            throw new Exception($"Could not disable data streaming for camera {camera.Path.Path}");
     }
 
     internal static unsafe bool ReadFrame(Camera camera, ref Frame frame)
@@ -300,7 +398,7 @@ public static class V4l2
 
                 case EIO:
                 default:
-                    throw new Exception($"Could not dequeue buffer for camera {camera.Info.Path}");
+                    throw new Exception($"Could not dequeue buffer for camera {camera.Path.Path}");
             }
         }
 
@@ -317,7 +415,7 @@ public static class V4l2
 
         // reenqueue the buffer
         if (xioctl(camera.DeviceFd, Ioctl.VidIOC.QBUF, &vbuf) == false)
-            throw new Exception($"Could not reenqueue buffer for camera {camera.Info.Path}");
+            throw new Exception($"Could not reenqueue buffer for camera {camera.Path.Path}");
 
         return true;
     }

@@ -13,24 +13,35 @@ public class Whatever
 {
     public static unsafe void Main(string[] args)
     {
-        Console.WriteLine("Getting available cameras");
-        List<CameraInfo> cameraInfos = V4l2.AvailableCameras();
-
-        Console.WriteLine($"Opening {cameraInfos[0]}");
-        V4l2.Camera camera = V4l2.OpenCamera(cameraInfos[0]);
-
-        Console.WriteLine("Start capture");
-        V4l2.StartCapture(camera);
-
-        Console.Write("Waiting..");
-        for (int i = 0; i < 5; i++)
+        if (OperatingSystem.IsLinux())
         {
-            Console.Write(".");
-            Thread.Sleep(1000);
-        }
-        Console.WriteLine(" ENOUGH");
+            Console.WriteLine("Getting available cameras");
+            List<CameraPath> cameraInfos = V4l2.AvailableCameras();
 
-        Console.WriteLine("Stop capture");
-        V4l2.StopCapture(camera);
+            Console.WriteLine($"Opening {cameraInfos[0]}");
+            V4l2.Camera camera = V4l2.OpenCamera(cameraInfos[0]);
+
+            Console.WriteLine("Start capture");
+            V4l2.StartCapture(camera);
+
+            Console.Write("Waiting..");
+            for (int i = 0; i < 100; i++)
+            {
+                Console.Write(".");
+                Thread.Sleep(50);
+            }
+            Console.WriteLine(" ENOUGH");
+
+            Console.WriteLine("Stop capture");
+            V4l2.StopCapture(camera);
+        }
+        else if (OperatingSystem.IsWindows())
+        {
+            Console.WriteLine($"Nothing on Windows yet");
+        }
+        else if (OperatingSystem.IsMacOS())
+        {
+            Console.WriteLine($"Nothing on MacOS yet");
+        }
     }
 }
