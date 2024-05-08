@@ -13,4 +13,6 @@ public struct FramerateRatio
 
     public uint Numerator;
     public uint Denominator;
+
+    public override string ToString() => $"{Value} fps";
 }

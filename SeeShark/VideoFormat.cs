@@ -2,6 +2,7 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
+using System;
 using System.Runtime.Versioning;
 using SeeShark.Interop.Libc;
 
@@ -41,4 +42,12 @@ public struct VideoFormat
     /// Whether or not to draw the mouse cursor in display captures.
     /// </summary>
     public bool DrawMouse { get; init; }
+
+    public override string ToString()
+    {
+        if (OperatingSystem.IsLinux())
+            return $"s{VideoSize} p{VideoPosition} {InputFormat} (mouse={DrawMouse}) | {Framerate}";
+        else
+            return $"s{VideoSize} p{VideoPosition} (mouse={DrawMouse}) | {Framerate}";
+    }
 }

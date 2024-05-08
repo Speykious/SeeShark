@@ -16,21 +16,29 @@ public class Whatever
         if (OperatingSystem.IsLinux())
         {
             Console.WriteLine("Getting available cameras");
-            List<CameraPath> cameraInfos = V4l2.AvailableCameras();
+            List<CameraPath> availableCameras = V4l2.AvailableCameras();
+            CameraPath cameraPath = availableCameras[0];
 
-            Console.WriteLine($"Opening {cameraInfos[0]}");
-            V4l2.Camera camera = V4l2.OpenCamera(cameraInfos[0]);
+            Console.WriteLine($"\nAvailable video formats for {cameraPath}:");
+            foreach (VideoFormat format in V4l2.AvailableFormats(cameraPath))
+                Console.WriteLine($"- {format}");
+
+            Console.WriteLine($"\nOpening {cameraPath}");
+            V4l2.Camera camera = V4l2.OpenCamera(cameraPath);
 
             Console.WriteLine("Start capture");
             V4l2.StartCapture(camera);
 
-            Console.Write("Waiting..");
+            Console.WriteLine("Capturing frames...");
+            Frame frame = new Frame();
             for (int i = 0; i < 100; i++)
             {
-                Console.Write(".");
+                V4l2.ReadFrame(camera, ref frame);
+                Console.WriteLine($"Frame: {frame}");
+
                 Thread.Sleep(50);
             }
-            Console.WriteLine(" ENOUGH");
+            Console.WriteLine("ENOUGH");
 
             Console.WriteLine("Stop capture");
             V4l2.StopCapture(camera);

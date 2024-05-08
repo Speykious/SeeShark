@@ -303,13 +303,6 @@ internal unsafe struct v4l2_requestbuffers
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public unsafe struct v4l2_timeval
-{
-    public uint tv_sec;
-    public uint tv_usec;
-}
-
-[StructLayout(LayoutKind.Sequential)]
 internal unsafe struct v4l2_timecode
 {
     public uint type;
@@ -351,13 +344,6 @@ internal unsafe struct v4l2_buffer
     public uint bytesused;
     public uint flags;
     public v4l2_field field;
-
-    [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct timeval_t
-    {
-        public ulong tv_sec;
-        public ulong tv_usec;
-    }
     public timeval_t timestamp;
 
     public v4l2_timecode timecode;
@@ -389,8 +375,17 @@ internal unsafe struct v4l2_frmsizeenum
     public uint index;
     public V4l2InputFormat pixel_format;
     public v4l2_frmsizetypes type;
-    public v4l2_frmsize_discrete discrete;
-    public v4l2_frmsize_stepwise stepwise;
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct frame_size_union
+    {
+        [FieldOffset(0)]
+        public v4l2_frmsize_discrete discrete;
+        [FieldOffset(0)]
+        public v4l2_frmsize_stepwise stepwise;
+    }
+    public frame_size_union frame_size;
+
     public fixed uint reserved[2];
 }
 
@@ -427,8 +422,17 @@ internal unsafe struct v4l2_frmivalenum
     public uint width;
     public uint height;
     public v4l2_frmivaltypes type;
-    public v4l2_fract discrete;
-    public v4l2_frmival_stepwise stepwise;
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct frame_interval_union
+    {
+        [FieldOffset(0)]
+        public v4l2_fract discrete;
+        [FieldOffset(0)]
+        public v4l2_frmival_stepwise stepwise;
+    }
+    public frame_interval_union frame_interval;
+
     public fixed uint reserved[2];
 }
 

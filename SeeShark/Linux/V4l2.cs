@@ -76,12 +76,12 @@ public static class V4l2
             {
                 if (frameSize.type == v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_DISCRETE)
                 {
-                    v4l2_frmsize_discrete discrete = frameSize.discrete;
+                    v4l2_frmsize_discrete discrete = frameSize.frame_size.discrete;
                     fillFrameIntervalFormats(formats, deviceFd, inputFormat, discrete.width, discrete.height);
                 }
                 else
                 {
-                    v4l2_frmsize_stepwise stepwise = frameSize.stepwise;
+                    v4l2_frmsize_stepwise stepwise = frameSize.frame_size.stepwise;
                     for (uint width = stepwise.min_width; width < stepwise.max_width; width += stepwise.step_width)
                     {
                         for (uint height = stepwise.min_height; height < stepwise.max_height; height += stepwise.step_height)
@@ -110,7 +110,7 @@ public static class V4l2
         {
             if (frameInterval.type == v4l2_frmivaltypes.V4L2_FRMIVAL_TYPE_DISCRETE)
             {
-                v4l2_fract intervalRatio = frameInterval.discrete;
+                v4l2_fract intervalRatio = frameInterval.frame_interval.discrete;
                 formats.Add(new VideoFormat
                 {
                     InputFormat = inputFormat,
@@ -379,8 +379,41 @@ public static class V4l2
             throw new Exception($"Could not disable data streaming for camera {camera.Path.Path}");
     }
 
-    internal static unsafe bool ReadFrame(Camera camera, ref Frame frame)
+    internal static unsafe void ReadFrame(Camera camera, ref Frame frame)
     {
+        while (true)
+        {
+            if (TryReadFrame(camera, ref frame))
+                break;
+        }
+    }
+
+    internal static unsafe bool TryReadFrame(Camera camera, ref Frame frame)
+    {
+        fd_set fds;
+        FD_ZERO(ref fds);
+        FD_SET(camera.DeviceFd, ref fds);
+
+        timeval_t timeout = new timeval_t
+        {
+            tv_sec = 2,
+            tv_usec = 0,
+        };
+
+        int res = select(camera.DeviceFd + 1, &fds, null, null, &timeout);
+        if (res == -1)
+        {
+            int errno = Marshal.GetLastWin32Error();
+            if (errno == EINTR)
+                return false;
+
+            throw new IOException($"Could not poll camera {camera.Path} (error {errno})");
+        }
+        else if (res == 0)
+        {
+            throw new IOException($"Timeout when polling camera {camera.Path}");
+        }
+
         v4l2_buffer vbuf = new v4l2_buffer
         {
             type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
@@ -408,7 +441,8 @@ public static class V4l2
         if (frame.Data.Length != vbuf.bytesused)
             frame.Data = new byte[vbuf.bytesused];
 
-        // TODO: set width and height
+        (frame.Width, frame.Height) = camera.CurrentFormat.VideoSize;
+        frame.InputFormat = camera.CurrentFormat.InputFormat;
 
         ReqBuffer reqBuffer = camera.Buffers[vbuf.index];
         Marshal.Copy((nint)reqBuffer.Ptr, frame.Data, 0, (int)vbuf.bytesused);

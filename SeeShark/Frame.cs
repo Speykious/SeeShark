@@ -3,12 +3,26 @@
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
 using System;
+using System.Runtime.Versioning;
+using SeeShark.Interop.Libc;
 
 namespace SeeShark;
 
 public class Frame
 {
-    public int Width { get; set; }
-    public int Height { get; set; }
+    public uint Width { get; set; }
+    public uint Height { get; set; }
+
+    [SupportedOSPlatform("Linux")]
+    public V4l2InputFormat InputFormat { get; set; }
+
     public byte[] Data { get; set; } = Array.Empty<byte>();
+
+    public override string ToString()
+    {
+        if (OperatingSystem.IsLinux())
+            return $"{Width}x{Height} w/ {Data.Length}b ({InputFormat})";
+        else
+            return $"{Width}x{Height} w/ {Data.Length}b";
+    }
 }

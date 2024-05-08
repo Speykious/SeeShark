@@ -2,6 +2,7 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
+using System;
 using System.Runtime.Versioning;
 
 namespace SeeShark.Interop.Libc;
@@ -87,9 +88,48 @@ internal static class Ioctl
         TRY_FMT = -1060088256,
         G_PRIORITY = -2147199421,
         S_PRIORITY = 1074026052,
-        ENUM_FRAMESIZES = -1070311862,
-        ENUM_FRAMEINTERVALS = -1069787573,
+        ENUM_FRAMESIZES = -1070836150,
+        ENUM_FRAMEINTERVALS = -1070311861,
         PREPARE_BUF = -1067952547,
+    }
+
+    internal static void PrintEnumVidIOC()
+    {
+        // I can't just put the values inside the enum directly...
+        // It is what it is.
+
+        Console.WriteLine("internal enum VidIOC : int");
+        Console.WriteLine("{");
+        Console.WriteLine($"    QUERYCAP = {VIDIOC_QUERYCAP},");
+        Console.WriteLine($"    ENUM_FMT = {VIDIOC_ENUM_FMT},");
+        Console.WriteLine($"    G_FMT = {VIDIOC_G_FMT},");
+        Console.WriteLine($"    S_FMT = {VIDIOC_S_FMT},");
+        Console.WriteLine($"    REQBUFS = {VIDIOC_REQBUFS},");
+        Console.WriteLine($"    QUERYBUF = {VIDIOC_QUERYBUF},");
+        Console.WriteLine($"    OVERLAY = {VIDIOC_OVERLAY},");
+        Console.WriteLine($"    QBUF = {VIDIOC_QBUF},");
+        Console.WriteLine($"    DQBUF = {VIDIOC_DQBUF},");
+        Console.WriteLine($"    STREAMON = {VIDIOC_STREAMON},");
+        Console.WriteLine($"    STREAMOFF = {VIDIOC_STREAMOFF},");
+        Console.WriteLine($"    G_PARM = {VIDIOC_G_PARM},");
+        Console.WriteLine($"    S_PARM = {VIDIOC_S_PARM},");
+        Console.WriteLine($"    G_CTRL = {VIDIOC_G_CTRL},");
+        Console.WriteLine($"    S_CTRL = {VIDIOC_S_CTRL},");
+        Console.WriteLine($"    QUERYCTRL = {VIDIOC_QUERYCTRL},");
+        Console.WriteLine($"    G_INPUT = {VIDIOC_G_INPUT},");
+        Console.WriteLine($"    S_INPUT = {VIDIOC_S_INPUT},");
+        Console.WriteLine($"    G_OUTPUT = {VIDIOC_G_OUTPUT},");
+        Console.WriteLine($"    S_OUTPUT = {VIDIOC_S_OUTPUT},");
+        Console.WriteLine($"    CROPCAP = {VIDIOC_CROPCAP},");
+        Console.WriteLine($"    G_CROP = {VIDIOC_G_CROP},");
+        Console.WriteLine($"    S_CROP = {VIDIOC_S_CROP},");
+        Console.WriteLine($"    TRY_FMT = {VIDIOC_TRY_FMT},");
+        Console.WriteLine($"    G_PRIORITY = {VIDIOC_G_PRIORITY},");
+        Console.WriteLine($"    S_PRIORITY = {VIDIOC_S_PRIORITY},");
+        Console.WriteLine($"    ENUM_FRAMESIZES = {VIDIOC_ENUM_FRAMESIZES},");
+        Console.WriteLine($"    ENUM_FRAMEINTERVALS = {VIDIOC_ENUM_FRAMEINTERVALS},");
+        Console.WriteLine($"    PREPARE_BUF = {VIDIOC_PREPARE_BUF},");
+        Console.WriteLine("}");
     }
 
     internal static int IOC(int dir, int type, int nr, int size)
