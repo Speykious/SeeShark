@@ -8,8 +8,8 @@ using System.Runtime.InteropServices;
 namespace SeeShark.Interop.X11;
 
 using Atom = Int64;
-using Display = IntPtr;
-using Window = IntPtr;
+using Display = nint;
+using Window = nint;
 
 internal class XLib
 {

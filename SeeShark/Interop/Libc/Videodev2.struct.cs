@@ -2,32 +2,22 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
 
-using System;
 using System.Runtime.InteropServices;
 
 namespace SeeShark.Interop.Libc;
 
-// internal struct V4l2FrameBuffer
-// {
-//     public IntPtr Start;
-//     public uint Length;
-// }
-
 #pragma warning disable IDE1006
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_capability
+internal unsafe struct v4l2_capability
 {
-    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 16)]
-    public string driver;
-    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-    public string card;
-    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-    public string bus_info;
+    public fixed byte driver[16];
+    public fixed byte card[32];
+    public fixed byte bus_info[32];
     public uint version;
     public uint capabilities;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-    public uint[] reserved;
-}
+    public uint device_caps;
+    public fixed uint reserved[3];
+};
 
 internal enum v4l2_ctrl_type : uint
 {
@@ -47,39 +37,36 @@ internal enum v4l2_ctrl_type : uint
 };
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_queryctrl
+internal unsafe struct v4l2_queryctrl
 {
-    public VideoDeviceValueType id;
+    public uint id;
     public v4l2_ctrl_type type;
-    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-    public string name;
+    public fixed byte name[32];
     public int minimum;
     public int maximum;
     public int step;
     public int default_value;
     public uint flags;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public uint[] reserved;
+    public fixed uint reserved[2];
 };
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_control
+internal unsafe struct v4l2_control
 {
-    public VideoDeviceValueType id;
+    public uint id;
     public int value;
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_fmtdesc
+internal unsafe struct v4l2_fmtdesc
 {
     public uint index;
     public v4l2_buf_type type;
     public uint flags;
-    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
-    public string description;
+    public fixed byte description[32];
     public V4l2InputFormat pixelformat;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-    public uint[] reserved;
+    public uint mbus_code;
+    public fixed uint reserved[3];
 }
 
 internal enum v4l2_buf_type : uint
@@ -132,7 +119,7 @@ internal enum v4l2_colorspace : uint
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_pix_format
+internal unsafe struct v4l2_pix_format
 {
     public uint width;
     public uint height;
@@ -145,7 +132,7 @@ internal struct v4l2_pix_format
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_rect
+internal unsafe struct v4l2_rect
 {
     public int left;
     public int top;
@@ -173,120 +160,117 @@ internal unsafe struct v4l2_window
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_vbi_format
+internal unsafe struct v4l2_vbi_format
 {
     public uint sampling_rate;
     public uint offset;
     public uint samples_per_line;
     public uint sample_format;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public uint[] start;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public uint[] count;
+    public fixed int start[2];
+    public fixed uint count[2];
     public uint flags;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public uint[] reserved;
+    public fixed uint reserved[2];
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_sliced_vbi_format
+internal unsafe struct v4l2_sliced_vbi_format
 {
     public uint service_set;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 48)]
-    public ushort[] service_lines;
+    public fixed ushort service_lines[48];
     public uint io_size;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public uint[] reserved;
+    public fixed uint reserved[2];
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_sdr_format
+internal unsafe struct v4l2_sdr_format
 {
     public V4l2InputFormat pixelformat;
     public uint buffersize;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 24)]
-    public byte[] reserved;
+    public fixed byte reserved[24];
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_meta_format
+internal unsafe struct v4l2_meta_format
 {
     public uint dataformat;
     public uint buffersize;
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct fmt
-{
-    public v4l2_pix_format pix;
-    public v4l2_window win;
-    public v4l2_vbi_format vbi;
-    public v4l2_sliced_vbi_format sliced;
-    public v4l2_sdr_format sdr;
-    public v4l2_meta_format meta;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 200)]
-    public byte[] raw;
-}
-
-[StructLayout(LayoutKind.Sequential, Size = 204)]
-internal struct v4l2_format
+internal unsafe struct v4l2_format
 {
     public v4l2_buf_type type;
-    public fmt fmt;
+
+    [StructLayout(LayoutKind.Explicit)]
+    internal unsafe struct fmt_union
+    {
+        [FieldOffset(0)]
+        public v4l2_pix_format pix;
+        [FieldOffset(0)]
+        public v4l2_window win;
+        [FieldOffset(0)]
+        public v4l2_vbi_format vbi;
+        [FieldOffset(0)]
+        public v4l2_sliced_vbi_format sliced;
+        [FieldOffset(0)]
+        public v4l2_sdr_format sdr;
+        [FieldOffset(0)]
+        public v4l2_meta_format meta;
+        [FieldOffset(0)]
+        public fixed byte raw_data[200];
+    }
+    public fmt_union fmt;
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_captureparm
+internal unsafe struct v4l2_captureparm
 {
     public uint capability;
     public uint capturemode;
     public v4l2_fract timeperframe;
     public uint extendedmode;
     public uint readbuffers;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-    public uint[] reserved;
+    public fixed uint reserved[4];
 }
 
-
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_outputparm
+internal unsafe struct v4l2_outputparm
 {
     public uint capability;
     public uint outputmode;
     public v4l2_fract timeperframe;
     public uint extendedmode;
     public uint writebuffers;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-    public uint[] reserved;
+    public fixed uint reserved[4];
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_streamparm
+internal unsafe struct v4l2_streamparm
 {
     public v4l2_buf_type type;
+
     [StructLayout(LayoutKind.Explicit)]
-    internal struct parm_union
+    internal unsafe struct parm_union
     {
         [FieldOffset(0)]
         public v4l2_captureparm capture;
         [FieldOffset(0)]
         public v4l2_outputparm output;
         [FieldOffset(0)]
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 200)]
-        public byte[] raw;
+        public fixed byte raw[200];
     }
     public parm_union parm;
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_fract
+internal unsafe struct v4l2_fract
 {
     public uint numerator;
     public uint denominator;
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_cropcap
+internal unsafe struct v4l2_cropcap
 {
     public v4l2_buf_type type;
     public v4l2_rect bounds;
@@ -295,7 +279,7 @@ internal struct v4l2_cropcap
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_crop
+internal unsafe struct v4l2_crop
 {
     public v4l2_buf_type type;
     public v4l2_rect c;
@@ -310,24 +294,23 @@ internal enum v4l2_memory : uint
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_requestbuffers
+internal unsafe struct v4l2_requestbuffers
 {
     public uint count;
     public v4l2_buf_type type;
     public v4l2_memory memory;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public uint[] reserved;
+    public fixed uint reserved[2];
 }
 
 [StructLayout(LayoutKind.Sequential)]
-public struct v4l2_timeval
+public unsafe struct v4l2_timeval
 {
     public uint tv_sec;
     public uint tv_usec;
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_timecode
+internal unsafe struct v4l2_timecode
 {
     public uint type;
     public uint flags;
@@ -335,12 +318,33 @@ internal struct v4l2_timecode
     public byte seconds;
     public byte minutes;
     public byte hours;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
-    public byte[] userbits;
+    public fixed byte userbits[4];
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_buffer
+internal unsafe struct v4l2_plane
+{
+    public uint bytesused;
+    public uint length;
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct m_union
+    {
+        [FieldOffset(0)]
+        uint mem_offset;
+        [FieldOffset(0)]
+        ulong userptr;
+        [FieldOffset(0)]
+        int fd;
+    }
+    public m_union m;
+
+    uint data_offset;
+    fixed uint reserved[11];
+};
+
+[StructLayout(LayoutKind.Sequential)]
+internal unsafe struct v4l2_buffer
 {
     public uint index;
     public v4l2_buf_type type;
@@ -349,12 +353,12 @@ internal struct v4l2_buffer
     public v4l2_field field;
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct timeval
+    public unsafe struct timeval_t
     {
-        public uint tv_sec;
-        public uint tv_usec;
+        public ulong tv_sec;
+        public ulong tv_usec;
     }
-    public timeval timestamp;
+    public timeval_t timestamp;
 
     public v4l2_timecode timecode;
     public uint sequence;
@@ -366,7 +370,11 @@ internal struct v4l2_buffer
         [FieldOffset(0)]
         public uint offset;
         [FieldOffset(0)]
-        public uint userptr;
+        public ulong userptr;
+        [FieldOffset(0)]
+        public v4l2_plane* planes;
+        [FieldOffset(0)]
+        public int fd;
     }
     public m_union m;
 
@@ -376,26 +384,25 @@ internal struct v4l2_buffer
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_frmsizeenum
+internal unsafe struct v4l2_frmsizeenum
 {
     public uint index;
     public V4l2InputFormat pixel_format;
     public v4l2_frmsizetypes type;
     public v4l2_frmsize_discrete discrete;
     public v4l2_frmsize_stepwise stepwise;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public uint[] reserved;
+    public fixed uint reserved[2];
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_frmsize_discrete
+internal unsafe struct v4l2_frmsize_discrete
 {
     public uint width;
     public uint height;
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_frmsize_stepwise
+internal unsafe struct v4l2_frmsize_stepwise
 {
     public uint min_width;
     public uint max_width;
@@ -413,7 +420,7 @@ internal enum v4l2_frmsizetypes : uint
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_frmivalenum
+internal unsafe struct v4l2_frmivalenum
 {
     public uint index;
     public V4l2InputFormat pixel_format;
@@ -422,12 +429,11 @@ internal struct v4l2_frmivalenum
     public v4l2_frmivaltypes type;
     public v4l2_fract discrete;
     public v4l2_frmival_stepwise stepwise;
-    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-    public uint[] reserved;
+    public fixed uint reserved[2];
 }
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct v4l2_frmival_stepwise
+internal unsafe struct v4l2_frmival_stepwise
 {
     public v4l2_fract min;
     public v4l2_fract max;
