@@ -3,9 +3,11 @@
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace SeeShark.Interop.MacOS;
 
+[SupportedOSPlatform("Macos")]
 internal static class DL
 {
     internal const string LIB_DL = "libSystem.dylib";

@@ -50,7 +50,6 @@ internal struct AVCaptureVideoDataOutput : IAVCaptureOutput
         managedDelegateDict.Add(id, new CVDOData
         {
             CVDOID = ID,
-            SampleBufferCallbackQueue = sampleBufferCallbackQueue,
             CVDODelegate = sampleBufferDelegate,
             CVDODelegateInstance = cvdoDelegateInstance,
         });
@@ -87,7 +86,6 @@ internal struct AVCaptureVideoDataOutput : IAVCaptureOutput
     private class CVDOData : IDisposable
     {
         internal required nint CVDOID;
-        internal required nint SampleBufferCallbackQueue;
         internal required IAVCaptureVideoDataOutputSampleBufferDelegate CVDODelegate;
         internal required nint CVDODelegateInstance;
 
@@ -101,11 +99,10 @@ internal struct AVCaptureVideoDataOutput : IAVCaptureOutput
 
         private void dispose()
         {
-            if (SampleBufferCallbackQueue != 0)
+            if (CVDODelegateInstance != 0)
             {
-                ObjC.dispatch_release(SampleBufferCallbackQueue);
                 ObjC.class_destructInstance(CVDODelegateInstance);
-                SampleBufferCallbackQueue = 0;
+                CVDODelegateInstance = 0;
             }
         }
     }

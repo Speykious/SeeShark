@@ -2,10 +2,12 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
+using System.Runtime.Versioning;
 using System.Text;
 
 namespace SeeShark.Interop.MacOS;
 
+[SupportedOSPlatform("Macos")]
 internal struct NSString : INSObject
 {
     private readonly nint id;

@@ -52,6 +52,9 @@ public class Whatever
         {
             Console.WriteLine($"AVFoundation handle: {ObjC.AVFoundationHandle}");
 
+            AVAuthorizationStatus auth = AVCaptureDevice.AuthorizationStatusForMediaType(AVCaptureDevice.AV_MEDIA_TYPE_VIDEO);
+            Console.WriteLine($"Current permissions: {auth}");
+
             {
                 nint[] devices = AVCaptureDevice.Devices.ToArray();
 
@@ -73,6 +76,7 @@ public class Whatever
             if (maybeDefaultDevice is AVCaptureDevice defaultDevice)
             {
                 Console.WriteLine("Got default device");
+
 
                 AVCaptureDeviceInput deviceInput = AVCaptureDeviceInput.DeviceInputWithDevice(defaultDevice);
                 Console.WriteLine("Got device input");

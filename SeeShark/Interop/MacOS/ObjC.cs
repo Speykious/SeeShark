@@ -4,19 +4,30 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace SeeShark.Interop.MacOS;
 
+[SupportedOSPlatform("Macos")]
 internal static class ObjC
 {
     private const string lib_objc = "/usr/lib/libobjc.dylib";
     private const string lib_avfoundation = "/System/Library/Frameworks/AVFoundation.framework/AVFoundation";
 
-    internal static nint AVFoundationHandle = DL.dlopen(lib_avfoundation, DL.RTLD_NOW);
-    internal static OClass NSObjectClass = GetClass("NSObject");
+    internal static nint AVFoundationHandle;
+    internal static OClass NSObjectClass;
 
-    internal static Selector Sel_alloc = ObjC.sel_registerName("alloc");
-    internal static Selector Sel_init = ObjC.sel_registerName("init");
+    internal static Selector Sel_alloc;
+    internal static Selector Sel_init;
+
+    static ObjC()
+    {
+        AVFoundationHandle = DL.dlopen(lib_avfoundation, DL.RTLD_NOW);
+        NSObjectClass = GetClass("NSObject");
+
+        Sel_alloc = sel_registerName("alloc");
+        Sel_init = sel_registerName("init");
+    }
 
     /// <summary>
     /// Returns the class definition of a specified class.
@@ -76,6 +87,9 @@ internal static class ObjC
     internal static extern int objc_msgSend_int(nint self, Selector op);
 
     [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
+    internal static extern int objc_msgSend_int(nint self, Selector op, nint arg1);
+
+    [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
     internal static extern uint objc_msgSend_uint(nint self, Selector op);
 
     [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
@@ -95,12 +109,16 @@ internal interface INSObject
     public nint ID { get; }
 }
 
+#pragma warning disable CS0169
 internal struct Selector
 {
     private nint id;
 }
+#pragma warning restore CS0169
 
+#pragma warning disable CS0649
 internal struct OClass
 {
     internal nint ID;
 }
+#pragma warning restore CS0649
