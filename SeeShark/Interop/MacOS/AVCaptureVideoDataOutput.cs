@@ -113,14 +113,14 @@ internal struct AVCaptureVideoDataOutput : IAVCaptureOutput
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe void captureOutput_didOutputSampleBuffer_fromConnection(nint self, Selector _cmd, nint output, nint sampleBuffer, nint connection)
     {
-        if (managedDelegateDict[output].CVDODelegate is IAVCaptureVideoDataOutputSampleBufferDelegate managedDelegate)
+        if (managedDelegateDict[output]?.CVDODelegate is IAVCaptureVideoDataOutputSampleBufferDelegate managedDelegate)
             managedDelegate.CaptureOutputSambleBuffer(new AVCaptureVideoDataOutput(output), sampleBuffer, connection);
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
     private static unsafe void captureOutput_didDropSampleBuffer_fromConnection(nint self, Selector _cmd, nint output, nint sampleBuffer, nint connection)
     {
-        if (managedDelegateDict[output].CVDODelegate is IAVCaptureVideoDataOutputSampleBufferDelegate managedDelegate)
+        if (managedDelegateDict[output]?.CVDODelegate is IAVCaptureVideoDataOutputSampleBufferDelegate managedDelegate)
             managedDelegate.CaptureDiscardedSampleBuffer(new AVCaptureVideoDataOutput(output), sampleBuffer, connection);
     }
 }
