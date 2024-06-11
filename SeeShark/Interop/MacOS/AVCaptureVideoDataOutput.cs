@@ -2,13 +2,14 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
-using System;
-using System.Collections.Generic;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 
 namespace SeeShark.Interop.MacOS;
 
+[SupportedOSPlatform("Macos")]
 internal struct AVCaptureVideoDataOutput : IAVCaptureOutput
 {
     private nint id;
@@ -29,7 +30,11 @@ internal struct AVCaptureVideoDataOutput : IAVCaptureOutput
     private static OClass classPtr = ObjC.GetClass(nameof(AVCaptureVideoDataOutput));
 
     private static Selector sel_availableVideoCodecTypes = ObjC.sel_registerName("availableVideoCodecTypes");
+    private static Selector sel_sampleBufferDelegate = ObjC.sel_registerName("sampleBufferDelegate");
     private static Selector sel_setSampleBufferDelegate = ObjC.sel_registerName("setSampleBufferDelegate:queue:");
+
+    private static Selector sel_captureOutputSambleBuffer = ObjC.sel_registerName("captureOutput:didOutputSampleBuffer:fromConnection:");
+    private static Selector sel_captureDiscardedSampleBuffer = ObjC.sel_registerName("captureOutput:didDropSampleBuffer:fromConnection:");
 
     internal static NSString AV_VIDEO_CODEC_TYPE_H264 = DL.GetConstant<NSString>(ObjC.AVFoundationHandle, "AVVideoCodecTypeH264");
     internal static NSString AV_VIDEO_CODEC_TYPE_HEVC = DL.GetConstant<NSString>(ObjC.AVFoundationHandle, "AVVideoCodecTypeHEVC");
@@ -43,21 +48,26 @@ internal struct AVCaptureVideoDataOutput : IAVCaptureOutput
 
     internal readonly NSArray AvailableVideoCodecTypes => new NSArray(ObjC.objc_msgSend_id(id, sel_availableVideoCodecTypes));
 
+    private nint getSampleBufferDelegate() => ObjC.objc_msgSend_id(id, sel_sampleBufferDelegate);
+
     internal void SetSampleBufferDelegate(IAVCaptureVideoDataOutputSampleBufferDelegate sampleBufferDelegate, nint sampleBufferCallbackQueue)
     {
-        nint cvdoDelegateInstance = ObjC.class_createInstance(cvdoDelegateClass, 0);
-
-        managedDelegateDict.Add(id, new CVDOData
+        nint prevDelegateInstance = getSampleBufferDelegate();
+        if (prevDelegateInstance != 0)
         {
-            CVDOID = ID,
-            CVDODelegate = sampleBufferDelegate,
-            CVDODelegateInstance = cvdoDelegateInstance,
-        });
+            GCHandle delegateHandle = getManagedSampleBufferDelegate(prevDelegateInstance);
+            if (delegateHandle.IsAllocated)
+                delegateHandle.Free();
+        }
+
+        nint cvdoDelegateInstance = ObjC.class_createInstance(cvdoDelegateClass, 0);
+        setManagedSampleBufferDelegate(cvdoDelegateInstance, sampleBufferDelegate);
 
         ObjC.objc_msgSend(id, sel_setSampleBufferDelegate, cvdoDelegateInstance, sampleBufferCallbackQueue);
     }
 
-    private static OClass cvdoDelegateClass = createCVDODelegateClass();
+    private static readonly OClass cvdoDelegateClass = createCVDODelegateClass();
+    private static readonly nint ivar_CVDO_MSBD = ObjC.class_getInstanceVariable(cvdoDelegateClass, "managedSampleBufferDelegate");
 
     private static OClass createCVDODelegateClass()
     {
@@ -65,60 +75,51 @@ internal struct AVCaptureVideoDataOutput : IAVCaptureOutput
 
         unsafe
         {
-            Selector sel_captureOutputSambleBuffer = ObjC.sel_registerName("captureOutput:didOutputSampleBuffer:fromConnection:");
-            bool successM1 = ObjC.class_addMethod(resultClass, sel_captureOutputSambleBuffer, &captureOutput_didOutputSampleBuffer_fromConnection, "v@:@@@");
+            ObjC.class_addIvar(resultClass, "managedSampleBufferDelegate", (nuint)sizeof(GCHandle), (byte)BitOperations.Log2((nuint)sizeof(nint)), "i");
 
-            Selector sel_captureDiscardedSampleBuffer = ObjC.sel_registerName("captureOutput:didDropSampleBuffer:fromConnection:");
-            bool successM2 = ObjC.class_addMethod(resultClass, sel_captureDiscardedSampleBuffer, &captureOutput_didDropSampleBuffer_fromConnection, "v@:@@@");
+            ObjC.class_addMethod(resultClass, sel_captureOutputSambleBuffer, &captureOutput_didOutputSampleBuffer_fromConnection, "v@:@@@");
+            ObjC.class_addMethod(resultClass, sel_captureDiscardedSampleBuffer, &captureOutput_didDropSampleBuffer_fromConnection, "v@:@@@");
 
             nint cvdosbdProtocol = ObjC.objc_getProtocol("AVCaptureVideoDataOutputSampleBufferDelegate");
-            bool successP = ObjC.class_addProtocol(resultClass, cvdosbdProtocol);
-
-            Console.WriteLine($"CVDO method/protocol creation success: {successM1} {successM2} {successP}");
+            ObjC.class_addProtocol(resultClass, cvdosbdProtocol);
         }
 
         ObjC.objc_registerClassPair(resultClass);
         return resultClass;
     }
 
-    private static Dictionary<nint, CVDOData> managedDelegateDict = [];
-
-    private class CVDOData : IDisposable
+    private static GCHandle getManagedSampleBufferDelegate(nint cvdoDelegateInstance)
     {
-        internal required nint CVDOID;
-        internal required IAVCaptureVideoDataOutputSampleBufferDelegate CVDODelegate;
-        internal required nint CVDODelegateInstance;
-
-        ~CVDOData() => dispose();
-
-        public void Dispose()
+        unsafe
         {
-            dispose();
-            GC.SuppressFinalize(this);
+            GCHandle* ivarDelegateHandlePtr = (GCHandle*)(cvdoDelegateInstance + ObjC.ivar_getOffset(ivar_CVDO_MSBD));
+            return *ivarDelegateHandlePtr;
         }
+    }
 
-        private void dispose()
+    private static void setManagedSampleBufferDelegate(nint cvdoDelegateInstance, IAVCaptureVideoDataOutputSampleBufferDelegate sampleBufferDelegate)
+    {
+        unsafe
         {
-            if (CVDODelegateInstance != 0)
-            {
-                ObjC.class_destructInstance(CVDODelegateInstance);
-                CVDODelegateInstance = 0;
-            }
+            GCHandle* ivarDelegateHandlePtr = (GCHandle*)(cvdoDelegateInstance + ObjC.ivar_getOffset(ivar_CVDO_MSBD));
+            *ivarDelegateHandlePtr = GCHandle.Alloc(sampleBufferDelegate, GCHandleType.Pinned);
         }
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
-    private static unsafe void captureOutput_didOutputSampleBuffer_fromConnection(nint self, Selector _cmd, nint output, nint sampleBuffer, nint connection)
+    private static unsafe void captureOutput_didOutputSampleBuffer_fromConnection(nint self, Selector _cmd, nint captureOutput, nint sampleBuffer, nint connection)
     {
-        if (managedDelegateDict[output]?.CVDODelegate is IAVCaptureVideoDataOutputSampleBufferDelegate managedDelegate)
-            managedDelegate.CaptureOutputSambleBuffer(new AVCaptureVideoDataOutput(output), sampleBuffer, connection);
+        GCHandle delegateHandle = getManagedSampleBufferDelegate(self);
+        if (delegateHandle.Target is IAVCaptureVideoDataOutputSampleBufferDelegate managedDelegate)
+            managedDelegate.CaptureOutputSambleBuffer(new AVCaptureVideoDataOutput(captureOutput), sampleBuffer, connection);
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
-    private static unsafe void captureOutput_didDropSampleBuffer_fromConnection(nint self, Selector _cmd, nint output, nint sampleBuffer, nint connection)
+    private static unsafe void captureOutput_didDropSampleBuffer_fromConnection(nint self, Selector _cmd, nint cvdoDelegateOutput, nint sampleBuffer, nint connection)
     {
-        if (managedDelegateDict[output]?.CVDODelegate is IAVCaptureVideoDataOutputSampleBufferDelegate managedDelegate)
-            managedDelegate.CaptureDiscardedSampleBuffer(new AVCaptureVideoDataOutput(output), sampleBuffer, connection);
+        GCHandle delegateHandle = getManagedSampleBufferDelegate(self);
+        if (delegateHandle.Target is IAVCaptureVideoDataOutputSampleBufferDelegate managedDelegate)
+            managedDelegate.CaptureDiscardedSampleBuffer(new AVCaptureVideoDataOutput(cvdoDelegateOutput), sampleBuffer, connection);
     }
 }
 

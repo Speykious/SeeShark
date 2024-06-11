@@ -77,7 +77,6 @@ public class Whatever
             {
                 Console.WriteLine("Got default device");
 
-
                 AVCaptureDeviceInput deviceInput = AVCaptureDeviceInput.DeviceInputWithDevice(defaultDevice);
                 Console.WriteLine("Got device input");
 
@@ -119,7 +118,7 @@ public class Whatever
                 session.StartRunning();
                 Console.WriteLine("Started running");
 
-                Thread.Sleep(10_000);
+                Thread.Sleep(5_000);
 
                 Console.WriteLine("We ran!");
                 session.StopRunning();

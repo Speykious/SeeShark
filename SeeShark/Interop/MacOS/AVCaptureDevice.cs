@@ -23,12 +23,13 @@ internal struct AVCaptureDevice : INSObject
     private static Selector sel_devices = ObjC.sel_registerName("devices");
     private static Selector sel_defaultDeviceWithMediaType = ObjC.sel_registerName("defaultDeviceWithMediaType:");
     private static Selector sel_deviceWithUniqueID = ObjC.sel_registerName("deviceWithUniqueID:");
+    private static Selector sel_authorizationStatusForMediaType = ObjC.sel_registerName("authorizationStatusForMediaType:");
+    private static Selector sel_requestAccessForMediaType = ObjC.sel_registerName("requestAccessForMediaType:completionHandler:");
 
     private static Selector sel_uniqueID = ObjC.sel_registerName("uniqueID");
     private static Selector sel_localizedName = ObjC.sel_registerName("localizedName");
     private static Selector sel_hasMediaType = ObjC.sel_registerName("hasMediaType:");
-    private static Selector sel_authorizationStatusForMediaType = ObjC.sel_registerName("authorizationStatusForMediaType:");
-    private static Selector sel_requestAccessForMediaType = ObjC.sel_registerName("requestAccessForMediaType:completionHandler:");
+    private static Selector sel_formats = ObjC.sel_registerName("formats");
 
     internal static NSString AV_MEDIA_TYPE_VIDEO = DL.GetConstant<NSString>(ObjC.AVFoundationHandle, "AVMediaTypeVideo");
 

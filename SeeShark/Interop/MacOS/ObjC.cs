@@ -3,6 +3,7 @@
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
@@ -54,6 +55,12 @@ internal static class ObjC
     internal static extern nint class_createInstance(OClass cls, nuint extraBytes);
     [DllImport(lib_objc)]
     internal static extern nint class_destructInstance(nint obj);
+    [DllImport(lib_objc)]
+    internal static extern bool class_addIvar(OClass cls, string name, nuint size, byte alignment, string types);
+    [DllImport(lib_objc)]
+    internal static extern nint class_getInstanceVariable(OClass cls, string name);
+    [DllImport(lib_objc)]
+    internal static extern nint ivar_getOffset(nint ivar);
     [DllImport(lib_objc)]
     internal static extern bool class_addProtocol(OClass cls, nint protocol);
     [DllImport(lib_objc)]
