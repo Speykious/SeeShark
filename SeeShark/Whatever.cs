@@ -66,67 +66,92 @@ public class Whatever
                     Console.WriteLine($"\n- {device.LocalizedName.ToUTF8String()}");
                     Console.WriteLine($"    Unique ID:    {device.UniqueID.ToUTF8String()}");
                     Console.WriteLine($"    Video device: {device.HasMediaType(AVCaptureDevice.AV_MEDIA_TYPE_VIDEO)}");
+                    Console.WriteLine($"    Formats:");
+
+                    nint[] formats = device.Formats.ToArray();
+                    foreach (nint formatID in formats)
+                    {
+                        AVCaptureDeviceFormat format = new AVCaptureDeviceFormat(formatID);
+                        Console.WriteLine($"    - media type: {format.MediaType.ToUTF8String()}");
+
+                        Console.WriteLine($"      framerate ranges:");
+                        nint[] framerateRanges = format.VideoSupportedFrameRateRanges.ToArray();
+                        foreach (nint framerateRangeID in framerateRanges)
+                        {
+                            AVFrameRateRange framerateRange = new AVFrameRateRange(framerateRangeID);
+                            Console.WriteLine($"      - {framerateRange.MinFrameRate}..{framerateRange.MaxFrameRate} fps");
+                        }
+
+                        Console.WriteLine($"      max dimensions:");
+                        nint[] maxDimensions = format.SupportedMaxPhotoDimensions.ToArray();
+                        foreach (nint maxDimensionID in maxDimensions)
+                        {
+                            NSValue<CMVideoDimensions> maxDimensionValue = new NSValue<CMVideoDimensions>(maxDimensionID);
+                            CMVideoDimensions maxDimension = maxDimensionValue.GetValue();
+                            Console.WriteLine($"      - {maxDimension.Width}x{maxDimension.Height}");
+                        }
+                    }
                 }
             }
 
             Console.WriteLine($"\nMedia type: {AVCaptureDevice.AV_MEDIA_TYPE_VIDEO.ToUTF8String()}");
-            Console.WriteLine("Getting default device");
-            AVCaptureDevice? maybeDefaultDevice = AVCaptureDevice.DefaultDeviceWithMediaType(AVCaptureDevice.AV_MEDIA_TYPE_VIDEO);
+            // Console.WriteLine("Getting default device");
+            // AVCaptureDevice? maybeDefaultDevice = AVCaptureDevice.DefaultDeviceWithMediaType(AVCaptureDevice.AV_MEDIA_TYPE_VIDEO);
 
-            if (maybeDefaultDevice is AVCaptureDevice defaultDevice)
-            {
-                Console.WriteLine("Got default device");
+            // if (maybeDefaultDevice is AVCaptureDevice defaultDevice)
+            // {
+            //     Console.WriteLine("Got default device");
 
-                AVCaptureDeviceInput deviceInput = AVCaptureDeviceInput.DeviceInputWithDevice(defaultDevice);
-                Console.WriteLine("Got device input");
+            //     AVCaptureDeviceInput deviceInput = AVCaptureDeviceInput.DeviceInputWithDevice(defaultDevice);
+            //     Console.WriteLine("Got device input");
 
-                AVCaptureSession session = new AVCaptureSession();
-                Console.WriteLine($"Allocated session");
+            //     AVCaptureSession session = new AVCaptureSession();
+            //     Console.WriteLine($"Allocated session");
 
-                if (session.CanAddInput(deviceInput))
-                {
-                    Console.WriteLine("Input can be added");
+            //     if (session.CanAddInput(deviceInput))
+            //     {
+            //         Console.WriteLine("Input can be added");
 
-                    session.AddInput(deviceInput);
-                    Console.WriteLine("Input was added");
-                }
-                else
-                {
-                    Console.WriteLine("Input cannot be added");
-                }
+            //         session.AddInput(deviceInput);
+            //         Console.WriteLine("Input was added");
+            //     }
+            //     else
+            //     {
+            //         Console.WriteLine("Input cannot be added");
+            //     }
 
-                AVCaptureVideoDataOutput deviceOutput = new();
-                Console.WriteLine("Got device output");
+            //     AVCaptureVideoDataOutput deviceOutput = new();
+            //     Console.WriteLine("Got device output");
 
-                nint queue = ObjC.dispatch_queue_create("seeshark.deviceOutputQueue", 0);
-                deviceOutput.SetSampleBufferDelegate(new MyAVCaptureVideoDataOutputSampleBufferDelegate(), queue);
-                Console.WriteLine("Buffer delegate was set");
+            //     nint queue = ObjC.dispatch_queue_create("seeshark.deviceOutputQueue", 0);
+            //     deviceOutput.SetSampleBufferDelegate(new MyAVCaptureVideoDataOutputSampleBufferDelegate(), queue);
+            //     Console.WriteLine("Buffer delegate was set");
 
-                if (session.CanAddOutput(deviceOutput))
-                {
-                    Console.WriteLine("Output can be added");
+            //     if (session.CanAddOutput(deviceOutput))
+            //     {
+            //         Console.WriteLine("Output can be added");
 
-                    session.AddOutput(deviceOutput);
-                    Console.WriteLine("Output was added");
-                }
-                else
-                {
-                    Console.WriteLine("Output cannot be added");
-                }
+            //         session.AddOutput(deviceOutput);
+            //         Console.WriteLine("Output was added");
+            //     }
+            //     else
+            //     {
+            //         Console.WriteLine("Output cannot be added");
+            //     }
 
-                Console.WriteLine("Start running...");
-                session.StartRunning();
-                Console.WriteLine("Started running");
+            //     Console.WriteLine("Start running...");
+            //     session.StartRunning();
+            //     Console.WriteLine("Started running");
 
-                Thread.Sleep(5_000);
+            //     Thread.Sleep(5_000);
 
-                Console.WriteLine("We ran!");
-                session.StopRunning();
-            }
-            else
-            {
-                Console.WriteLine("there's no default device :(");
-            }
+            //     Console.WriteLine("We ran!");
+            //     session.StopRunning();
+            // }
+            // else
+            // {
+            //     Console.WriteLine("there's no default device :(");
+            // }
         }
     }
 }

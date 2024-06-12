@@ -60,6 +60,7 @@ internal struct AVCaptureDevice : INSObject
 
     internal readonly NSString UniqueID => new NSString(ObjC.objc_msgSend_id(id, sel_uniqueID));
     internal readonly NSString LocalizedName => new NSString(ObjC.objc_msgSend_id(id, sel_localizedName));
+    internal readonly NSArray Formats => new NSArray(ObjC.objc_msgSend_id(id, sel_formats));
 
     internal bool HasMediaType(NSString mediaType) => ObjC.objc_msgSend_bool(id, sel_hasMediaType, mediaType.ID);
 }
