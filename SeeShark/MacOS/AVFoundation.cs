@@ -32,4 +32,44 @@ public static class AVFoundation
 
         return captureDevices;
     }
+
+    internal static unsafe List<VideoFormat> AvailableFormats(CameraPath path)
+    {
+        List<VideoFormat> formats = new List<VideoFormat>();
+
+        if (AVCaptureDevice.DeviceWithUniqueID(path.Path) is AVCaptureDevice device)
+        {
+            nint[] deviceFormats = device.Formats.ToArray();
+            foreach (nint deviceFormatID in deviceFormats)
+            {
+                AVCaptureDeviceFormat deviceFormat = new AVCaptureDeviceFormat(deviceFormatID);
+
+                nint[] maxDimensions = deviceFormat.SupportedMaxPhotoDimensions.ToArray();
+                nint[] framerateRanges = deviceFormat.VideoSupportedFrameRateRanges.ToArray();
+
+                foreach (nint maxDimensionID in maxDimensions)
+                {
+                    NSValue<CMVideoDimensions> maxDimensionValue = new NSValue<CMVideoDimensions>(maxDimensionID);
+                    CMVideoDimensions maxDimension = maxDimensionValue.GetValue();
+
+                    foreach (nint framerateRangeID in framerateRanges)
+                    {
+                        AVFrameRateRange framerateRange = new AVFrameRateRange(framerateRangeID);
+
+                        formats.Add(new VideoFormat
+                        {
+                            VideoSize = ((uint)maxDimension.Width, (uint)maxDimension.Height),
+                            Framerate = new FramerateRatio
+                            {
+                                Numerator = (uint)framerateRange.MaxFrameRate,
+                                Denominator = 1,
+                            },
+                        });
+                    }
+                }
+            }
+        }
+
+        return formats;
+    }
 }
