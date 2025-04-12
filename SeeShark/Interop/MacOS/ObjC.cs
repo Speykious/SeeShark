@@ -3,7 +3,6 @@
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
 using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
@@ -43,6 +42,14 @@ internal static class ObjC
         return cls;
     }
 
+    internal static string GetClassName(nint id)
+    {
+        unsafe
+        {
+            return new string((sbyte*)object_getClassName(id));
+        }
+    }
+
     [DllImport(lib_objc)]
     internal static extern OClass objc_getClass(string name);
     [DllImport(lib_objc)]
@@ -51,6 +58,8 @@ internal static class ObjC
     internal static extern void objc_registerClassPair(OClass cls);
     [DllImport(lib_objc)]
     internal static extern nint objc_getProtocol(string name);
+    [DllImport(lib_objc)]
+    internal static extern nint object_getClassName(nint id);
     [DllImport(lib_objc)]
     internal static extern nint class_createInstance(OClass cls, nuint extraBytes);
     [DllImport(lib_objc)]
@@ -79,6 +88,9 @@ internal static class ObjC
     internal static extern void objc_msgSend(nint self, Selector op, nint arg1, nuint arg2);
 
     [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
+    internal static extern void objc_msgSend(nint self, Selector op, nint[] arg1, nint[] arg2, uint arg3);
+
+    [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
     internal static extern nint objc_msgSend_id(nint self, Selector op);
 
     [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
@@ -103,7 +115,13 @@ internal static class ObjC
     internal static extern uint objc_msgSend_uint(nint self, Selector op);
 
     [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
+    internal static extern ulong objc_msgSend_ulong(nint self, Selector op);
+
+    [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
     internal static extern double objc_msgSend_double(nint self, Selector op);
+
+    [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
+    internal static extern bool objc_msgSend_bool(nint self, Selector op);
 
     [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
     internal static extern bool objc_msgSend_bool(nint self, Selector op, nint arg1);

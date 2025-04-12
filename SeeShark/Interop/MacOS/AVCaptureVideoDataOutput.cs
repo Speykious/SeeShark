@@ -111,7 +111,7 @@ internal struct AVCaptureVideoDataOutput : IAVCaptureOutput
     {
         GCHandle delegateHandle = getManagedSampleBufferDelegate(self);
         if (delegateHandle.Target is IAVCaptureVideoDataOutputSampleBufferDelegate managedDelegate)
-            managedDelegate.CaptureOutputSambleBuffer(new AVCaptureVideoDataOutput(captureOutput), sampleBuffer, connection);
+            managedDelegate.CaptureOutputSambleBuffer(new AVCaptureVideoDataOutput(captureOutput), new CMSampleBufferRef(sampleBuffer), connection);
     }
 
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
@@ -119,7 +119,7 @@ internal struct AVCaptureVideoDataOutput : IAVCaptureOutput
     {
         GCHandle delegateHandle = getManagedSampleBufferDelegate(self);
         if (delegateHandle.Target is IAVCaptureVideoDataOutputSampleBufferDelegate managedDelegate)
-            managedDelegate.CaptureDiscardedSampleBuffer(new AVCaptureVideoDataOutput(cvdoDelegateOutput), sampleBuffer, connection);
+            managedDelegate.CaptureDiscardedSampleBuffer(new AVCaptureVideoDataOutput(cvdoDelegateOutput), new CMSampleBufferRef(sampleBuffer), connection);
     }
 }
 
@@ -128,10 +128,10 @@ internal interface IAVCaptureVideoDataOutputSampleBufferDelegate
     /// <summary>
     /// Notifies the delegate that a new video frame was written.
     /// </summary>
-    void CaptureOutputSambleBuffer(IAVCaptureOutput output, nint sampleBuffer, nint connection);
+    void CaptureOutputSambleBuffer(IAVCaptureOutput output, CMSampleBufferRef sampleBuffer, nint connection);
 
     /// <summary>
     /// Notifies the delegate that a video frame was discarded.
     /// </summary>
-    void CaptureDiscardedSampleBuffer(IAVCaptureOutput output, nint sampleBuffer, nint connection);
+    void CaptureDiscardedSampleBuffer(IAVCaptureOutput output, CMSampleBufferRef sampleBuffer, nint connection);
 }

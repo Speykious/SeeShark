@@ -2,6 +2,8 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
+using System;
+
 namespace SeeShark;
 
 /// <summary>
@@ -22,5 +24,5 @@ public struct FramerateRatio
     public uint Numerator;
     public uint Denominator;
 
-    public override string ToString() => $"{Value} fps";
+    public override string ToString() => string.Format("{0:0.##} fps", Value);
 }

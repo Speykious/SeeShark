@@ -7,6 +7,11 @@ namespace SeeShark;
 public struct CameraPath
 {
     /// <summary>
+    /// Name of the camera device, if it exists.
+    /// </summary>
+    public string? Name { get; init; }
+
+    /// <summary>
     /// Path of the camera device.
     /// <list type="bullet">
     ///   <item>On Linux, this represents a file in /dev/.</item>

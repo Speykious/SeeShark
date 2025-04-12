@@ -46,8 +46,8 @@ public struct VideoFormat
     public override string ToString()
     {
         if (OperatingSystem.IsLinux())
-            return $"s{VideoSize} p{VideoPosition} {InputFormat} (mouse={DrawMouse}) | {Framerate}";
+            return $"size{VideoSize} pos{VideoPosition} {InputFormat} (mouse={DrawMouse}) | {Framerate}";
         else
-            return $"s{VideoSize} p{VideoPosition} (mouse={DrawMouse}) | {Framerate}";
+            return $"size{VideoSize} pos{VideoPosition} (mouse={DrawMouse}) | {Framerate}";
     }
 }

@@ -6,9 +6,13 @@ namespace SeeShark;
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Threading;
 using SeeShark.Interop.MacOS;
 using SeeShark.Linux;
+using SeeShark.MacOS;
 
 public class Whatever
 {
@@ -16,155 +20,127 @@ public class Whatever
     {
         if (OperatingSystem.IsLinux())
         {
-            Console.WriteLine("Getting available cameras");
+            Console.Error.WriteLine("Getting available cameras");
             List<CameraPath> availableCameras = V4l2.AvailableCameras();
             CameraPath cameraPath = availableCameras[0];
 
-            Console.WriteLine($"\nAvailable video formats for {cameraPath}:");
+            Console.Error.WriteLine($"\nAvailable video formats for {cameraPath}:");
             foreach (VideoFormat format in V4l2.AvailableFormats(cameraPath))
-                Console.WriteLine($"- {format}");
+                Console.Error.WriteLine($"- {format}");
 
-            Console.WriteLine($"\nOpening {cameraPath}");
+            Console.Error.WriteLine($"\nOpening {cameraPath}");
             V4l2.Camera camera = V4l2.OpenCamera(cameraPath);
 
-            Console.WriteLine("Start capture");
+            Console.Error.WriteLine("Start capture");
             V4l2.StartCapture(camera);
 
-            Console.WriteLine("Capturing frames...");
+            Console.Error.WriteLine("Capturing frames...");
             Frame frame = new Frame();
             for (int i = 0; i < 100; i++)
             {
                 V4l2.ReadFrame(camera, ref frame);
-                Console.WriteLine($"Frame: {frame}");
+                Console.Error.WriteLine($"Frame: {frame}");
 
                 Thread.Sleep(50);
             }
-            Console.WriteLine("ENOUGH");
+            Console.Error.WriteLine("ENOUGH");
 
-            Console.WriteLine("Stop capture");
+            Console.Error.WriteLine("Stop capture");
             V4l2.StopCapture(camera);
         }
         else if (OperatingSystem.IsWindows())
         {
-            Console.WriteLine($"Nothing on Windows yet");
+            Console.Error.WriteLine($"Nothing on Windows yet");
         }
         else if (OperatingSystem.IsMacOS())
         {
-            Console.WriteLine($"AVFoundation handle: {ObjC.AVFoundationHandle}");
+            Console.Error.WriteLine($"AVFoundation handle: {ObjC.AVFoundationHandle}");
+            Console.Error.WriteLine($"CoreMedia    handle: {CoreMedia.CoreMediaHandle}");
+            Console.Error.WriteLine($"CoreVideo    handle: {CoreVideo.CoreVideoHandle}");
 
             AVAuthorizationStatus auth = AVCaptureDevice.AuthorizationStatusForMediaType(AVCaptureDevice.AV_MEDIA_TYPE_VIDEO);
-            Console.WriteLine($"Current permissions: {auth}");
+            Console.Error.WriteLine($"Current permissions: {auth}");
 
             {
-                nint[] devices = AVCaptureDevice.Devices.ToArray();
-
-                Console.WriteLine($"Got devices");
-                foreach (nint deviceID in devices)
+                foreach (CameraPath cameraPath in AVFoundation.AvailableCameras())
                 {
-                    AVCaptureDevice device = new AVCaptureDevice(deviceID);
-
-                    Console.WriteLine($"\n- {device.LocalizedName.ToUTF8String()}");
-                    Console.WriteLine($"    Unique ID:    {device.UniqueID.ToUTF8String()}");
-                    Console.WriteLine($"    Video device: {device.HasMediaType(AVCaptureDevice.AV_MEDIA_TYPE_VIDEO)}");
-                    Console.WriteLine($"    Formats:");
-
-                    nint[] formats = device.Formats.ToArray();
-                    foreach (nint formatID in formats)
-                    {
-                        AVCaptureDeviceFormat format = new AVCaptureDeviceFormat(formatID);
-                        Console.WriteLine($"    - media type: {format.MediaType.ToUTF8String()}");
-
-                        Console.WriteLine($"      framerate ranges:");
-                        nint[] framerateRanges = format.VideoSupportedFrameRateRanges.ToArray();
-                        foreach (nint framerateRangeID in framerateRanges)
-                        {
-                            AVFrameRateRange framerateRange = new AVFrameRateRange(framerateRangeID);
-                            Console.WriteLine($"      - {framerateRange.MinFrameRate}..{framerateRange.MaxFrameRate} fps");
-                        }
-
-                        Console.WriteLine($"      max dimensions:");
-                        nint[] maxDimensions = format.SupportedMaxPhotoDimensions.ToArray();
-                        foreach (nint maxDimensionID in maxDimensions)
-                        {
-                            NSValue<CMVideoDimensions> maxDimensionValue = new NSValue<CMVideoDimensions>(maxDimensionID);
-                            CMVideoDimensions maxDimension = maxDimensionValue.GetValue();
-                            Console.WriteLine($"      - {maxDimension.Width}x{maxDimension.Height}");
-                        }
-                    }
+                    Console.Error.WriteLine($"\n- {cameraPath.Name} ({cameraPath.Path})");
+                    foreach (VideoFormat availableFormat in AVFoundation.AvailableFormats(cameraPath))
+                        Console.Error.WriteLine($"  - {availableFormat}");
                 }
             }
 
-            Console.WriteLine($"\nMedia type: {AVCaptureDevice.AV_MEDIA_TYPE_VIDEO.ToUTF8String()}");
-            // Console.WriteLine("Getting default device");
-            // AVCaptureDevice? maybeDefaultDevice = AVCaptureDevice.DefaultDeviceWithMediaType(AVCaptureDevice.AV_MEDIA_TYPE_VIDEO);
+            Console.Error.WriteLine($"\nMedia type: {AVCaptureDevice.AV_MEDIA_TYPE_VIDEO.ToUTF8String()}");
 
-            // if (maybeDefaultDevice is AVCaptureDevice defaultDevice)
-            // {
-            //     Console.WriteLine("Got default device");
+            {
+                Console.Error.WriteLine("Getting default device");
+                AVCaptureDevice? maybeDefaultDevice = AVCaptureDevice.DefaultDeviceWithMediaType(AVCaptureDevice.AV_MEDIA_TYPE_VIDEO);
 
-            //     AVCaptureDeviceInput deviceInput = AVCaptureDeviceInput.DeviceInputWithDevice(defaultDevice);
-            //     Console.WriteLine("Got device input");
+                if (maybeDefaultDevice is AVCaptureDevice defaultDevice)
+                {
+                    AVCaptureDeviceInput deviceInput = AVCaptureDeviceInput.DeviceInputWithDevice(defaultDevice);
+                    AVCaptureSession session = new AVCaptureSession();
 
-            //     AVCaptureSession session = new AVCaptureSession();
-            //     Console.WriteLine($"Allocated session");
+                    if (session.CanAddInput(deviceInput))
+                        session.AddInput(deviceInput);
 
-            //     if (session.CanAddInput(deviceInput))
-            //     {
-            //         Console.WriteLine("Input can be added");
+                    AVCaptureVideoDataOutput deviceOutput = new();
 
-            //         session.AddInput(deviceInput);
-            //         Console.WriteLine("Input was added");
-            //     }
-            //     else
-            //     {
-            //         Console.WriteLine("Input cannot be added");
-            //     }
+                    nint queue = ObjC.dispatch_queue_create("seeshark.deviceOutputQueue", 0);
+                    deviceOutput.SetSampleBufferDelegate(new MyAVCaptureVideoDataOutputSampleBufferDelegate(), queue);
 
-            //     AVCaptureVideoDataOutput deviceOutput = new();
-            //     Console.WriteLine("Got device output");
+                    if (session.CanAddOutput(deviceOutput))
+                        session.AddOutput(deviceOutput);
 
-            //     nint queue = ObjC.dispatch_queue_create("seeshark.deviceOutputQueue", 0);
-            //     deviceOutput.SetSampleBufferDelegate(new MyAVCaptureVideoDataOutputSampleBufferDelegate(), queue);
-            //     Console.WriteLine("Buffer delegate was set");
+                    Console.Error.WriteLine("Start running...");
+                    session.StartRunning();
+                    Console.Error.WriteLine("Started running");
 
-            //     if (session.CanAddOutput(deviceOutput))
-            //     {
-            //         Console.WriteLine("Output can be added");
+                    Thread.Sleep(5_000);
 
-            //         session.AddOutput(deviceOutput);
-            //         Console.WriteLine("Output was added");
-            //     }
-            //     else
-            //     {
-            //         Console.WriteLine("Output cannot be added");
-            //     }
-
-            //     Console.WriteLine("Start running...");
-            //     session.StartRunning();
-            //     Console.WriteLine("Started running");
-
-            //     Thread.Sleep(5_000);
-
-            //     Console.WriteLine("We ran!");
-            //     session.StopRunning();
-            // }
-            // else
-            // {
-            //     Console.WriteLine("there's no default device :(");
-            // }
+                    Console.Error.WriteLine("We ran!");
+                    session.StopRunning();
+                }
+                else
+                {
+                    Console.Error.WriteLine("There's no default device :(");
+                }
+            }
         }
     }
 }
 
+[SupportedOSPlatform("MacOS")]
 internal class MyAVCaptureVideoDataOutputSampleBufferDelegate : IAVCaptureVideoDataOutputSampleBufferDelegate
 {
-    public void CaptureOutputSambleBuffer(IAVCaptureOutput output, nint sampleBuffer, nint connection)
+    public void CaptureOutputSambleBuffer(IAVCaptureOutput output, CMSampleBufferRef sampleBuffer, nint connection)
     {
-        Console.WriteLine("Captured a sample buffer");
+        CVBufferRef buffer = CoreMedia.CMSampleBufferGetImageBuffer(sampleBuffer);
+        NSDictionary dict = CoreVideo.CVBufferCopyAttachments(buffer, CVAttachmentMode.ShouldPropagate);
+        uint count = (uint)dict.Count();
+        nuint width = CoreVideo.CVPixelBufferGetWidth(buffer);
+        nuint height = CoreVideo.CVPixelBufferGetHeight(buffer);
+        FourCharCode pixelFormat = CoreVideo.CVPixelBufferGetPixelFormatType(buffer);
+
+        nuint dataSize = CoreVideo.CVPixelBufferGetDataSize(buffer);
+        bool isPlanar = CoreVideo.CVPixelBufferIsPlanar(buffer);
+
+        byte[] pixelBuffer = new byte[dataSize];
+
+        CoreVideo.CVPixelBufferLockBaseAddress(buffer, CVPixelBufferLockFlags.ReadOnly);
+        nint baseAddress = CoreVideo.CVPixelBufferGetBaseAddress(buffer);
+        Marshal.Copy(baseAddress, pixelBuffer, 0, (int)dataSize);
+        CoreVideo.CVPixelBufferUnlockBaseAddress(buffer, CVPixelBufferLockFlags.ReadOnly);
+
+        Console.Error.WriteLine($"Captured a sample buffer ({count} attachments, {width}x{height}, pxfmt {pixelFormat}, ds {pixelBuffer.Length}, planar={isPlanar})");
+
+        // Write this raw pixel buffer to a file
+        using (FileStream rawPixels = File.Open($"camera-feed.{width}x{height}.{pixelFormat}.raw", FileMode.Append))
+            rawPixels.Write(pixelBuffer, 0, pixelBuffer.Length);
     }
 
-    public void CaptureDiscardedSampleBuffer(IAVCaptureOutput output, nint sampleBuffer, nint connection)
+    public void CaptureDiscardedSampleBuffer(IAVCaptureOutput output, CMSampleBufferRef sampleBuffer, nint connection)
     {
-        Console.WriteLine("Capturedn't a sample buffer");
+        Console.Error.WriteLine("Capturedn't a sample buffer");
     }
 }

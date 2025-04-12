@@ -25,6 +25,7 @@ public static class AVFoundation
             {
                 captureDevices.Add(new CameraPath
                 {
+                    Name = device.LocalizedName.ToUTF8String(),
                     Path = device.UniqueID.ToUTF8String(),
                 });
             }

@@ -71,10 +71,6 @@ internal struct AVCaptureSession : INSObject
     internal void StopRunning() => ObjC.objc_msgSend(id, sel_stopRunning);
 }
 
-internal interface IAVCaptureInput : INSObject
-{
-}
+internal interface IAVCaptureInput : INSObject { }
 
-internal interface IAVCaptureOutput : INSObject
-{
-}
+internal interface IAVCaptureOutput : INSObject { }
