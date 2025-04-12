@@ -8,6 +8,9 @@ namespace SeeShark.Interop.Libc;
 
 /// <summary>
 /// The pixel format or codec of a v4l2 video device.
+///
+/// Its value is a FourCC code. When it is in BigEndian, its strongest bit is 1
+/// and is ignored in the string representation: <code>code | (1 << 31)</code>.
 /// </summary>
 [SupportedOSPlatform("Linux")]
 internal enum V4l2InputFormat : uint
@@ -34,8 +37,8 @@ internal enum V4l2InputFormat : uint
     BGRX555          = 0x35315842, // 'BX15'
     RGB565           = 0x50424752, // 'RGBP'
     RGB555X          = 0x51424752, // 'RGBQ'
-    ARGB555X         = 0xb5315241, // 'AR1µ'
-    XRGB555X         = 0xb5315258, // 'XR1µ'
+    ARGB555X         = 0xb5315241, // 'AR15' BE
+    XRGB555X         = 0xb5315258, // 'XR15' BE
     RGB565X          = 0x52424752, // 'RGBR'
     BGR666           = 0x48524742, // 'BGRH'
     BGR24            = 0x33524742, // 'BGR3'
@@ -56,7 +59,7 @@ internal enum V4l2InputFormat : uint
     Y10              = 0x20303159, // 'Y10 '
     Y12              = 0x20323159, // 'Y12 '
     Y16              = 0x20363159, // 'Y16 '
-    Y16_BE           = 0xa0363159, // 'Y16 '
+    Y16_BE           = 0xa0363159, // 'Y16 ' BE
     Y10BPACK         = 0x42303159, // 'Y10B'
     Y10P             = 0x50303159, // 'Y10P'
     PAL8             = 0x384c4150, // 'PAL8'
