@@ -113,6 +113,8 @@ public class Whatever
 [SupportedOSPlatform("MacOS")]
 internal class MyAVCaptureVideoDataOutputSampleBufferDelegate : IAVCaptureVideoDataOutputSampleBufferDelegate
 {
+    private bool wasPixelFormatDescribed = false;
+
     public void CaptureOutputSambleBuffer(IAVCaptureOutput output, CMSampleBufferRef sampleBuffer, nint connection)
     {
         CVBufferRef buffer = CoreMedia.CMSampleBufferGetImageBuffer(sampleBuffer);
@@ -120,7 +122,7 @@ internal class MyAVCaptureVideoDataOutputSampleBufferDelegate : IAVCaptureVideoD
         uint count = (uint)dict.Count();
         nuint width = CoreVideo.CVPixelBufferGetWidth(buffer);
         nuint height = CoreVideo.CVPixelBufferGetHeight(buffer);
-        FourCharCode pixelFormat = CoreVideo.CVPixelBufferGetPixelFormatType(buffer);
+        CVPixelFormatType pixelFormat = CoreVideo.CVPixelBufferGetPixelFormatType(buffer);
 
         nuint dataSize = CoreVideo.CVPixelBufferGetDataSize(buffer);
         bool isPlanar = CoreVideo.CVPixelBufferIsPlanar(buffer);
@@ -132,6 +134,10 @@ internal class MyAVCaptureVideoDataOutputSampleBufferDelegate : IAVCaptureVideoD
         Marshal.Copy(baseAddress, pixelBuffer, 0, (int)dataSize);
         CoreVideo.CVPixelBufferUnlockBaseAddress(buffer, CVPixelBufferLockFlags.ReadOnly);
 
+        if (!wasPixelFormatDescribed)
+            Console.Error.WriteLine($"Pixel format description: {pixelFormat} | {CoreVideo.DescribePixelFormat(pixelFormat)}\n");
+
+        wasPixelFormatDescribed = true;
         Console.Error.WriteLine($"Captured a sample buffer ({count} attachments, {width}x{height}, pxfmt {pixelFormat}, ds {pixelBuffer.Length}, planar={isPlanar})");
 
         // Write this raw pixel buffer to a file
