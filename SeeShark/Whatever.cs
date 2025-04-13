@@ -135,7 +135,7 @@ internal class MyAVCaptureVideoDataOutputSampleBufferDelegate : IAVCaptureVideoD
         CoreVideo.CVPixelBufferUnlockBaseAddress(buffer, CVPixelBufferLockFlags.ReadOnly);
 
         if (!wasPixelFormatDescribed)
-            Console.Error.WriteLine($"Pixel format description: {pixelFormat} | {CoreVideo.DescribePixelFormat(pixelFormat)}\n");
+            Console.Error.WriteLine($"Pixel format description: {pixelFormat} | {CVPixelFormatTypeMethods.Describe(pixelFormat)}\n");
 
         wasPixelFormatDescribed = true;
         Console.Error.WriteLine($"Captured a sample buffer ({count} attachments, {width}x{height}, pxfmt {pixelFormat}, ds {pixelBuffer.Length}, planar={isPlanar})");

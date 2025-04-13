@@ -6,6 +6,9 @@ using System.Runtime.Versioning;
 
 namespace SeeShark.Interop.Libc;
 
+// Obtained from Linux kernel source code
+// https://github.com/torvalds/linux/blob/7cdabafc001202de9984f22c973305f424e0a8b7/include/uapi/linux/videodev2.h#L541-L831
+
 /// <summary>
 /// The pixel format or codec of a v4l2 video device.
 ///
