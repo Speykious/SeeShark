@@ -12,6 +12,7 @@ namespace SeeShark.Interop.MacOS;
 internal static class ObjC
 {
     private const string lib_objc = "/usr/lib/libobjc.dylib";
+    private const string lib_system = "libSystem.B.dylib";
     private const string lib_avfoundation = "/System/Library/Frameworks/AVFoundation.framework/AVFoundation";
 
     internal static nint AVFoundationHandle;
@@ -133,6 +134,76 @@ internal static class ObjC
     internal static extern nint dispatch_queue_create(string label, nint attr);
     [DllImport(lib_objc)]
     internal static extern void dispatch_release(nint dispatchObject);
+
+    #region ObjC blocks
+    // Arguments such as completionHandler from AVCaptureDevice.requestAccessForMediaType are
+    // actually not function pointers but something very specific to Objective C called "blocks".
+    // See https://clang.llvm.org/docs/Block-ABI-Apple.html for documentation on this.
+    // Man what a nightmare of just-barely-documented shit this runtime is...
+
+    [DllImport(lib_system)]
+    internal static extern nint dlsym(nint handle, string symbol);
+
+    internal static nint NSConcreteGlobalBlock = dlsym(0, "_NSConcreteGlobalBlock");
+
+    [Flags]
+    internal enum BlockFlags : int
+    {
+        /// <summary>
+        /// Set to true on blocks that have captures (and thus are not true
+        /// global blocks) but are known not to escape for various other
+        /// reasons. For backward compatibility with old runtimes, whenever
+        /// BLOCK_IS_NOESCAPE is set, BLOCK_IS_GLOBAL is set too. Copying a
+        /// non-escaping block returns the original block and releasing such a
+        /// block is a no-op, which is exactly how global blocks are handled.
+        /// </summary>
+        IS_NOESCAPE = 1 << 23,
+
+        HAS_COPY_DISPOSE = 1 << 25,
+        HAS_CTOR = 1 << 26, // helpers have C++ code
+        IS_GLOBAL = 1 << 28,
+        HAS_STRET = 1 << 29, // IFF BLOCK_HAS_SIGNATURE
+        HAS_SIGNATURE = 1 << 30,
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct BlockLiteral
+    {
+        /// <summary>
+        /// initialized to <c>&_NSConcreteStackBlock</c> or <c>&_NSConcreteGlobalBlock</c>
+        /// </summary>
+        internal nint Isa;
+        internal BlockFlags Flags;
+        internal int Reserved;
+        internal nint Invoke;
+        internal nint Descriptor;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct BlockDescriptor
+    {
+        /// <summary>
+        /// <c>NULL</c>
+        /// </summary>
+        internal ulong Reserved;
+        /// <summary>
+        /// sizeof(BlockLiteral)
+        /// </summary>
+        internal ulong Size;
+        /// <summary>
+        /// Optional helper function, IFF <c>HAS_COPY_DISPOSE</c>
+        /// </summary>
+        internal nint CopyHelper;
+        /// <summary>
+        /// Optional helper function, IFF <c>HAS_COPY_DISPOSE</c>
+        /// </summary>
+        internal nint DisposeHelper;
+        /// <summary>
+        /// Required <c>ABI.2010.3.16</c>, IFF <c>HAS_SIGNATURE</c>
+        /// </summary>
+        internal nint Signature;
+    }
+    #endregion
 }
 
 internal interface INSObject

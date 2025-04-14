@@ -2,6 +2,9 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
+using System;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
 namespace SeeShark.Interop.MacOS;
@@ -57,6 +60,45 @@ internal struct AVCaptureDevice : INSObject
 
     internal static AVAuthorizationStatus AuthorizationStatusForMediaType(NSString mediaType) =>
         (AVAuthorizationStatus)ObjC.objc_msgSend_int(classPtr.ID, sel_authorizationStatusForMediaType, mediaType.ID);
+
+    public static event EventHandler<bool>? VideoAccessPermissionEventHandler;
+
+    private static unsafe ObjC.BlockDescriptor* rvaDescriptor;
+    private static unsafe ObjC.BlockLiteral* rvaBlock;
+
+    internal static void RequestVideoAccess()
+    {
+        unsafe
+        {
+            if (rvaDescriptor == null)
+            {
+                rvaDescriptor = (ObjC.BlockDescriptor*)NativeMemory.Alloc((nuint)sizeof(ObjC.BlockDescriptor));
+                rvaDescriptor->Reserved = 0;
+                rvaDescriptor->Size = (ulong)sizeof(ObjC.BlockLiteral);
+                rvaDescriptor->CopyHelper = 0;
+                rvaDescriptor->DisposeHelper = 0;
+                rvaDescriptor->Signature = Marshal.StringToHGlobalAnsi("vB");
+            }
+
+            if (rvaBlock == null)
+            {
+                rvaBlock = (ObjC.BlockLiteral*)NativeMemory.Alloc((nuint)sizeof(ObjC.BlockLiteral));
+                rvaBlock->Isa = ObjC.NSConcreteGlobalBlock;
+                rvaBlock->Flags = ObjC.BlockFlags.HAS_SIGNATURE;
+                rvaBlock->Reserved = 0;
+                rvaBlock->Invoke = (nint)(delegate* unmanaged[Cdecl]<nint, byte, void>)&requestAccessForMediaType_completionHandler;
+                rvaBlock->Descriptor = (nint)rvaDescriptor;
+            }
+
+            ObjC.objc_msgSend(classPtr.ID, sel_requestAccessForMediaType, AV_MEDIA_TYPE_VIDEO.ID, (nint)rvaBlock);
+        }
+    }
+
+    [UnmanagedCallersOnly(CallConvs = [typeof(CallConvCdecl)])]
+    private static unsafe void requestAccessForMediaType_completionHandler(nint _blockPtr, byte permissionGranted)
+    {
+        VideoAccessPermissionEventHandler?.Invoke(null, permissionGranted > 0);
+    }
 
     internal readonly NSString UniqueID => new NSString(ObjC.objc_msgSend_id(id, sel_uniqueID));
     internal readonly NSString LocalizedName => new NSString(ObjC.objc_msgSend_id(id, sel_localizedName));

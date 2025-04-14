@@ -16,6 +16,19 @@ using SeeShark.MacOS;
 
 public class Whatever
 {
+    private static bool hasPermission = false;
+    private static bool askedPermission = false;
+
+    private static void onPermissionRequestCompleted(object? _sender, bool permissionGranted)
+    {
+        if (permissionGranted)
+            Console.Error.WriteLine("Permission has been granted!");
+        else
+            Console.Error.WriteLine("Permission has not been granted! (wat)");
+        askedPermission = true;
+        hasPermission = permissionGranted;
+    }
+
     public static unsafe void Main(string[] args)
     {
         if (OperatingSystem.IsMacOS())
@@ -24,8 +37,21 @@ public class Whatever
             Console.Error.WriteLine($"CoreMedia    handle: {CoreMedia.CoreMediaHandle}");
             Console.Error.WriteLine($"CoreVideo    handle: {CoreVideo.CoreVideoHandle}");
 
+            Console.Error.WriteLine("Kindly asking permission before proceeding...");
+            AVCaptureDevice.VideoAccessPermissionEventHandler += onPermissionRequestCompleted;
+            AVCaptureDevice.RequestVideoAccess();
+
+            while (!askedPermission)
+                Thread.Sleep(100);
+
             AVAuthorizationStatus auth = AVCaptureDevice.AuthorizationStatusForMediaType(AVCaptureDevice.AV_MEDIA_TYPE_VIDEO);
             Console.Error.WriteLine($"Current permissions: {auth}");
+
+            if (auth != AVAuthorizationStatus.Authorized)
+            {
+                Console.Error.WriteLine("Not authorized to get camera input, quitting immediately");
+                return;
+            }
 
             foreach (CameraPath cameraPath in CameraDevice.Available())
             {
