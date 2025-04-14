@@ -3,8 +3,8 @@
   <PropertyGroup Label="Project">
     <AssemtlyTitle>SeeShark</AssemtlyTitle>
     <AssemblyName>SeeShark</AssemblyName>
-    <TargetFramework>net6.0</TargetFramework>
-    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Exe</OutputType>
     <ImplicitUsings>disable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
@@ -12,20 +12,18 @@
 
   <PropertyGroup Label="Nuget">
     <PackageId>SeeShark</PackageId>
-    <Version>4.0.0</Version>
-    <Authors>The Vignette Authors</Authors>
-    <PackageTags>FFmpeg;Camera;Webcam;Stream;</PackageTags>
+    <Version>5.0.0</Version>
+    <Authors>Speykious</Authors>
+    <PackageTags>Camera;Webcam;Stream;</PackageTags>
     <Title>SeeShark</Title>
     <Description>Simple Camera library</Description>
-    <Copyright>2021 The Vignette Authors</Copyright>
-    <PackageProjectUrl>https://github.com/vignetteapp/SeeShark</PackageProjectUrl>
+    <Copyright>2022 Speykious</Copyright>
+    <PackageProjectUrl>https://github.com/Speykious/SeeShark</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup Label="Package References">
-    <PackageReference Include="DirectShowLib.Standard" Version="2.1.0" />
-    <PackageReference Include="FFmpeg.AutoGen" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup Label="Documents">

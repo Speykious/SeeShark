@@ -1,1011 +1,223 @@
 // Copyright (c) Speykious
 // This file is part of SeeShark.
-// SeeShark is licensed under the BSD 3-Clause License. See LICENSE for details.
+// SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
+
+using System.Runtime.Versioning;
 
 namespace SeeShark.Interop.Libc;
 
+// Obtained from Linux kernel source code
+// https://github.com/torvalds/linux/blob/7cdabafc001202de9984f22c973305f424e0a8b7/include/uapi/linux/videodev2.h#L541-L831
+
 /// <summary>
-/// The pixel format or codec of a video device.
+/// The pixel format or codec of a v4l2 video device.
+///
+/// Its value is a FourCC code. When it is in BigEndian, its strongest bit is 1
+/// and is ignored in the string representation: <code>code | (1 << 31)</code>.
 /// </summary>
+[SupportedOSPlatform("Linux")]
 internal enum V4l2InputFormat : uint
 {
-    /// <summary>
-    /// RGB332
-    /// </summary>
-    RGB332 = 826427218,
-
-    /// <summary>
-    /// RGB444
-    /// </summary>
-    RGB444 = 875836498,
-
-    /// <summary>
-    /// ARGB444
-    /// </summary>
-    ARGB444 = 842093121,
-
-    /// <summary>
-    /// XRGB444
-    /// </summary>
-    XRGB444 = 842093144,
-
-    /// <summary>
-    /// RGBA444
-    /// </summary>
-    RGBA444 = 842088786,
-
-    /// <summary>
-    /// RGBX444
-    /// </summary>
-    RGBX444 = 842094674,
-
-    /// <summary>
-    /// ABGR444
-    /// </summary>
-    ABGR444 = 842089025,
-
-    /// <summary>
-    /// XBGR444
-    /// </summary>
-    XBGR444 = 842089048,
-
-    /// <summary>
-    /// BGRA444
-    /// </summary>
-    BGRA444 = 842088775,
-
-    /// <summary>
-    /// BGRX444
-    /// </summary>
-    BGRX444 = 842094658,
-
-    /// <summary>
-    /// RGB555
-    /// </summary>
-    RGB555 = 1329743698,
-
-    /// <summary>
-    /// ARGB555
-    /// </summary>
-    ARGB555 = 892424769,
-
-    /// <summary>
-    /// XRGB555
-    /// </summary>
-    XRGB555 = 892424792,
-
-    /// <summary>
-    /// RGBA555
-    /// </summary>
-    RGBA555 = 892420434,
-
-    /// <summary>
-    /// RGBX555
-    /// </summary>
-    RGBX555 = 892426322,
-
-    /// <summary>
-    /// ABGR555
-    /// </summary>
-    ABGR555 = 892420673,
-
-    /// <summary>
-    /// XBGR555
-    /// </summary>
-    XBGR555 = 892420696,
-
-    /// <summary>
-    /// BGRA555
-    /// </summary>
-    BGRA555 = 892420418,
-
-    /// <summary>
-    /// BGRX555
-    /// </summary>
-    BGRX555 = 892426306,
-
-    /// <summary>
-    /// RGB565
-    /// </summary>
-    RGB565 = 1346520914,
-
-    /// <summary>
-    /// RGB555X
-    /// </summary>
-    RGB555X = 1363298130,
-
-    /// <summary>
-    /// ARGB555X
-    /// </summary>
-    ARGB555X = 3039908417,
-
-    /// <summary>
-    /// XRGB555X
-    /// </summary>
-    XRGB555X = 3039908440,
-
-    /// <summary>
-    /// RGB565X
-    /// </summary>
-    RGB565X = 1380075346,
-
-    /// <summary>
-    /// BGR666
-    /// </summary>
-    BGR666 = 1213351746,
-
-    /// <summary>
-    /// BGR24
-    /// </summary>
-    BGR24 = 861030210,
-
-    /// <summary>
-    /// RGB24
-    /// </summary>
-    RGB24 = 859981650,
-
-    /// <summary>
-    /// BGR32
-    /// </summary>
-    BGR32 = 877807426,
-
-    /// <summary>
-    /// ABGR32
-    /// </summary>
-    ABGR32 = 875713089,
-
-    /// <summary>
-    /// XBGR32
-    /// </summary>
-    XBGR32 = 875713112,
-
-    /// <summary>
-    /// BGRA32
-    /// </summary>
-    BGRA32 = 875708754,
-
-    /// <summary>
-    /// BGRX32
-    /// </summary>
-    BGRX32 = 875714642,
-
-    /// <summary>
-    /// RGB32
-    /// </summary>
-    RGB32 = 876758866,
-
-    /// <summary>
-    /// RGBA32
-    /// </summary>
-    RGBA32 = 875708993,
-
-    /// <summary>
-    /// RGBX32
-    /// </summary>
-    RGBX32 = 875709016,
-
-    /// <summary>
-    /// ARGB32
-    /// </summary>
-    ARGB32 = 875708738,
-
-    /// <summary>
-    /// XRGB32
-    /// </summary>
-    XRGB32 = 875714626,
-
-    /// <summary>
-    /// GREY
-    /// </summary>
-    GREY = 1497715271,
-
-    /// <summary>
-    /// Y4
-    /// </summary>
-    Y4 = 540291161,
-
-    /// <summary>
-    /// Y6
-    /// </summary>
-    Y6 = 540422233,
-
-    /// <summary>
-    /// Y10
-    /// </summary>
-    Y10 = 540029273,
-
-    /// <summary>
-    /// Y12
-    /// </summary>
-    Y12 = 540160345,
-
-    /// <summary>
-    /// Y16
-    /// </summary>
-    Y16 = 540422489,
-
-    /// <summary>
-    /// Y16_BE
-    /// </summary>
-    Y16_BE = 2687906137,
-
-    /// <summary>
-    /// Y10BPACK
-    /// </summary>
-    Y10BPACK = 1110454617,
-
-    /// <summary>
-    /// Y10P
-    /// </summary>
-    Y10P = 1345335641,
-
-    /// <summary>
-    /// PAL8
-    /// </summary>
-    PAL8 = 944521552,
-
-    /// <summary>
-    /// UV8
-    /// </summary>
-    UV8 = 540563029,
-
-    /// <summary>
-    /// YUYV
-    /// </summary>
-    YUYV = 1448695129,
-
-    /// <summary>
-    /// YYUV
-    /// </summary>
-    YYUV = 1448434009,
-
-    /// <summary>
-    /// YVYU
-    /// </summary>
-    YVYU = 1431918169,
-
-    /// <summary>
-    /// UYVY
-    /// </summary>
-    UYVY = 1498831189,
-
-    /// <summary>
-    /// VYUY
-    /// </summary>
-    VYUY = 1498765654,
-
-    /// <summary>
-    /// Y41P
-    /// </summary>
-    Y41P = 1345401945,
-
-    /// <summary>
-    /// YUV444
-    /// </summary>
-    YUV444 = 875836505,
-
-    /// <summary>
-    /// YUV555
-    /// </summary>
-    YUV555 = 1331058009,
-
-    /// <summary>
-    /// YUV565
-    /// </summary>
-    YUV565 = 1347835225,
-
-    /// <summary>
-    /// YUV32
-    /// </summary>
-    YUV32 = 878073177,
-
-    /// <summary>
-    /// AYUV32
-    /// </summary>
-    AYUV32 = 1448433985,
-
-    /// <summary>
-    /// XYUV32
-    /// </summary>
-    XYUV32 = 1448434008,
-
-    /// <summary>
-    /// VUYA32
-    /// </summary>
-    VUYA32 = 1096373590,
-
-    /// <summary>
-    /// VUYX32
-    /// </summary>
-    VUYX32 = 1482249558,
-
-    /// <summary>
-    /// HI240
-    /// </summary>
-    HI240 = 875710792,
-
-    /// <summary>
-    /// HM12
-    /// </summary>
-    HM12 = 842091848,
-
-    /// <summary>
-    /// M420
-    /// </summary>
-    M420 = 808596557,
-
-    /// <summary>
-    /// NV12
-    /// </summary>
-    NV12 = 842094158,
-
-    /// <summary>
-    /// NV21
-    /// </summary>
-    NV21 = 825382478,
-
-    /// <summary>
-    /// NV16
-    /// </summary>
-    NV16 = 909203022,
-
-    /// <summary>
-    /// NV61
-    /// </summary>
-    NV61 = 825644622,
-
-    /// <summary>
-    /// NV24
-    /// </summary>
-    NV24 = 875714126,
-
-    /// <summary>
-    /// NV42
-    /// </summary>
-    NV42 = 842290766,
-
-    /// <summary>
-    /// NV12M
-    /// </summary>
-    NV12M = 842091854,
-
-    /// <summary>
-    /// NV21M
-    /// </summary>
-    NV21M = 825380174,
-
-    /// <summary>
-    /// NV16M
-    /// </summary>
-    NV16M = 909200718,
-
-    /// <summary>
-    /// NV61M
-    /// </summary>
-    NV61M = 825642318,
-
-    /// <summary>
-    /// NV12MT
-    /// </summary>
-    NV12MT = 842091860,
-
-    /// <summary>
-    /// NV12MT_16X16
-    /// </summary>
-    NV12MT_16X16 = 842091862,
-
-    /// <summary>
-    /// YUV410
-    /// </summary>
-    YUV410 = 961959257,
-
-    /// <summary>
-    /// YVU410
-    /// </summary>
-    YVU410 = 961893977,
-
-    /// <summary>
-    /// YUV411P
-    /// </summary>
-    YUV411P = 1345401140,
-
-    /// <summary>
-    /// YUV420
-    /// </summary>
-    YUV420 = 842093913,
-
-    /// <summary>
-    /// YVU420
-    /// </summary>
-    YVU420 = 842094169,
-
-    /// <summary>
-    /// YUV422P
-    /// </summary>
-    YUV422P = 1345466932,
-
-    /// <summary>
-    /// YUV420M
-    /// </summary>
-    YUV420M = 842091865,
-
-    /// <summary>
-    /// YVU420M
-    /// </summary>
-    YVU420M = 825380185,
-
-    /// <summary>
-    /// YUV422M
-    /// </summary>
-    YUV422M = 909200729,
-
-    /// <summary>
-    /// YVU422M
-    /// </summary>
-    YVU422M = 825642329,
-
-    /// <summary>
-    /// YUV444M
-    /// </summary>
-    YUV444M = 875711833,
-
-    /// <summary>
-    /// YVU444M
-    /// </summary>
-    YVU444M = 842288473,
-
-    /// <summary>
-    /// SBGGR8
-    /// </summary>
-    SBGGR8 = 825770306,
-
-    /// <summary>
-    /// SGBRG8
-    /// </summary>
-    SGBRG8 = 1196573255,
-
-    /// <summary>
-    /// SGRBG8
-    /// </summary>
-    SGRBG8 = 1195528775,
-
-    /// <summary>
-    /// SRGGB8
-    /// </summary>
-    SRGGB8 = 1111967570,
-
-    /// <summary>
-    /// SBGGR10
-    /// </summary>
-    SBGGR10 = 808535874,
-
-    /// <summary>
-    /// SGBRG10
-    /// </summary>
-    SGBRG10 = 808534599,
-
-    /// <summary>
-    /// SGRBG10
-    /// </summary>
-    SGRBG10 = 808534338,
-
-    /// <summary>
-    /// SRGGB10
-    /// </summary>
-    SRGGB10 = 808535890,
-
-    /// <summary>
-    /// SBGGR10P
-    /// </summary>
-    SBGGR10P = 1094795888,
-
-    /// <summary>
-    /// SGBRG10P
-    /// </summary>
-    SGBRG10P = 1094797168,
-
-    /// <summary>
-    /// SGRBG10P
-    /// </summary>
-    SGRBG10P = 1094805360,
-
-    /// <summary>
-    /// SRGGB10P
-    /// </summary>
-    SRGGB10P = 1094799984,
-
-    /// <summary>
-    /// SBGGR10ALAW8
-    /// </summary>
-    SBGGR10ALAW8 = 943800929,
-
-    /// <summary>
-    /// SGBRG10ALAW8
-    /// </summary>
-    SGBRG10ALAW8 = 943802209,
-
-    /// <summary>
-    /// SGRBG10ALAW8
-    /// </summary>
-    SGRBG10ALAW8 = 943810401,
-
-    /// <summary>
-    /// SRGGB10ALAW8
-    /// </summary>
-    SRGGB10ALAW8 = 943805025,
-
-    /// <summary>
-    /// SBGGR10DPCM8
-    /// </summary>
-    SBGGR10DPCM8 = 943800930,
-
-    /// <summary>
-    /// SGBRG10DPCM8
-    /// </summary>
-    SGBRG10DPCM8 = 943802210,
-
-    /// <summary>
-    /// SGRBG10DPCM8
-    /// </summary>
-    SGRBG10DPCM8 = 808535106,
-
-    /// <summary>
-    /// SRGGB10DPCM8
-    /// </summary>
-    SRGGB10DPCM8 = 943805026,
-
-    /// <summary>
-    /// SBGGR12
-    /// </summary>
-    SBGGR12 = 842090306,
-
-    /// <summary>
-    /// SGBRG12
-    /// </summary>
-    SGBRG12 = 842089031,
-
-    /// <summary>
-    /// SGRBG12
-    /// </summary>
-    SGRBG12 = 842088770,
-
-    /// <summary>
-    /// SRGGB12
-    /// </summary>
-    SRGGB12 = 842090322,
-
-    /// <summary>
-    /// SBGGR12P
-    /// </summary>
-    SBGGR12P = 1128481392,
-
-    /// <summary>
-    /// SGBRG12P
-    /// </summary>
-    SGBRG12P = 1128482672,
-
-    /// <summary>
-    /// SGRBG12P
-    /// </summary>
-    SGRBG12P = 1128490864,
-
-    /// <summary>
-    /// SRGGB12P
-    /// </summary>
-    SRGGB12P = 1128485488,
-
-    /// <summary>
-    /// SBGGR14P
-    /// </summary>
-    SBGGR14P = 1162166896,
-
-    /// <summary>
-    /// SGBRG14P
-    /// </summary>
-    SGBRG14P = 1162168176,
-
-    /// <summary>
-    /// SGRBG14P
-    /// </summary>
-    SGRBG14P = 1162176368,
-
-    /// <summary>
-    /// SRGGB14P
-    /// </summary>
-    SRGGB14P = 1162170992,
-
-    /// <summary>
-    /// SBGGR16
-    /// </summary>
-    SBGGR16 = 844257602,
-
-    /// <summary>
-    /// SGBRG16
-    /// </summary>
-    SGBRG16 = 909197895,
-
-    /// <summary>
-    /// SGRBG16
-    /// </summary>
-    SGRBG16 = 909201991,
-
-    /// <summary>
-    /// SRGGB16
-    /// </summary>
-    SRGGB16 = 909199186,
-
-    /// <summary>
-    /// HSV24
-    /// </summary>
-    HSV24 = 861295432,
-
-    /// <summary>
-    /// HSV32
-    /// </summary>
-    HSV32 = 878072648,
-
-    /// <summary>
-    /// MJPEG
-    /// </summary>
-    MJPEG = 1196444237,
-
-    /// <summary>
-    /// JPEG
-    /// </summary>
-    JPEG = 1195724874,
-
-    /// <summary>
-    /// DV
-    /// </summary>
-    DV = 1685288548,
-
-    /// <summary>
-    /// MPEG
-    /// </summary>
-    MPEG = 1195724877,
-
-    /// <summary>
-    /// H264
-    /// </summary>
-    H264 = 875967048,
-
-    /// <summary>
-    /// H264_NO_SC
-    /// </summary>
-    H264_NO_SC = 826496577,
-
-    /// <summary>
-    /// H264_MVC
-    /// </summary>
-    H264_MVC = 875967053,
-
-    /// <summary>
-    /// H263
-    /// </summary>
-    H263 = 859189832,
-
-    /// <summary>
-    /// MPEG1
-    /// </summary>
-    MPEG1 = 826757197,
-
-    /// <summary>
-    /// MPEG2
-    /// </summary>
-    MPEG2 = 843534413,
-
-    /// <summary>
-    /// MPEG2_SLICE
-    /// </summary>
-    MPEG2_SLICE = 1395803981,
-
-    /// <summary>
-    /// MPEG4
-    /// </summary>
-    MPEG4 = 877088845,
-
-    /// <summary>
-    /// XVID
-    /// </summary>
-    XVID = 1145656920,
-
-    /// <summary>
-    /// VC1_ANNEX_G
-    /// </summary>
-    VC1_ANNEX_G = 1194410838,
-
-    /// <summary>
-    /// VC1_ANNEX_L
-    /// </summary>
-    VC1_ANNEX_L = 1278296918,
-
-    /// <summary>
-    /// VP8
-    /// </summary>
-    VP8 = 808996950,
-
-    /// <summary>
-    /// VP9
-    /// </summary>
-    VP9 = 809062486,
-
-    /// <summary>
-    /// HEVC
-    /// </summary>
-    HEVC = 1129727304,
-
-    /// <summary>
-    /// FWHT
-    /// </summary>
-    FWHT = 1414027078,
-
-    /// <summary>
-    /// FWHT_STATELESS
-    /// </summary>
-    FWHT_STATELESS = 1213679187,
-
-    /// <summary>
-    /// CPIA1
-    /// </summary>
-    CPIA1 = 1095323715,
-
-    /// <summary>
-    /// WNVA
-    /// </summary>
-    WNVA = 1096175191,
-
-    /// <summary>
-    /// SN9C10X
-    /// </summary>
-    SN9C10X = 808532307,
-
-    /// <summary>
-    /// SN9C20X_I420
-    /// </summary>
-    SN9C20X_I420 = 808597843,
-
-    /// <summary>
-    /// PWC1
-    /// </summary>
-    PWC1 = 826496848,
-
-    /// <summary>
-    /// PWC2
-    /// </summary>
-    PWC2 = 843274064,
-
-    /// <summary>
-    /// ET61X251
-    /// </summary>
-    ET61X251 = 892483141,
-
-    /// <summary>
-    /// SPCA501
-    /// </summary>
-    SPCA501 = 825242963,
-
-    /// <summary>
-    /// SPCA505
-    /// </summary>
-    SPCA505 = 892351827,
-
-    /// <summary>
-    /// SPCA508
-    /// </summary>
-    SPCA508 = 942683475,
-
-    /// <summary>
-    /// SPCA561
-    /// </summary>
-    SPCA561 = 825636179,
-
-    /// <summary>
-    /// PAC207
-    /// </summary>
-    PAC207 = 925905488,
-
-    /// <summary>
-    /// MR97310A
-    /// </summary>
-    MR97310A = 808530765,
-
-    /// <summary>
-    /// JL2005BCD
-    /// </summary>
-    JL2005BCD = 808602698,
-
-    /// <summary>
-    /// SN9C2028
-    /// </summary>
-    SN9C2028 = 1481527123,
-
-    /// <summary>
-    /// SQ905C
-    /// </summary>
-    SQ905C = 1127559225,
-
-    /// <summary>
-    /// PJPG
-    /// </summary>
-    PJPG = 1196444240,
-
-    /// <summary>
-    /// OV511
-    /// </summary>
-    OV511 = 825308495,
-
-    /// <summary>
-    /// OV518
-    /// </summary>
-    OV518 = 942749007,
-
-    /// <summary>
-    /// STV0680
-    /// </summary>
-    STV0680 = 808990291,
-
-    /// <summary>
-    /// TM6000
-    /// </summary>
-    TM6000 = 808865108,
-
-    /// <summary>
-    /// CIT_YYVYUY
-    /// </summary>
-    CIT_YYVYUY = 1448364355,
-
-    /// <summary>
-    /// KONICA420
-    /// </summary>
-    KONICA420 = 1229868875,
-
-    /// <summary>
-    /// JPGL
-    /// </summary>
-    JPGL = 1279742026,
-
-    /// <summary>
-    /// SE401
-    /// </summary>
-    SE401 = 825242707,
-
-    /// <summary>
-    /// S5C_UYVY_JPG
-    /// </summary>
-    S5C_UYVY_JPG = 1229141331,
-
-    /// <summary>
-    /// Y8I
-    /// </summary>
-    Y8I = 541669465,
-
-    /// <summary>
-    /// Y12I
-    /// </summary>
-    Y12I = 1228026201,
-
-    /// <summary>
-    /// Z16
-    /// </summary>
-    Z16 = 540422490,
-
-    /// <summary>
-    /// MT21C
-    /// </summary>
-    MT21C = 825381965,
-
-    /// <summary>
-    /// INZI
-    /// </summary>
-    INZI = 1230655049,
-
-    /// <summary>
-    /// SUNXI_TILED_NV12
-    /// </summary>
-    SUNXI_TILED_NV12 = 842093651,
-
-    /// <summary>
-    /// CNF4
-    /// </summary>
-    CNF4 = 877022787,
-
-    /// <summary>
-    /// IPU3_SBGGR10
-    /// </summary>
-    IPU3_SBGGR10 = 1647538281,
-
-    /// <summary>
-    /// IPU3_SGBRG10
-    /// </summary>
-    IPU3_SGBRG10 = 1731424361,
-
-    /// <summary>
-    /// IPU3_SGRBG10
-    /// </summary>
-    IPU3_SGRBG10 = 1194553449,
-
-    /// <summary>
-    /// IPU3_SRGGB10
-    /// </summary>
-    IPU3_SRGGB10 = 1915973737,
-
-    /// <summary>
-    /// CU8
-    /// </summary>
-    CU8 = 942691651,
-
-    /// <summary>
-    /// CU16LE
-    /// </summary>
-    CU16LE = 909202755,
-
-    /// <summary>
-    /// CS8
-    /// </summary>
-    CS8 = 942691139,
-
-    /// <summary>
-    /// CS14LE
-    /// </summary>
-    CS14LE = 875647811,
-
-    /// <summary>
-    /// RU12LE
-    /// </summary>
-    RU12LE = 842093906,
-
-    /// <summary>
-    /// PCU16BE
-    /// </summary>
-    PCU16BE = 909198160,
-
-    /// <summary>
-    /// PCU18BE
-    /// </summary>
-    PCU18BE = 942752592,
-
-    /// <summary>
-    /// PCU20BE
-    /// </summary>
-    PCU20BE = 808600400,
-
-    /// <summary>
-    /// DELTA_TD16
-    /// </summary>
-    DELTA_TD16 = 909198420,
-
-    /// <summary>
-    /// DELTA_TD08
-    /// </summary>
-    DELTA_TD08 = 942687316,
-
-    /// <summary>
-    /// TU16
-    /// </summary>
-    TU16 = 909202772,
-
-    /// <summary>
-    /// TU08
-    /// </summary>
-    TU08 = 942691668,
-
-    /// <summary>
-    /// VSP1_HGO
-    /// </summary>
-    VSP1_HGO = 1213223766,
-
-    /// <summary>
-    /// VSP1_HGT
-    /// </summary>
-    VSP1_HGT = 1414550358,
-
-    /// <summary>
-    /// UVC
-    /// </summary>
-    UVC = 1212372565,
-
-    /// <summary>
-    /// D4XX
-    /// </summary>
-    D4XX = 1482175556,
+#pragma warning disable format
+    RGB332           = 0x31424752, // 'RGB1'
+    RGB444           = 0x34343452, // 'R444'
+    ARGB444          = 0x32315241, // 'AR12'
+    XRGB444          = 0x32315258, // 'XR12'
+    RGBA444          = 0x32314152, // 'RA12'
+    RGBX444          = 0x32315852, // 'RX12'
+    ABGR444          = 0x32314241, // 'AB12'
+    XBGR444          = 0x32314258, // 'XB12'
+    BGRA444          = 0x32314147, // 'GA12'
+    BGRX444          = 0x32315842, // 'BX12'
+    RGB555           = 0x4f424752, // 'RGBO'
+    ARGB555          = 0x35315241, // 'AR15'
+    XRGB555          = 0x35315258, // 'XR15'
+    RGBA555          = 0x35314152, // 'RA15'
+    RGBX555          = 0x35315852, // 'RX15'
+    ABGR555          = 0x35314241, // 'AB15'
+    XBGR555          = 0x35314258, // 'XB15'
+    BGRA555          = 0x35314142, // 'BA15'
+    BGRX555          = 0x35315842, // 'BX15'
+    RGB565           = 0x50424752, // 'RGBP'
+    RGB555X          = 0x51424752, // 'RGBQ'
+    ARGB555X         = 0xb5315241, // 'AR15' BE
+    XRGB555X         = 0xb5315258, // 'XR15' BE
+    RGB565X          = 0x52424752, // 'RGBR'
+    BGR666           = 0x48524742, // 'BGRH'
+    BGR24            = 0x33524742, // 'BGR3'
+    RGB24            = 0x33424752, // 'RGB3'
+    BGR32            = 0x34524742, // 'BGR4'
+    ABGR32           = 0x34325241, // 'AR24'
+    XBGR32           = 0x34325258, // 'XR24'
+    BGRA32           = 0x34324152, // 'RA24'
+    BGRX32           = 0x34325852, // 'RX24'
+    RGB32            = 0x34424752, // 'RGB4'
+    RGBA32           = 0x34324241, // 'AB24'
+    RGBX32           = 0x34324258, // 'XB24'
+    ARGB32           = 0x34324142, // 'BA24'
+    XRGB32           = 0x34325842, // 'BX24'
+    GREY             = 0x59455247, // 'GREY'
+    Y4               = 0x20343059, // 'Y04 '
+    Y6               = 0x20363059, // 'Y06 '
+    Y10              = 0x20303159, // 'Y10 '
+    Y12              = 0x20323159, // 'Y12 '
+    Y16              = 0x20363159, // 'Y16 '
+    Y16_BE           = 0xa0363159, // 'Y16 ' BE
+    Y10BPACK         = 0x42303159, // 'Y10B'
+    Y10P             = 0x50303159, // 'Y10P'
+    PAL8             = 0x384c4150, // 'PAL8'
+    UV8              = 0x20385655, // 'UV8 '
+    YUYV             = 0x56595559, // 'YUYV'
+    YYUV             = 0x56555959, // 'YYUV'
+    YVYU             = 0x55595659, // 'YVYU'
+    UYVY             = 0x59565955, // 'UYVY'
+    VYUY             = 0x59555956, // 'VYUY'
+    Y41P             = 0x50313459, // 'Y41P'
+    YUV444           = 0x34343459, // 'Y444'
+    YUV555           = 0x4f565559, // 'YUVO'
+    YUV565           = 0x50565559, // 'YUVP'
+    YUV32            = 0x34565559, // 'YUV4'
+    AYUV32           = 0x56555941, // 'AYUV'
+    XYUV32           = 0x56555958, // 'XYUV'
+    VUYA32           = 0x41595556, // 'VUYA'
+    VUYX32           = 0x58595556, // 'VUYX'
+    HI240            = 0x34324948, // 'HI24'
+    HM12             = 0x32314d48, // 'HM12'
+    M420             = 0x3032344d, // 'M420'
+    NV12             = 0x3231564e, // 'NV12'
+    NV21             = 0x3132564e, // 'NV21'
+    NV16             = 0x3631564e, // 'NV16'
+    NV61             = 0x3136564e, // 'NV61'
+    NV24             = 0x3432564e, // 'NV24'
+    NV42             = 0x3234564e, // 'NV42'
+    NV12M            = 0x32314d4e, // 'NM12'
+    NV21M            = 0x31324d4e, // 'NM21'
+    NV16M            = 0x36314d4e, // 'NM16'
+    NV61M            = 0x31364d4e, // 'NM61'
+    NV12MT           = 0x32314d54, // 'TM12'
+    NV12MT_16X16     = 0x32314d56, // 'VM12'
+    YUV410           = 0x39565559, // 'YUV9'
+    YVU410           = 0x39555659, // 'YVU9'
+    YUV411P          = 0x50313134, // '411P'
+    YUV420           = 0x32315559, // 'YU12'
+    YVU420           = 0x32315659, // 'YV12'
+    YUV422P          = 0x50323234, // '422P'
+    YUV420M          = 0x32314d59, // 'YM12'
+    YVU420M          = 0x31324d59, // 'YM21'
+    YUV422M          = 0x36314d59, // 'YM16'
+    YVU422M          = 0x31364d59, // 'YM61'
+    YUV444M          = 0x34324d59, // 'YM24'
+    YVU444M          = 0x32344d59, // 'YM42'
+    SBGGR8           = 0x31384142, // 'BA81'
+    SGBRG8           = 0x47524247, // 'GBRG'
+    SGRBG8           = 0x47425247, // 'GRBG'
+    SRGGB8           = 0x42474752, // 'RGGB'
+    SBGGR10          = 0x30314742, // 'BG10'
+    SGBRG10          = 0x30314247, // 'GB10'
+    SGRBG10          = 0x30314142, // 'BA10'
+    SRGGB10          = 0x30314752, // 'RG10'
+    SBGGR10P         = 0x41414270, // 'pBAA'
+    SGBRG10P         = 0x41414770, // 'pGAA'
+    SGRBG10P         = 0x41416770, // 'pgAA'
+    SRGGB10P         = 0x41415270, // 'pRAA'
+    SBGGR10ALAW8     = 0x38414261, // 'aBA8'
+    SGBRG10ALAW8     = 0x38414761, // 'aGA8'
+    SGRBG10ALAW8     = 0x38416761, // 'agA8'
+    SRGGB10ALAW8     = 0x38415261, // 'aRA8'
+    SBGGR10DPCM8     = 0x38414262, // 'bBA8'
+    SGBRG10DPCM8     = 0x38414762, // 'bGA8'
+    SGRBG10DPCM8     = 0x30314442, // 'BD10'
+    SRGGB10DPCM8     = 0x38415262, // 'bRA8'
+    SBGGR12          = 0x32314742, // 'BG12'
+    SGBRG12          = 0x32314247, // 'GB12'
+    SGRBG12          = 0x32314142, // 'BA12'
+    SRGGB12          = 0x32314752, // 'RG12'
+    SBGGR12P         = 0x43434270, // 'pBCC'
+    SGBRG12P         = 0x43434770, // 'pGCC'
+    SGRBG12P         = 0x43436770, // 'pgCC'
+    SRGGB12P         = 0x43435270, // 'pRCC'
+    SBGGR14P         = 0x45454270, // 'pBEE'
+    SGBRG14P         = 0x45454770, // 'pGEE'
+    SGRBG14P         = 0x45456770, // 'pgEE'
+    SRGGB14P         = 0x45455270, // 'pREE'
+    SBGGR16          = 0x32525942, // 'BYR2'
+    SGBRG16          = 0x36314247, // 'GB16'
+    SGRBG16          = 0x36315247, // 'GR16'
+    SRGGB16          = 0x36314752, // 'RG16'
+    HSV24            = 0x33565348, // 'HSV3'
+    HSV32            = 0x34565348, // 'HSV4'
+    MJPEG            = 0x47504a4d, // 'MJPG'
+    JPEG             = 0x4745504a, // 'JPEG'
+    DV               = 0x64737664, // 'dvsd'
+    MPEG             = 0x4745504d, // 'MPEG'
+    H264             = 0x34363248, // 'H264'
+    H264_NO_SC       = 0x31435641, // 'AVC1'
+    H264_MVC         = 0x3436324d, // 'M264'
+    H263             = 0x33363248, // 'H263'
+    MPEG1            = 0x3147504d, // 'MPG1'
+    MPEG2            = 0x3247504d, // 'MPG2'
+    MPEG2_SLICE      = 0x5332474d, // 'MG2S'
+    MPEG4            = 0x3447504d, // 'MPG4'
+    XVID             = 0x44495658, // 'XVID'
+    VC1_ANNEX_G      = 0x47314356, // 'VC1G'
+    VC1_ANNEX_L      = 0x4c314356, // 'VC1L'
+    VP8              = 0x30385056, // 'VP80'
+    VP9              = 0x30395056, // 'VP90'
+    HEVC             = 0x43564548, // 'HEVC'
+    FWHT             = 0x54485746, // 'FWHT'
+    FWHT_STATELESS   = 0x48574653, // 'SFWH'
+    CPIA1            = 0x41495043, // 'CPIA'
+    WNVA             = 0x41564e57, // 'WNVA'
+    SN9C10X          = 0x30313953, // 'S910'
+    SN9C20X_I420     = 0x30323953, // 'S920'
+    PWC1             = 0x31435750, // 'PWC1'
+    PWC2             = 0x32435750, // 'PWC2'
+    ET61X251         = 0x35323645, // 'E625'
+    SPCA501          = 0x31303553, // 'S501'
+    SPCA505          = 0x35303553, // 'S505'
+    SPCA508          = 0x38303553, // 'S508'
+    SPCA561          = 0x31363553, // 'S561'
+    PAC207           = 0x37303250, // 'P207'
+    MR97310A         = 0x3031334d, // 'M310'
+    JL2005BCD        = 0x30324c4a, // 'JL20'
+    SN9C2028         = 0x584e4f53, // 'SONX'
+    SQ905C           = 0x43353039, // '905C'
+    PJPG             = 0x47504a50, // 'PJPG'
+    OV511            = 0x3131354f, // 'O511'
+    OV518            = 0x3831354f, // 'O518'
+    STV0680          = 0x30383653, // 'S680'
+    TM6000           = 0x30364d54, // 'TM60'
+    CIT_YYVYUY       = 0x56544943, // 'CITV'
+    KONICA420        = 0x494e4f4b, // 'KONI'
+    JPGL             = 0x4c47504a, // 'JPGL'
+    SE401            = 0x31303453, // 'S401'
+    S5C_UYVY_JPG     = 0x49433553, // 'S5CI'
+    Y8I              = 0x20493859, // 'Y8I '
+    Y12I             = 0x49323159, // 'Y12I'
+    Z16              = 0x2036315a, // 'Z16 '
+    MT21C            = 0x3132544d, // 'MT21'
+    INZI             = 0x495a4e49, // 'INZI'
+    SUNXI_TILED_NV12 = 0x32315453, // 'ST12'
+    CNF4             = 0x34464e43, // 'CNF4'
+    IPU3_SBGGR10     = 0x62337069, // 'ip3b'
+    IPU3_SGBRG10     = 0x67337069, // 'ip3g'
+    IPU3_SGRBG10     = 0x47337069, // 'ip3G'
+    IPU3_SRGGB10     = 0x72337069, // 'ip3r'
+    CU8              = 0x38305543, // 'CU08'
+    CU16LE           = 0x36315543, // 'CU16'
+    CS8              = 0x38305343, // 'CS08'
+    CS14LE           = 0x34315343, // 'CS14'
+    RU12LE           = 0x32315552, // 'RU12'
+    PCU16BE          = 0x36314350, // 'PC16'
+    PCU18BE          = 0x38314350, // 'PC18'
+    PCU20BE          = 0x30324350, // 'PC20'
+    DELTA_TD16       = 0x36314454, // 'TD16'
+    DELTA_TD08       = 0x38304454, // 'TD08'
+    TU16             = 0x36315554, // 'TU16'
+    TU08             = 0x38305554, // 'TU08'
+    VSP1_HGO         = 0x48505356, // 'VSPH'
+    VSP1_HGT         = 0x54505356, // 'VSPT'
+    UVC              = 0x48435655, // 'UVCH'
+    D4XX             = 0x58583444, // 'D4XX'
+#pragma warning restore format
 }
