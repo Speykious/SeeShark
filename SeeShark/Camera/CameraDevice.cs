@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using SeeShark.Linux;
+using SeeShark.MacOS;
 
 namespace SeeShark.Camera;
 
@@ -43,6 +44,8 @@ public abstract class CameraDevice : IDisposable
     {
         if (OperatingSystem.IsLinux())
             return V4l2.AvailableCameras();
+        else if (OperatingSystem.IsMacOS())
+            return AVFoundation.AvailableCameras();
         else
             throw new NotImplementedException();
     }
@@ -51,8 +54,15 @@ public abstract class CameraDevice : IDisposable
     {
         if (OperatingSystem.IsLinux())
             return V4l2.AvailableFormats(device);
+        else if (OperatingSystem.IsMacOS())
+            return AVFoundation.AvailableFormats(device);
         else
             throw new NotImplementedException();
+    }
+
+    public List<VideoFormat> AvailableFormats()
+    {
+        return AvailableFormats(Path);
     }
 
     public abstract void StartCapture();

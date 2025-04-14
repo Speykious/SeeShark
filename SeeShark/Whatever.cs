@@ -27,13 +27,11 @@ public class Whatever
             AVAuthorizationStatus auth = AVCaptureDevice.AuthorizationStatusForMediaType(AVCaptureDevice.AV_MEDIA_TYPE_VIDEO);
             Console.Error.WriteLine($"Current permissions: {auth}");
 
+            foreach (CameraPath cameraPath in CameraDevice.Available())
             {
-                foreach (CameraPath cameraPath in AVFoundation.AvailableCameras())
-                {
-                    Console.Error.WriteLine($"\n- {cameraPath.Name} ({cameraPath.Path})");
-                    foreach (VideoFormat availableFormat in AVFoundation.AvailableFormats(cameraPath))
-                        Console.Error.WriteLine($"  - {availableFormat}");
-                }
+                Console.Error.WriteLine($"\n- {cameraPath.Name} ({cameraPath.Path})");
+                foreach (VideoFormat availableFormat in CameraDevice.AvailableFormats(cameraPath))
+                    Console.Error.WriteLine($"  - {availableFormat}");
             }
 
             Console.Error.WriteLine($"\nMedia type: {AVCaptureDevice.AV_MEDIA_TYPE_VIDEO.ToUTF8String()}");
