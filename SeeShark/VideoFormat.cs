@@ -2,10 +2,6 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
-using System;
-using System.Runtime.Versioning;
-using SeeShark.Interop.Libc;
-
 namespace SeeShark;
 
 /// <summary>
@@ -18,36 +14,30 @@ public struct VideoFormat
     /// <summary>
     /// The resolution of the video stream.
     /// </summary>
-    /// <value>(width, height)</value>
+    /// <value><c>(width, height)</c></value>
     public (uint, uint) VideoSize { get; init; }
 
     /// <summary>
-    /// Starting point of the capture. It's always (0, 0) for cameras.
+    /// Starting point of the capture. It's always <c>(0, 0)</c> for cameras.
     /// </summary>
-    /// <value>(x, y)</value>
+    /// <value><c>(x, y)</c></value>
     public (int, int) VideoPosition { get; init; }
 
     /// <summary>
-    /// To request a specific framerate for the video stream.
+    /// The Frames Per Second of the video stream.
     /// </summary>
-    /// <remarks>
-    /// The underlying driver will change it back to a compatible framerate.
-    /// </remarks>
     public FramerateRatio Framerate { get; init; }
 
-    [SupportedOSPlatform("Linux")]
-    internal V4l2InputFormat InputFormat { get; init; }
+    /// <summary>
+    /// The image format of the video stream.
+    /// Can be a raw pixel format like <c>ARGB</c> of <c>YUV422</c>, or a compressed image format like <c>MJPEG</c> for instance.
+    /// </summary>
+    internal ImageFormat ImageFormat { get; init; }
 
     /// <summary>
     /// Whether or not to draw the mouse cursor in display captures.
     /// </summary>
     public bool DrawMouse { get; init; }
 
-    public override string ToString()
-    {
-        if (OperatingSystem.IsLinux())
-            return $"size{VideoSize} pos{VideoPosition} {InputFormat} (mouse={DrawMouse}) | {Framerate}";
-        else
-            return $"size{VideoSize} pos{VideoPosition} (mouse={DrawMouse}) | {Framerate}";
-    }
+    public override string ToString() => $"size{VideoSize} pos{VideoPosition} {ImageFormat} (mouse={DrawMouse}) | {Framerate}";
 }

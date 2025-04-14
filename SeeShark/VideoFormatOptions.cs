@@ -2,9 +2,6 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
-using System.Runtime.Versioning;
-using SeeShark.Interop.Libc;
-
 namespace SeeShark;
 
 /// <summary>
@@ -18,13 +15,13 @@ public class VideoFormatOptions
     /// To request a specific resolution of the video stream.
     /// </summary>
     /// <remarks>
-    /// The underlying driver will change it back to a compatible resolution.
+    /// The underlying driver might fallback to a compatible resolution.
     /// </remarks>
     /// <value>(width, height)</value>
     public (uint, uint)? VideoSize { get; set; }
 
     /// <summary>
-    /// To request the capture to start from a specific point
+    /// To request the capture to start from a specific point.
     /// </summary>
     /// <value>(x, y)</value>
     public (int, int)? VideoPosition { get; set; }
@@ -33,12 +30,17 @@ public class VideoFormatOptions
     /// To request a specific framerate for the video stream.
     /// </summary>
     /// <remarks>
-    /// The underlying driver will change it back to a compatible framerate.
+    /// The underlying driver might fallback to a compatible framerate.
     /// </remarks>
     public FramerateRatio? Framerate { get; set; }
 
-    [SupportedOSPlatform("Linux")]
-    internal V4l2InputFormat? InputFormat { get; set; }
+    /// <summary>
+    /// To request a specific image format for the video stream.
+    /// </summary>
+    /// <remarks>
+    /// The underlying driver might fallback to a compatible image format.
+    /// </remarks>
+    internal ImageFormat? ImageFormat { get; set; }
 
     /// <summary>
     /// Whether or not to draw the mouse cursor in display captures.
