@@ -3,7 +3,9 @@
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.Versioning;
+using SeeShark.Camera;
 using SeeShark.Interop.MacOS;
 
 namespace SeeShark.MacOS;
@@ -73,4 +75,15 @@ public static class AVFoundation
 
         return formats;
     }
+
+    #region Open
+    internal static MacOSCameraDevice OpenCamera(CameraPath cameraInfo, VideoFormatOptions options)
+    {
+        AVCaptureDevice? maybeCaptureDevice = AVCaptureDevice.DeviceWithUniqueID(cameraInfo.Path);
+        if (maybeCaptureDevice is AVCaptureDevice captureDevice)
+            return new MacOSCameraDevice(captureDevice, options);
+        else
+            throw new IOException($"Cannot open camera {cameraInfo}");
+    }
+    #endregion
 }

@@ -19,6 +19,12 @@ internal struct AVCaptureDevice : INSObject
         this.id = id;
     }
 
+    public AVCaptureDevice()
+    {
+        id = ObjC.objc_msgSend_id(classPtr.ID, ObjC.Sel_alloc);
+        ObjC.objc_msgSend(id, ObjC.Sel_init);
+    }
+
     public nint ID => id;
 
     private static OClass classPtr = ObjC.GetClass(nameof(AVCaptureDevice));
@@ -33,6 +39,10 @@ internal struct AVCaptureDevice : INSObject
     private static Selector sel_localizedName = ObjC.sel_registerName("localizedName");
     private static Selector sel_hasMediaType = ObjC.sel_registerName("hasMediaType:");
     private static Selector sel_formats = ObjC.sel_registerName("formats");
+    private static Selector sel_activeFormat = ObjC.sel_registerName("activeFormat");
+    private static Selector sel_setActiveFormat = ObjC.sel_registerName("setActiveFormat:");
+    private static Selector sel_lockForConfiguration = ObjC.sel_registerName("lockForConfiguration:");
+    private static Selector sel_unlockForConfiguration = ObjC.sel_registerName("unlockForConfiguration");
 
     internal static NSString AV_MEDIA_TYPE_VIDEO = DL.GetConstant<NSString>(ObjC.AVFoundationHandle, "AVMediaTypeVideo");
 
@@ -104,7 +114,16 @@ internal struct AVCaptureDevice : INSObject
     internal readonly NSString LocalizedName => new NSString(ObjC.objc_msgSend_id(id, sel_localizedName));
     internal readonly NSArray Formats => new NSArray(ObjC.objc_msgSend_id(id, sel_formats));
 
+    internal AVCaptureDeviceFormat ActiveFormat
+    {
+        get => new AVCaptureDeviceFormat(ObjC.objc_msgSend_id(id, sel_activeFormat));
+        set => ObjC.objc_msgSend(id, sel_setActiveFormat, value.ID);
+    }
+
     internal bool HasMediaType(NSString mediaType) => ObjC.objc_msgSend_bool(id, sel_hasMediaType, mediaType.ID);
+
+    internal bool LockForConfiguration() => ObjC.objc_msgSend_bool(id, sel_lockForConfiguration, 0);
+    internal void UnlockForConfiguration() => ObjC.objc_msgSend(id, sel_unlockForConfiguration);
 }
 
 internal enum AVAuthorizationStatus : int

@@ -160,7 +160,7 @@ public static class V4l2
     {
         int deviceFd = open(cameraInfo.Path, FileOpenFlags.O_RDWR);
         if (deviceFd < 0)
-            throw new IOException($"Cannot open camera {cameraInfo.Path}");
+            throw new IOException($"Cannot open camera {cameraInfo}");
 
         // get a suited pixel format
         V4l2InputFormat pixelFormat;
@@ -181,7 +181,7 @@ public static class V4l2
             };
 
             if (V4l2.Xioctl(deviceFd, Ioctl.VidIOC.ENUM_FMT, &formatDesc) == false)
-                throw new IOException($"Cannot get video format for camera {cameraInfo.Path}: {Marshal.GetLastWin32Error()}");
+                throw new IOException($"Cannot get video format for camera {cameraInfo}: {Marshal.GetLastWin32Error()}");
 
             pixelFormat = formatDesc.pixelformat;
         }
@@ -203,7 +203,7 @@ public static class V4l2
         };
 
         if (V4l2.Xioctl(deviceFd, Ioctl.VidIOC.S_FMT, &format) == false)
-            throw new IOException($"Cannot set video format for camera {cameraInfo.Path}");
+            throw new IOException($"Cannot set video format for camera {cameraInfo}");
 
         // get a suited framerate
         FramerateRatio framerate;
@@ -230,7 +230,7 @@ public static class V4l2
             };
 
             if (Xioctl(deviceFd, Ioctl.VidIOC.S_PARM, &parameter) == false)
-                throw new IOException($"Cannot set video format for camera {cameraInfo.Path}");
+                throw new IOException($"Cannot set video format for camera {cameraInfo}");
 
             v4l2_fract timeperframe = parameter.parm.capture.timeperframe;
             framerate = new FramerateRatio
@@ -248,7 +248,7 @@ public static class V4l2
             };
 
             if (Xioctl(deviceFd, Ioctl.VidIOC.G_PARM, &parameter) == false)
-                throw new IOException($"Cannot set video format for camera {cameraInfo.Path}");
+                throw new IOException($"Cannot set video format for camera {cameraInfo}");
 
             v4l2_fract timeperframe = parameter.parm.capture.timeperframe;
             framerate = new FramerateRatio
@@ -284,7 +284,7 @@ public static class V4l2
         };
 
         if (Xioctl(deviceFd, Ioctl.VidIOC.REQBUFS, &requestBuffers) == false)
-            throw new IOException($"Cannot request buffers for camera {cameraInfo.Path}");
+            throw new IOException($"Cannot request buffers for camera {cameraInfo}");
 
         if (requestBuffers.count < 2)
             throw new IOException($"Didn't get enough buffers");
@@ -300,7 +300,7 @@ public static class V4l2
             };
 
             if (V4l2.Xioctl(deviceFd, Ioctl.VidIOC.QUERYBUF, &vbuf) == false)
-                throw new IOException($"Could not query buffer for camera {cameraInfo.Path}");
+                throw new IOException($"Could not query buffer for camera {cameraInfo}");
 
             buffers[i] = new ReqBuffer(ref vbuf, deviceFd);
         }
@@ -315,7 +315,6 @@ public static class V4l2
         };
     }
     #endregion
-
 
     internal static unsafe bool Xioctl(int fd, Ioctl.VidIOC request, void* argp)
     {

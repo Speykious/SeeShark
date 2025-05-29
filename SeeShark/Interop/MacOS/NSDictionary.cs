@@ -3,6 +3,7 @@
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.Versioning;
 
 namespace SeeShark.Interop.MacOS;
@@ -23,6 +24,8 @@ internal struct NSDictionary : INSObject
 
     private static readonly Selector sel_count = ObjC.sel_registerName("count");
     private static readonly Selector sel_getObjects_andKeys_count = ObjC.sel_registerName("getObjects:andKeys:count:");
+    private static readonly Selector sel_objectForKey = ObjC.sel_registerName("objectForKey:");
+    private static readonly Selector sel_dictionaryWithObjects_forKeys = ObjC.sel_registerName("dictionaryWithObjects:forKeys:");
 
     internal ulong Count() => ObjC.objc_msgSend_ulong(id, sel_count);
 
@@ -31,18 +34,31 @@ internal struct NSDictionary : INSObject
         ObjC.objc_msgSend(id, sel_getObjects_andKeys_count, objects, keys, count);
     }
 
-    internal void DebugPrintNSDictionary(NSDictionary dict)
+    internal nint ObjectForKey(string key)
     {
-        debugPrintNSDictionary(dict, 0);
+        NSString nsstring = NSString.FromUTF8String(key);
+        return ObjC.objc_msgSend_id(id, sel_objectForKey, nsstring.ID);
     }
 
-    private void debugPrintNSDictionary(NSDictionary dict, int level)
+    internal static NSDictionary DictionaryWithObjectsAndKeys(NSArray objects, NSArray keys)
     {
-        uint count = (uint)dict.Count();
+        return new NSDictionary(ObjC.objc_msgSend_id(classPtr.ID, sel_dictionaryWithObjects_forKeys, objects.ID, keys.ID));
+    }
+
+    internal void DebugPrint()
+    {
+        Console.Error.WriteLine("NSDictionary\n{");
+        debugPrint(1);
+        Console.Error.WriteLine("}");
+    }
+
+    private void debugPrint(int level)
+    {
+        uint count = (uint)Count();
 
         nint[] objects = new nint[count];
         nint[] keys = new nint[count];
-        dict.GetObjectsAndKeys(objects, keys, count);
+        GetObjectsAndKeys(objects, keys, count);
 
         string indent = new string(' ', level * 2);
 
@@ -53,13 +69,14 @@ internal struct NSDictionary : INSObject
 
             switch (objectClassName)
             {
+                case "__NSCFString":
                 case "__NSCFConstantString":
                     Console.Error.WriteLine($"{indent}{key,-36}: string \"{new NSString(objects[i]).ToUTF8String()}\"");
                     break;
                 case "__NSDictionaryM":
                     NSDictionary subDict = new NSDictionary(objects[i]);
                     Console.Error.WriteLine($"{indent}{key,-36}: dict ({subDict.Count()})");
-                    debugPrintNSDictionary(subDict, level + 1);
+                    subDict.debugPrint(level + 1);
                     break;
                 case "__NSCFNumber":
                     Console.Error.WriteLine($"{indent}{key,-36}: num ({new NSNumber(objects[i]).StringValue()})");

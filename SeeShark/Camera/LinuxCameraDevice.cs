@@ -36,7 +36,7 @@ public sealed class LinuxCameraDevice : CameraDevice
             unsafe
             {
                 if (Xioctl(DeviceFd, Ioctl.VidIOC.QBUF, &vbuf) == false)
-                    throw new IOException($"Could not enqueue buffer for camera {Path.Path}");
+                    throw new IOException($"Could not enqueue buffer for camera {Path}");
             }
         }
 
@@ -45,7 +45,7 @@ public sealed class LinuxCameraDevice : CameraDevice
         unsafe
         {
             if (Xioctl(DeviceFd, Ioctl.VidIOC.STREAMON, &type) == false)
-                throw new IOException($"Could not enable data streaming for camera {Path.Path}");
+                throw new IOException($"Could not enable data streaming for camera {Path}");
         }
     }
 
@@ -56,7 +56,7 @@ public sealed class LinuxCameraDevice : CameraDevice
         unsafe
         {
             if (Xioctl(DeviceFd, Ioctl.VidIOC.STREAMOFF, &type) == false)
-                throw new Exception($"Could not disable data streaming for camera {Path.Path}");
+                throw new Exception($"Could not disable data streaming for camera {Path}");
         }
     }
 
@@ -114,7 +114,7 @@ public sealed class LinuxCameraDevice : CameraDevice
 
                 case EIO:
                 default:
-                    throw new Exception($"Could not dequeue buffer for camera {Path.Path}");
+                    throw new Exception($"Could not dequeue buffer for camera {Path}");
             }
         }
 
@@ -141,7 +141,7 @@ public sealed class LinuxCameraDevice : CameraDevice
         }
 
         if (qbuf == false)
-            throw new Exception($"Could not reenqueue buffer for camera {Path.Path}");
+            throw new Exception($"Could not reenqueue buffer for camera {Path}");
 
         return true;
     }

@@ -80,6 +80,9 @@ internal static class ObjC
     internal static extern void objc_msgSend(nint self, Selector op);
 
     [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
+    internal static extern void objc_msgSend(nint self, Selector op, bool arg1);
+
+    [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
     internal static extern void objc_msgSend(nint self, Selector op, nint arg1);
 
     [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
@@ -96,12 +99,17 @@ internal static class ObjC
 
     [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
     internal static extern nint objc_msgSend_id(nint self, Selector op, int arg1);
+    [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
+    internal static extern nint objc_msgSend_id(nint self, Selector op, uint arg1);
 
     [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
     internal static extern nint objc_msgSend_id(nint self, Selector op, nint arg1);
 
     [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
     internal static extern nint objc_msgSend_id(nint self, Selector op, nint arg1, nint arg2);
+
+    [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
+    internal static extern nint objc_msgSend_id(nint self, Selector op, nint[] arg1, nint arg2);
 
     [DllImport(lib_objc, EntryPoint = "objc_msgSend")]
     internal static extern nint objc_msgSend_id(nint self, Selector op, nint arg1, uint arg2, uint agr3);

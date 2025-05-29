@@ -5,7 +5,6 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Text;
 
 namespace SeeShark.Interop.MacOS;
 
@@ -20,6 +19,10 @@ internal static class CoreVideo
     {
         CoreVideoHandle = DL.dlopen(lib_corevideo, DL.RTLD_NOW);
     }
+
+    internal static NSString KCvPixelBufferWidthKey => DL.GetConstant<NSString>(CoreVideoHandle, "kCVPixelBufferWidthKey");
+    internal static NSString KCvPixelBufferHeightKey => DL.GetConstant<NSString>(CoreVideoHandle, "kCVPixelBufferHeightKey");
+    internal static NSString KCvPixelBufferPixelFormatTypeKey => DL.GetConstant<NSString>(CoreVideoHandle, "kCVPixelBufferPixelFormatTypeKey");
 
     [DllImport(lib_corevideo)]
     internal static extern NSDictionary CVBufferCopyAttachments(CVBufferRef buffer, CVAttachmentMode attachmentMode);

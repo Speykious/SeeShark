@@ -27,8 +27,10 @@ internal struct AVCaptureSession : INSObject
     private static OClass classPtr = ObjC.GetClass(nameof(AVCaptureSession));
 
     private static Selector sel_sessionPreset = ObjC.sel_registerName("sessionPreset");
-    private static Selector sel_setSessionPreset = ObjC.sel_registerName("setSessionPreset");
+    private static Selector sel_setSessionPreset = ObjC.sel_registerName("setSessionPreset:");
     private static Selector sel_canSetSessionPreset = ObjC.sel_registerName("canSetSessionPreset:");
+    private static Selector sel_beginConfiguration = ObjC.sel_registerName("beginConfiguration");
+    private static Selector sel_commitConfiguration = ObjC.sel_registerName("commitConfiguration");
     private static Selector sel_canAddInput = ObjC.sel_registerName("canAddInput:");
     private static Selector sel_addInput = ObjC.sel_registerName("addInput:");
     private static Selector sel_removeInput = ObjC.sel_registerName("removeInput:");
@@ -60,6 +62,8 @@ internal struct AVCaptureSession : INSObject
     }
 
     internal bool CanSetSessionPreset(NSString preset) => ObjC.objc_msgSend_bool(id, sel_canSetSessionPreset, preset.ID);
+    internal void BeginConfiguration() => ObjC.objc_msgSend(id, sel_beginConfiguration);
+    internal void CommitConfiguration() => ObjC.objc_msgSend(id, sel_commitConfiguration);
     internal bool CanAddInput(IAVCaptureInput input) => ObjC.objc_msgSend_bool(id, sel_canAddInput, input.ID);
     internal void AddInput(IAVCaptureInput input) => ObjC.objc_msgSend(id, sel_addInput, input.ID);
     internal void RemoveInput(IAVCaptureInput input) => ObjC.objc_msgSend(id, sel_removeInput, input.ID);

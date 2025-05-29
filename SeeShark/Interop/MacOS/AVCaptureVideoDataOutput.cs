@@ -29,12 +29,20 @@ internal struct AVCaptureVideoDataOutput : IAVCaptureOutput
 
     private static OClass classPtr = ObjC.GetClass(nameof(AVCaptureVideoDataOutput));
 
+    private static Selector sel_availableVideoCVPixelFormatTypes = ObjC.sel_registerName("availableVideoCVPixelFormatTypes");
     private static Selector sel_availableVideoCodecTypes = ObjC.sel_registerName("availableVideoCodecTypes");
+    private static Selector sel_videoSettings = ObjC.sel_registerName("videoSettings");
+    private static Selector sel_setVideoSettings = ObjC.sel_registerName("setVideoSettings:");
     private static Selector sel_sampleBufferDelegate = ObjC.sel_registerName("sampleBufferDelegate");
     private static Selector sel_setSampleBufferDelegate = ObjC.sel_registerName("setSampleBufferDelegate:queue:");
+    private static Selector sel_automaticallyConfiguresOutputBufferDimensions = ObjC.sel_registerName("automaticallyConfiguresOutputBufferDimensions");
+    private static Selector sel_setAutomaticallyConfiguresOutputBufferDimensions = ObjC.sel_registerName("setAutomaticallyConfiguresOutputBufferDimensions:");
 
     private static Selector sel_captureOutputSambleBuffer = ObjC.sel_registerName("captureOutput:didOutputSampleBuffer:fromConnection:");
     private static Selector sel_captureDiscardedSampleBuffer = ObjC.sel_registerName("captureOutput:didDropSampleBuffer:fromConnection:");
+
+    internal static NSString AVVideoWidthKey => DL.GetConstant<NSString>(ObjC.AVFoundationHandle, "AVVideoWidthKey");
+    internal static NSString AVVideoHeightKey => DL.GetConstant<NSString>(ObjC.AVFoundationHandle, "AVVideoHeightKey");
 
     internal static NSString AV_VIDEO_CODEC_TYPE_H264 = DL.GetConstant<NSString>(ObjC.AVFoundationHandle, "AVVideoCodecTypeH264");
     internal static NSString AV_VIDEO_CODEC_TYPE_HEVC = DL.GetConstant<NSString>(ObjC.AVFoundationHandle, "AVVideoCodecTypeHEVC");
@@ -47,6 +55,13 @@ internal struct AVCaptureVideoDataOutput : IAVCaptureOutput
     internal static NSString AV_VIDEO_CODEC_TYPE_APPLE_PRO_RES4444 = DL.GetConstant<NSString>(ObjC.AVFoundationHandle, "AVVideoCodecTypeAppleProRes4444");
 
     internal readonly NSArray AvailableVideoCodecTypes => new NSArray(ObjC.objc_msgSend_id(id, sel_availableVideoCodecTypes));
+    internal readonly NSArray AvailableVideoCVPixelFormatTypes => new NSArray(ObjC.objc_msgSend_id(id, sel_availableVideoCVPixelFormatTypes));
+
+    internal NSDictionary VideoSettings
+    {
+        get => new NSDictionary(ObjC.objc_msgSend_id(id, sel_videoSettings));
+        set => ObjC.objc_msgSend(id, sel_setVideoSettings, value.ID);
+    }
 
     private nint getSampleBufferDelegate() => ObjC.objc_msgSend_id(id, sel_sampleBufferDelegate);
 
@@ -65,6 +80,9 @@ internal struct AVCaptureVideoDataOutput : IAVCaptureOutput
 
         ObjC.objc_msgSend(id, sel_setSampleBufferDelegate, cvdoDelegateInstance, sampleBufferCallbackQueue);
     }
+
+    internal bool AutomaticallyConfiguresOutputBufferDimensions() => ObjC.objc_msgSend_bool(id, sel_automaticallyConfiguresOutputBufferDimensions);
+    internal void SetAutomaticallyConfiguresOutputBufferDimensions(bool value) => ObjC.objc_msgSend(id, sel_setAutomaticallyConfiguresOutputBufferDimensions, value);
 
     private static readonly OClass cvdoDelegateClass = createCVDODelegateClass();
     private static readonly nint ivar_CVDO_MSBD = ObjC.class_getInstanceVariable(cvdoDelegateClass, "managedSampleBufferDelegate");

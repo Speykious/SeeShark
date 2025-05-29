@@ -22,12 +22,14 @@ internal struct NSNumber : INSObject
     private static readonly OClass classPtr = ObjC.GetClass(nameof(NSNumber));
 
     private static readonly Selector sel_stringValue = ObjC.sel_registerName("stringValue");
+    private static readonly Selector sel_unsignedIntValue = ObjC.sel_registerName("unsignedIntValue");
+    private static readonly Selector sel_numberWithUnsignedInt = ObjC.sel_registerName("numberWithUnsignedInt:");
 
-    internal string StringValue()
+    internal string StringValue() => new NSString(ObjC.objc_msgSend_id(id, sel_stringValue)).ToUTF8String();
+    internal uint UIntValue() => ObjC.objc_msgSend_uint(id, sel_unsignedIntValue);
+
+    internal static NSNumber UInt(uint value)
     {
-        unsafe
-        {
-            return new NSString(ObjC.objc_msgSend_id(id, sel_stringValue)).ToUTF8String();
-        }
+        return new NSNumber(ObjC.objc_msgSend_id(classPtr.ID, sel_numberWithUnsignedInt, value));
     }
 }
