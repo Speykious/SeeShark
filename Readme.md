@@ -35,6 +35,7 @@ using System;
 using System.Threading;
 using SeeShark;
 using SeeShark.FFmpeg;
+using SeeShark.Device;
 
 namespace YourProgram;
 
