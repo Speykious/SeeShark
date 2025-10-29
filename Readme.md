@@ -2,21 +2,23 @@
 
 > Simple C# camera and display library.
 
+***
+
+> [!IMPORTANT]
+> SeeShark is currently being [rewritten from scratch](https://github.com/Speykious/SeeShark/pull/51) without using FFmpeg.
+> It will become a library with zero third-party dependencies and rely solely on ones readily available on your OS.
+
+***
+
 When you SeeShark, you C#!
 
-SeeShark is a simple cross-platform .NET library for handling camera and screen display inputs on Linux, Windows and MacOS.
+SeeShark is a simple cross-platform .NET library for handling camera and screen display inputs on Linux and Windows.
 
-Using FFmpeg, it allows you to enumerate camera and display devices and decode raw frames in 206 different pixel formats (because that's how powerful FFmpeg is!).
+Using FFmpeg, it allows you to enumerate camera and display devices, and decode raw frames in 206 different pixel formats (because that's how powerful FFmpeg is!).
 
 Features include:
-- Zero-copy.
-- Memory-safe.
-- Cross platform (Tested on Windows and Linux, might work on more platforms like MacOS).
-- Managing camera and display devices.
 - Control framerate, resolution and input format.
-- Notifies the application if devices get connected/disconnected.
-- Provides synchronous (method-driven) and asynchronous (event-driven) code flow.
-- Supports 206 different pixel formats.
+- Notify the application if devices get connected/disconnected.
 - Conversion of a frame from a pixel format to another.
 - Scaling frames.
 - Access to raw pixel data.
@@ -25,6 +27,12 @@ Features **don't** include:
 - Saving a frame as an image (here's a [wiki page on how to do it](https://github.com/Speykious/SeeShark/wiki/Saving-images) using ImageSharp).
 - Recording a video stream to a video file.
 - Managing audio devices.
+
+## Cross-platform support
+
+SeeShark has been confirmed to work on Linux and Windows.
+
+Unfortunately, it doesn't work on MacOS. Long story short, FFmpeg 5 doesn't implement device enumeration for MacOS, and SeeShark doesn't implement a custom function to do that.
 
 ***
 
