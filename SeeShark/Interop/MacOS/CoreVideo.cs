@@ -20,6 +20,9 @@ internal static class CoreVideo
         CoreVideoHandle = DL.dlopen(lib_corevideo, DL.RTLD_NOW);
     }
 
+    internal static NSString AVVideoScalingModeKey => NSString.FromUTF8String("AVVideoScalingModeKey");
+    internal static NSString AVVideoScalingModeResizeAspect => NSString.FromUTF8String("AVVideoScalingModeResizeAspect");
+
     internal static NSString KCvPixelBufferWidthKey => DL.GetConstant<NSString>(CoreVideoHandle, "kCVPixelBufferWidthKey");
     internal static NSString KCvPixelBufferHeightKey => DL.GetConstant<NSString>(CoreVideoHandle, "kCVPixelBufferHeightKey");
     internal static NSString KCvPixelBufferPixelFormatTypeKey => DL.GetConstant<NSString>(CoreVideoHandle, "kCVPixelBufferPixelFormatTypeKey");
@@ -31,6 +34,8 @@ internal static class CoreVideo
     internal static extern nuint CVPixelBufferGetWidth(CVBufferRef pixelBuffer);
     [DllImport(lib_corevideo)]
     internal static extern nuint CVPixelBufferGetHeight(CVBufferRef pixelBuffer);
+    [DllImport(lib_corevideo)]
+    internal static extern nuint CVPixelBufferGetBytesPerRow(CVBufferRef pixelBuffer);
     [DllImport(lib_corevideo)]
     internal static extern CVPixelFormatType CVPixelBufferGetPixelFormatType(CVBufferRef pixelBuffer);
     [DllImport(lib_corevideo)]

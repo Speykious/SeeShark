@@ -261,4 +261,114 @@ internal static class CVPixelFormatTypeMethods
 
         return "???";
     }
+
+    /// <summary>
+    /// Bit size of the pixel format
+    /// </summary>
+    /// <returns>The size of a pixel in this pixel format in bits, -1 if unknown</returns>
+    internal static int BitSize(CVPixelFormatType pixelFormat)
+    {
+        switch (pixelFormat)
+        {
+            #pragma warning disable format
+            case CVPixelFormatType.k_1Monochrome:                                  return 1;
+            case CVPixelFormatType.k_2Indexed:                                     return 2;
+            case CVPixelFormatType.k_4Indexed:                                     return 4;
+            case CVPixelFormatType.k_8Indexed:                                     return 8;
+            case CVPixelFormatType.k_1IndexedGray_WhiteIsZero:                     return 1;
+            case CVPixelFormatType.k_2IndexedGray_WhiteIsZero:                     return 2;
+            case CVPixelFormatType.k_4IndexedGray_WhiteIsZero:                     return 4;
+            case CVPixelFormatType.k_8IndexedGray_WhiteIsZero:                     return 8;
+            case CVPixelFormatType.k_16BE555:                                      return 16;
+            case CVPixelFormatType.k_16LE555:                                      return 16;
+            case CVPixelFormatType.k_16LE5551:                                     return 16;
+            case CVPixelFormatType.k_16BE565:                                      return 16;
+            case CVPixelFormatType.k_16LE565:                                      return 16;
+            case CVPixelFormatType.k_24RGB:                                        return 24;
+            case CVPixelFormatType.k_24BGR:                                        return 24;
+            case CVPixelFormatType.k_32ARGB:                                       return 32;
+            case CVPixelFormatType.k_32BGRA:                                       return 32;
+            case CVPixelFormatType.k_32ABGR:                                       return 32;
+            case CVPixelFormatType.k_32RGBA:                                       return 32;
+            case CVPixelFormatType.k_64ARGB:                                       return 64;
+            case CVPixelFormatType.k_64RGBALE:                                     return 64;
+            case CVPixelFormatType.k_48RGB:                                        return 48;
+            case CVPixelFormatType.k_32AlphaGray:                                  return 32;
+            case CVPixelFormatType.k_16Gray:                                       return 16;
+            case CVPixelFormatType.k_30RGB:                                        return 32;
+            case CVPixelFormatType.k_30RGB_r210:                                   return 32;
+            case CVPixelFormatType.k_422YpCbCr8:                                   return 8;
+            case CVPixelFormatType.k_4444YpCbCrA8:                                 return 8;
+            case CVPixelFormatType.k_4444YpCbCrA8R:                                return 8;
+            case CVPixelFormatType.k_4444AYpCbCr8:                                 return 8;
+            case CVPixelFormatType.k_4444AYpCbCr16:                                return 16;
+            case CVPixelFormatType.k_4444AYpCbCrFloat:                             return -1;
+            case CVPixelFormatType.k_444YpCbCr8:                                   return 8;
+            case CVPixelFormatType.k_422YpCbCr16:                                  return -1;
+            case CVPixelFormatType.k_422YpCbCr10:                                  return 10;
+            case CVPixelFormatType.k_444YpCbCr10:                                  return 10;
+            case CVPixelFormatType.k_420YpCbCr8Planar:                             return -1;
+            case CVPixelFormatType.k_420YpCbCr8PlanarFullRange:                    return -1;
+            case CVPixelFormatType.k_422YpCbCr_4A_8BiPlanar:                       return -1;
+            case CVPixelFormatType.k_420YpCbCr8BiPlanarVideoRange:                 return -1;
+            case CVPixelFormatType.k_420YpCbCr8BiPlanarFullRange:                  return -1;
+            case CVPixelFormatType.k_422YpCbCr8BiPlanarVideoRange:                 return -1;
+            case CVPixelFormatType.k_422YpCbCr8BiPlanarFullRange:                  return -1;
+            case CVPixelFormatType.k_444YpCbCr8BiPlanarVideoRange:                 return -1;
+            case CVPixelFormatType.k_444YpCbCr8BiPlanarFullRange:                  return -1;
+            case CVPixelFormatType.k_422YpCbCr8_yuvs:                              return 8;
+            case CVPixelFormatType.k_422YpCbCr8FullRange:                          return 8;
+            case CVPixelFormatType.k_OneComponent8:                                return 8;
+            case CVPixelFormatType.k_TwoComponent8:                                return 8;
+            case CVPixelFormatType.k_30RGBLEPackedWideGamut:                       return 30;
+            case CVPixelFormatType.k_ARGB2101010LEPacked:                          return 32;
+            case CVPixelFormatType.k_40ARGBLEWideGamut:                            return 64;
+            case CVPixelFormatType.k_40ARGBLEWideGamutPremultiplied:               return 64;
+            case CVPixelFormatType.k_OneComponent10:                               return 16;
+            case CVPixelFormatType.k_OneComponent12:                               return 16;
+            case CVPixelFormatType.k_OneComponent16:                               return 16;
+            case CVPixelFormatType.k_TwoComponent16:                               return 16;
+            case CVPixelFormatType.k_OneComponent16Half:                           return 16;
+            case CVPixelFormatType.k_OneComponent32Float:                          return 32;
+            case CVPixelFormatType.k_TwoComponent16Half:                           return 16;
+            case CVPixelFormatType.k_TwoComponent32Float:                          return 32;
+            case CVPixelFormatType.k_64RGBAHalf:                                   return 64;
+            case CVPixelFormatType.k_128RGBAFloat:                                 return 128;
+            case CVPixelFormatType.k_14Bayer_RGGB:                                 return 16;
+            case CVPixelFormatType.k_14Bayer_GRBG:                                 return 16;
+            case CVPixelFormatType.k_14Bayer_BGGR:                                 return 16;
+            case CVPixelFormatType.k_14Bayer_GBRG:                                 return 16;
+            case CVPixelFormatType.k_DisparityFloat16:                             return 16;
+            case CVPixelFormatType.k_DisparityFloat32:                             return 32;
+            case CVPixelFormatType.k_DepthFloat16:                                 return 16;
+            case CVPixelFormatType.k_DepthFloat32:                                 return 32;
+            case CVPixelFormatType.k_420YpCbCr10BiPlanarVideoRange:                return -1;
+            case CVPixelFormatType.k_422YpCbCr10BiPlanarVideoRange:                return -1;
+            case CVPixelFormatType.k_444YpCbCr10BiPlanarVideoRange:                return -1;
+            case CVPixelFormatType.k_420YpCbCr10BiPlanarFullRange:                 return -1;
+            case CVPixelFormatType.k_422YpCbCr10BiPlanarFullRange:                 return -1;
+            case CVPixelFormatType.k_444YpCbCr10BiPlanarFullRange:                 return -1;
+            case CVPixelFormatType.k_420YpCbCr8VideoRange_8A_TriPlanar:            return -1;
+            case CVPixelFormatType.k_16VersatileBayer:                             return 16;
+            case CVPixelFormatType.k_64RGBA_DownscaledProResRAW:                   return 64;
+            case CVPixelFormatType.k_422YpCbCr16BiPlanarVideoRange:                return -1;
+            case CVPixelFormatType.k_444YpCbCr16BiPlanarVideoRange:                return -1;
+            case CVPixelFormatType.k_444YpCbCr16VideoRange_16A_TriPlanar:          return -1;
+            case CVPixelFormatType.k_Lossless_32BGRA:                              return -1;
+            case CVPixelFormatType.k_Lossless_64RGBAHalf:                          return -1;
+            case CVPixelFormatType.k_Lossless_420YpCbCr8BiPlanarVideoRange:        return -1;
+            case CVPixelFormatType.k_Lossless_420YpCbCr8BiPlanarFullRange:         return -1;
+            case CVPixelFormatType.k_Lossless_420YpCbCr10PackedBiPlanarVideoRange: return -1;
+            case CVPixelFormatType.k_Lossless_422YpCbCr10PackedBiPlanarVideoRange: return -1;
+            case CVPixelFormatType.k_Lossless_420YpCbCr10PackedBiPlanarFullRange:  return -1;
+            case CVPixelFormatType.k_Lossy_32BGRA:                                 return -1;
+            case CVPixelFormatType.k_Lossy_420YpCbCr8BiPlanarVideoRange:           return -1;
+            case CVPixelFormatType.k_Lossy_420YpCbCr8BiPlanarFullRange:            return -1;
+            case CVPixelFormatType.k_Lossy_420YpCbCr10PackedBiPlanarVideoRange:    return -1;
+            case CVPixelFormatType.k_Lossy_422YpCbCr10PackedBiPlanarVideoRange:    return -1;
+            #pragma warning restore format
+        }
+
+        return -1;
+    }
 }
