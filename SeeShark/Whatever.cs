@@ -6,6 +6,7 @@ namespace SeeShark;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using SeeShark.Camera;
@@ -40,11 +41,14 @@ public class Whatever
         foreach (VideoFormat format in availableFormats)
             Console.Error.WriteLine($"- {format}");
 
+        ImageFormat imageFormat = new ImageFormat((uint)CVPixelFormatType.k_32ARGB);
+        string ffmpegPixelFormat = "argb";
+
         Console.Error.WriteLine($"\nOpening {cameraPath}");
         CameraDevice camera = CameraDevice.Open(cameraPath, new VideoFormatOptions
         {
-            VideoSize = (658, 582),
-            ImageFormat = new ImageFormat((uint)CVPixelFormatType.k_32ARGB),
+            VideoSize = (1280, 720),
+            ImageFormat = imageFormat,
             Framerate = new FramerateRatio
             {
                 Numerator = 30,
@@ -53,8 +57,28 @@ public class Whatever
         });
 
         (uint width, uint height) = camera.CurrentFormat.VideoSize;
-        ImageFormat imageFormat = camera.CurrentFormat.ImageFormat;
-        using FileStream rawPixelsFile = File.OpenWrite($"camera-feed.{width}x{height}.{imageFormat}.raw");
+        imageFormat = camera.CurrentFormat.ImageFormat;
+
+        Stream rawPixelsStream;
+
+        ProcessStartInfo ffmpegStartInfo = new ProcessStartInfo()
+        {
+            RedirectStandardInput = true,
+            UseShellExecute = false,
+            FileName = "ffmpeg",
+            Arguments = $"-hide_banner -f rawvideo -video_size {width}x{height} -pixel_format {ffmpegPixelFormat} -i - -pix_fmt yuv420p -y camera-feed.mp4"
+        };
+
+        Process? ffmpegProcess = Process.Start(ffmpegStartInfo);
+        if (ffmpegProcess is not null)
+        {
+            rawPixelsStream = ffmpegProcess.StandardInput.BaseStream;
+        }
+        else
+        {
+            Console.Error.WriteLine("[SeeShark] Could not find ffmpeg executable, outputting raw frames to file instead");
+            rawPixelsStream = File.OpenWrite($"camera-feed.{width}x{height}.{imageFormat}.raw");
+        }
 
         Console.Error.WriteLine("Start capture");
         camera.StartCapture();
@@ -65,11 +89,17 @@ public class Whatever
         {
             camera.ReadFrame(ref frame);
             Console.Error.WriteLine($"Frame: {frame}");
-            rawPixelsFile.Write(frame.Data, 0, frame.Data.Length);
+            rawPixelsStream.Write(frame.Data, 0, frame.Data.Length);
         }
         Console.Error.WriteLine("ENOUGH");
 
         Console.Error.WriteLine("Stop capture");
         camera.StopCapture();
+
+        rawPixelsStream.Close();
+        if (ffmpegProcess is not null)
+            ffmpegProcess.WaitForExit();
+        else
+            rawPixelsStream.Dispose();
     }
 }
