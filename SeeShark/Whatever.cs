@@ -45,6 +45,11 @@ public class Whatever
         {
             VideoSize = (658, 582),
             ImageFormat = new ImageFormat((uint)CVPixelFormatType.k_32ARGB),
+            Framerate = new FramerateRatio
+            {
+                Numerator = 60,
+                Denominator = 1,
+            },
         });
 
         (uint width, uint height) = camera.CurrentFormat.VideoSize;

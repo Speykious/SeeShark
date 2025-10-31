@@ -2,6 +2,7 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
+using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
@@ -34,4 +35,38 @@ internal struct CMSampleBufferRef : INSObject
     }
 
     public nint ID => id;
+}
+
+// See /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/CoreMedia.framework/Versions/Current/Headers/CMTime.h
+[StructLayout(LayoutKind.Sequential)]
+internal struct CMTime
+{
+    /// <summary>
+    /// The value of the CMTime. value/timescale = seconds
+    /// </summary>
+    public long Value;
+    /// <summary>
+    /// The timescale of the CMTime. value/timescale = seconds.
+    /// </summary>
+    public int Timescale;
+    /// <summary>
+    /// The flags, eg. kCMTimeFlags_Valid, kCMTimeFlags_PositiveInfinity, etc.
+    /// </summary>
+    public CMTimeFlags Flags;
+    /// <summary>
+    /// Differentiates between equal timestamps that are actually different because of looping, multi-item sequencing, etc.
+	/// Will be used during comparison: greater epochs happen after lesser ones.
+	/// Additions/subtraction is only possible within a single epoch, however, since epoch length may be unknown/variable
+    /// </summary>
+    public long Epoch;
+}
+
+[Flags]
+internal enum CMTimeFlags : uint
+{
+    VALID = 0x0,
+    HAS_BEEN_ROUNDED = 0x1,
+    POSITIVE_INFINITY = 0x2,
+    NEGATIVE_INFINITY = 0x4,
+    INDEFINITE = 0x8,
 }

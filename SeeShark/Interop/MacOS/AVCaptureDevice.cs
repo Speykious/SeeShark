@@ -41,6 +41,10 @@ internal struct AVCaptureDevice : INSObject
     private static Selector sel_formats = ObjC.sel_registerName("formats");
     private static Selector sel_activeFormat = ObjC.sel_registerName("activeFormat");
     private static Selector sel_setActiveFormat = ObjC.sel_registerName("setActiveFormat:");
+    private static Selector sel_activeVideoMinFrameDuration = ObjC.sel_registerName("activeVideoMinFrameDuration");
+    private static Selector sel_setActiveVideoMinFrameDuration = ObjC.sel_registerName("setActiveVideoMinFrameDuration:");
+    private static Selector sel_activeVideoMaxFrameDuration = ObjC.sel_registerName("activeVideoMaxFrameDuration");
+    private static Selector sel_setActiveVideoMaxFrameDuration = ObjC.sel_registerName("setActiveVideoMaxFrameDuration:");
     private static Selector sel_lockForConfiguration = ObjC.sel_registerName("lockForConfiguration:");
     private static Selector sel_unlockForConfiguration = ObjC.sel_registerName("unlockForConfiguration");
 
@@ -112,15 +116,26 @@ internal struct AVCaptureDevice : INSObject
 
     internal readonly NSString UniqueID => new NSString(ObjC.objc_msgSend_id(id, sel_uniqueID));
     internal readonly NSString LocalizedName => new NSString(ObjC.objc_msgSend_id(id, sel_localizedName));
-    internal readonly NSArray Formats => new NSArray(ObjC.objc_msgSend_id(id, sel_formats));
+    internal bool HasMediaType(NSString mediaType) => ObjC.objc_msgSend_bool(id, sel_hasMediaType, mediaType.ID);
 
+    internal readonly NSArray Formats => new NSArray(ObjC.objc_msgSend_id(id, sel_formats));
     internal AVCaptureDeviceFormat ActiveFormat
     {
         get => new AVCaptureDeviceFormat(ObjC.objc_msgSend_id(id, sel_activeFormat));
         set => ObjC.objc_msgSend(id, sel_setActiveFormat, value.ID);
     }
 
-    internal bool HasMediaType(NSString mediaType) => ObjC.objc_msgSend_bool(id, sel_hasMediaType, mediaType.ID);
+    internal CMTime ActiveVideoMinFrameDuration
+    {
+        get => ObjC.objc_msgSend_cmTime(id, sel_activeVideoMinFrameDuration);
+        set => ObjC.objc_msgSend(id, sel_setActiveVideoMinFrameDuration, value);
+    }
+
+    internal CMTime ActiveVideoMaxFrameDuration
+    {
+        get => ObjC.objc_msgSend_cmTime(id, sel_activeVideoMaxFrameDuration);
+        set => ObjC.objc_msgSend(id, sel_setActiveVideoMaxFrameDuration, value);
+    }
 
     internal bool LockForConfiguration() => ObjC.objc_msgSend_bool(id, sel_lockForConfiguration, 0);
     internal void UnlockForConfiguration() => ObjC.objc_msgSend(id, sel_unlockForConfiguration);

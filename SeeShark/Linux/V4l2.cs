@@ -14,7 +14,7 @@ using SeeShark.Interop.Libc;
 using static SeeShark.Interop.Libc.Libc;
 
 [SupportedOSPlatform("Linux")]
-public static class V4l2
+internal static class V4l2
 {
     // Helpful resource and reference: https://github.com/kmdouglass/v4l2-examples
 

@@ -11,7 +11,7 @@ using SeeShark.Interop.MacOS;
 namespace SeeShark.MacOS;
 
 [SupportedOSPlatform("Macos")]
-public static class AVFoundation
+internal static class AVFoundation
 {
     internal static unsafe List<CameraPath> AvailableCameras()
     {

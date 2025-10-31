@@ -22,10 +22,46 @@ public sealed class MacOSCameraDevice : CameraDevice
 
     internal MacOSCameraDevice(AVCaptureDevice device, VideoFormatOptions options)
     {
+        // Make sure we have the permission to access the camera
+        AVAuthorizationStatus auth = AVCaptureDevice.AuthorizationStatusForMediaType(AVCaptureDevice.AV_MEDIA_TYPE_VIDEO);
+        if (auth == AVAuthorizationStatus.Denied)
+            throw new UnauthorizedAccessException("Access to camera is denied");
+
         // TODO: Go through device formats and choose most suited one according to options
         AVCaptureDeviceFormat deviceFormat = new AVCaptureDeviceFormat(device.Formats.ObjectAtIndex(1));
         device.LockForConfiguration();
-        device.ActiveFormat = deviceFormat;
+        {
+            device.ActiveFormat = deviceFormat;
+
+            if (options.Framerate is FramerateRatio framerateRatio)
+            {
+                double framerate = framerateRatio.Value;
+                CMTime frameDuration = new()
+                {
+                    Value = framerateRatio.Denominator,
+                    Timescale = (int)framerateRatio.Numerator,
+                    Flags = CMTimeFlags.HAS_BEEN_ROUNDED,
+                    Epoch = 0,
+                };
+
+                // Check framerate against supported ranges ourselves to avoid crashing.
+                // See https://developer.apple.com/documentation/avfoundation/avcapturedevice/activevideominframeduration?language=objc
+                //     https://developer.apple.com/documentation/avfoundation/avcapturedevice/activevideomaxframeduration?language=objc
+                NSArray frameRateRanges = deviceFormat.VideoSupportedFrameRateRanges;
+                uint frameRateRangesCount = frameRateRanges.Count;
+                for (int i = 0; i < frameRateRangesCount; i++)
+                {
+                    AVFrameRateRange framerateRange = new AVFrameRateRange(frameRateRanges.ObjectAtIndex(i));
+                    if (!(framerateRange.MinFrameRate <= framerate && framerate <= framerateRange.MaxFrameRate))
+                        // TODO: Improve error message (also use a custom Exception type?)
+                        throw new Exception("Framerate not supported");
+                }
+
+                // TODO: Consider whether it would be useful to be able to let the user specify a framerate range.
+                device.ActiveVideoMinFrameDuration = frameDuration;
+                device.ActiveVideoMaxFrameDuration = frameDuration;
+            }
+        }
         device.UnlockForConfiguration();
 
         captureDevice = device;
@@ -54,16 +90,13 @@ public sealed class MacOSCameraDevice : CameraDevice
         // session.SessionPreset = AVCaptureSession.AV_CAPTURE_SESSION_PRESET_MEDIUM;
         // session.CommitConfiguration();
 
-        AVAuthorizationStatus auth = AVCaptureDevice.AuthorizationStatusForMediaType(AVCaptureDevice.AV_MEDIA_TYPE_VIDEO);
-        if (auth == AVAuthorizationStatus.Denied)
-            throw new UnauthorizedAccessException("Access to camera is denied");
-
         AVCaptureDeviceInput deviceInput = AVCaptureDeviceInput.DeviceInputWithDevice(captureDevice);
-
         if (session.CanAddInput(deviceInput))
             session.AddInput(deviceInput);
 
         AVCaptureVideoDataOutput deviceOutput = new();
+        if (session.CanAddOutput(deviceOutput))
+            session.AddOutput(deviceOutput);
 
         // TODO: A camera supports several pixel formats for the same dimensions.
         // Might need to do something more clever about enumerating the available video formats.
@@ -77,7 +110,48 @@ public sealed class MacOSCameraDevice : CameraDevice
         }
 
         // TODO: Think about how I should do logging
-        Console.Error.WriteLine("[SeeShark] Warning: framerate settings are currently ignored on MacOS");
+
+        deviceOutput.SetAutomaticallyConfiguresOutputBufferDimensions(false);
+        Debug.Assert(!deviceOutput.AutomaticallyConfiguresOutputBufferDimensions(), "Cannot disable automatic configuration of output buffer dimensions in device output");
+
+        // Set video settings
+
+        // NOTE: While MacOS lists a few set dimensions as available formats, it supports arbitrary dimensions
+        // in its video settings and will resize the output accordingly.
+        deviceOutput.VideoSettings = videoFormatOptionsToSettingsDict(options);
+
+        // // According to Apple documentation:
+        // // "To receive samples in a default uncompressed format, set this value to nil. Then you can query this value to receive a dictionary of the settings the session uses."
+        // // https://developer.apple.com/documentation/avfoundation/avcapturevideodataoutput/videosettings?language=objc
+        // deviceOutput.VideoSettings = new NSDictionary(0);
+
+        // Determine current video format from applied video settings
+        {
+            NSDictionary dict = deviceOutput.VideoSettings;
+            CMTime maxFrameDuration = device.ActiveVideoMaxFrameDuration;
+
+            CMVideoDimensions maxDimension = new NSValue<CMVideoDimensions>(deviceFormat.SupportedMaxPhotoDimensions.ObjectAtIndex(0)).GetValue();
+
+            nint objWidth = dict.ObjectForKey("Width");
+            nint objHeight = dict.ObjectForKey("Height");
+
+            uint width = objWidth == 0 ? (uint)maxDimension.Width : new NSNumber(objWidth).UIntValue();
+            uint height = objHeight == 0 ? (uint)maxDimension.Height : new NSNumber(objHeight).UIntValue();
+
+            NSNumber pixelFormatNumber = new(deviceOutput.VideoSettings.ObjectForKey("PixelFormatType"));
+            CVPixelFormatType pixelFormat = (CVPixelFormatType)pixelFormatNumber.UIntValue();
+
+            CurrentFormat = new VideoFormat
+            {
+                VideoSize = (width, height),
+                Framerate = new FramerateRatio
+                {
+                    Numerator = (uint)maxFrameDuration.Timescale,
+                    Denominator = (uint)maxFrameDuration.Value,
+                },
+                ImageFormat = new ImageFormat((uint)pixelFormat)
+            };
+        }
 
         sampleBufferDelegate = new()
         {
@@ -87,51 +161,6 @@ public sealed class MacOSCameraDevice : CameraDevice
 
         nint queue = ObjC.dispatch_queue_create("seeshark.deviceOutputQueue", 0);
         deviceOutput.SetSampleBufferDelegate(sampleBufferDelegate, queue);
-
-        deviceOutput.SetAutomaticallyConfiguresOutputBufferDimensions(false);
-        Debug.Assert(!deviceOutput.AutomaticallyConfiguresOutputBufferDimensions(), "Cannot disable automatic configuration of output buffer dimensions in device output");
-
-        if (session.CanAddOutput(deviceOutput))
-            session.AddOutput(deviceOutput);
-
-        // Set video settings
-
-        // NOTE: While MacOS lists a few set dimensions as available formats, it supports arbitrary dimensions
-        // in its video settings and will resize the output accordingly.
-        NSDictionary dict = videoFormatOptionsToSettingsDict(options);
-        deviceOutput.VideoSettings = dict;
-
-        // // According to Apple documentation:
-        // // "To receive samples in a default uncompressed format, set this value to nil. Then you can query this value to receive a dictionary of the settings the session uses."
-        // // https://developer.apple.com/documentation/avfoundation/avcapturevideodataoutput/videosettings?language=objc
-        // deviceOutput.VideoSettings = new NSDictionary(0);
-
-        dict = deviceOutput.VideoSettings;
-
-        // Determine current video format from applied video settings
-
-        CMVideoDimensions maxDimension = new NSValue<CMVideoDimensions>(deviceFormat.SupportedMaxPhotoDimensions.ObjectAtIndex(0)).GetValue();
-        AVFrameRateRange framerateRange = new AVFrameRateRange(deviceFormat.VideoSupportedFrameRateRanges.ObjectAtIndex(0));
-
-        nint objWidth = dict.ObjectForKey("Width");
-        nint objHeight = dict.ObjectForKey("Height");
-
-        uint width = objWidth == 0 ? (uint)maxDimension.Width : new NSNumber(objWidth).UIntValue();
-        uint height = objHeight == 0 ? (uint)maxDimension.Height : new NSNumber(objHeight).UIntValue();
-
-        NSNumber pixelFormatNumber = new(deviceOutput.VideoSettings.ObjectForKey("PixelFormatType"));
-        CVPixelFormatType pixelFormat = (CVPixelFormatType)pixelFormatNumber.UIntValue();
-
-        CurrentFormat = new VideoFormat
-        {
-            VideoSize = (width, height),
-            Framerate = new FramerateRatio
-            {
-                Numerator = (uint)framerateRange.MaxFrameRate,
-                Denominator = 1,
-            },
-            ImageFormat = new ImageFormat((uint)pixelFormat)
-        };
     }
 
     #region Capture
@@ -171,7 +200,7 @@ public sealed class MacOSCameraDevice : CameraDevice
         nint[] keys = new nint[maxLength];
         nint[] objects = new nint[maxLength];
 
-        // TODO: Should this video scaling mode be configurable by the user?
+        // NOTE: Consider making the video scaling mode configurable by the user in the future.
         keys[count] = CoreVideo.AVVideoScalingModeKey.ID;
         objects[count++] = CoreVideo.AVVideoScalingModeResizeAspect.ID;
 
@@ -214,9 +243,6 @@ internal class AVCaptureVideoDataOutputSampleBufferDelegate : IAVCaptureVideoDat
         nuint stride = CoreVideo.CVPixelBufferGetBytesPerRow(buffer);
         CVPixelFormatType pixelFormat = CoreVideo.CVPixelBufferGetPixelFormatType(buffer);
 
-        // TODO: Test what happens when an assert fails inside of a delegate
-        // (It gets passed to native code, so let's make sure it's still ok)
-
         int sampleBitSize = CVPixelFormatTypeMethods.BitSize(pixelFormat);
         Debug.Assert(sampleBitSize > 0, $"Unsupported pixel format ({pixelFormat}): untested, bit size unknown or non-trivial/non-raw format");
         Debug.Assert(sampleBitSize % 8 == 0, $"Unsupported pixel format ({pixelFormat}): untested, bit size is not a multiple of 8");
@@ -237,7 +263,7 @@ internal class AVCaptureVideoDataOutputSampleBufferDelegate : IAVCaptureVideoDat
         }
         else
         {
-            // Expected stride different from buffer stride; copy row by row
+            // Expected stride different from buffer stride; copy row by row while ignoring the padding at the end
             for (nuint y = 0; y < height; y++)
                 Marshal.Copy(baseAddress + (nint)(y * stride), pixelBuffer, (int)(y * expectedStride), (int)expectedStride);
         }
