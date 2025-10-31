@@ -14,7 +14,7 @@ Features include:
   - [ ] Linux (X11)
   - [ ] Windows (DirectShow)
   - [ ] Windows (Gdi)
-  - [ ] MacOS (AVFoundation)
+  - [x] MacOS (AVFoundation)
 - [x] Managing camera devices
 - [ ] Managing display devices
 - [x] Control framerate, resolution and input format

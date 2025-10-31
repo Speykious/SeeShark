@@ -17,13 +17,14 @@
     <PackageTags>Camera;Webcam;Stream;</PackageTags>
     <Title>SeeShark</Title>
     <Description>Simple Camera library</Description>
-    <Copyright>2022 Speykious</Copyright>
+    <Copyright>2024 Speykious</Copyright>
     <PackageProjectUrl>https://github.com/Speykious/SeeShark</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup Label="Package References">
+    <!-- No third-party dependencies. B) -->
   </ItemGroup>
 
   <ItemGroup Label="Documents">
