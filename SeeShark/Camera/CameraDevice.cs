@@ -37,7 +37,7 @@ public abstract class CameraDevice : IDisposable
         if (OperatingSystem.IsLinux())
             return V4l2.OpenCamera(cameraInfo, options);
         else if (OperatingSystem.IsMacOS())
-            return AVFoundation.OpenCamera(cameraInfo, options);
+            return new MacOSCameraDevice(cameraInfo, options);
         else
             throw new NotImplementedException();
     }

@@ -2,7 +2,7 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
-using System.Collections.Generic;
+using System;
 using System.Runtime.Versioning;
 
 namespace SeeShark.Interop.MacOS;
@@ -39,6 +39,14 @@ internal struct NSArray : INSObject
         nint[] result = new nint[Count];
         for (int i = 0; i < result.Length; i++)
             result[i] = ObjectAtIndex(i);
+        return result;
+    }
+
+    internal T[] ToTypedArray<T>(Func<nint, T> f)
+    {
+        T[] result = new T[Count];
+        for (int i = 0; i < result.Length; i++)
+            result[i] = f(ObjectAtIndex(i));
         return result;
     }
 }

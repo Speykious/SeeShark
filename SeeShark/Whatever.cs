@@ -47,7 +47,7 @@ public class Whatever
             ImageFormat = new ImageFormat((uint)CVPixelFormatType.k_32ARGB),
             Framerate = new FramerateRatio
             {
-                Numerator = 60,
+                Numerator = 30,
                 Denominator = 1,
             },
         });

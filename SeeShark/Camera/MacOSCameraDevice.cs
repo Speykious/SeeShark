@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Text;
 using SeeShark.Interop.MacOS;
 
 namespace SeeShark.Camera;
@@ -20,49 +21,108 @@ public sealed class MacOSCameraDevice : CameraDevice
     private AVCaptureSession session;
     private AVCaptureVideoDataOutputSampleBufferDelegate sampleBufferDelegate;
 
-    internal MacOSCameraDevice(AVCaptureDevice device, VideoFormatOptions options)
+    internal MacOSCameraDevice(CameraPath cameraInfo, VideoFormatOptions options)
     {
         // Make sure we have the permission to access the camera
         AVAuthorizationStatus auth = AVCaptureDevice.AuthorizationStatusForMediaType(AVCaptureDevice.AV_MEDIA_TYPE_VIDEO);
         if (auth == AVAuthorizationStatus.Denied)
             throw new UnauthorizedAccessException("Access to camera is denied");
 
-        // TODO: Go through device formats and choose most suited one according to options
-        AVCaptureDeviceFormat deviceFormat = new AVCaptureDeviceFormat(device.Formats.ObjectAtIndex(1));
-        device.LockForConfiguration();
+        AVCaptureDevice? maybeCaptureDevice = AVCaptureDevice.DeviceWithUniqueID(cameraInfo.Path);
+        if (maybeCaptureDevice is not AVCaptureDevice device)
+            throw new CameraDeviceIOException(cameraInfo, "Cannot open camera");
+
+        if (options.VideoSize is not null || options.Framerate is not null)
         {
-            device.ActiveFormat = deviceFormat;
+            if (!device.LockForConfiguration())
+                throw new CameraDeviceIOException(cameraInfo, "Cannot lock camera for configuration");
 
-            if (options.Framerate is FramerateRatio framerateRatio)
+            try
             {
-                double framerate = framerateRatio.Value;
-                CMTime frameDuration = new()
+                // Go through device formats and choose most suited one according to options
+                if (options.VideoSize is (uint width, uint height))
                 {
-                    Value = framerateRatio.Denominator,
-                    Timescale = (int)framerateRatio.Numerator,
-                    Flags = CMTimeFlags.HAS_BEEN_ROUNDED,
-                    Epoch = 0,
-                };
+                    AVCaptureDeviceFormat[] deviceFormats = device.Formats.ToTypedArray<AVCaptureDeviceFormat>(id => new(id));
 
-                // Check framerate against supported ranges ourselves to avoid crashing.
-                // See https://developer.apple.com/documentation/avfoundation/avcapturedevice/activevideominframeduration?language=objc
-                //     https://developer.apple.com/documentation/avfoundation/avcapturedevice/activevideomaxframeduration?language=objc
-                NSArray frameRateRanges = deviceFormat.VideoSupportedFrameRateRanges;
-                uint frameRateRangesCount = frameRateRanges.Count;
-                for (int i = 0; i < frameRateRangesCount; i++)
-                {
-                    AVFrameRateRange framerateRange = new AVFrameRateRange(frameRateRanges.ObjectAtIndex(i));
-                    if (!(framerateRange.MinFrameRate <= framerate && framerate <= framerateRange.MaxFrameRate))
-                        // TODO: Improve error message (also use a custom Exception type?)
-                        throw new Exception("Framerate not supported");
+                    // Compare minimum side lengths, get closest dimension
+                    AVCaptureDeviceFormat selectedDeviceFormat = deviceFormats[0];
+                    {
+                        int minDelta = int.MaxValue;
+                        foreach (AVCaptureDeviceFormat deviceFormat in deviceFormats)
+                        {
+                            // TODO: What about other supported max photo dimensions?
+                            CMVideoDimensions maxDimension = new NSValue<CMVideoDimensions>(deviceFormat.SupportedMaxPhotoDimensions.ObjectAtIndex(0)).GetValue();
+
+                            int delta = Math.Abs(height <= width
+                                ? (int)height - maxDimension.Height
+                                : (int)width - maxDimension.Width);
+
+                            if (delta < minDelta)
+                            {
+                                minDelta = delta;
+                                selectedDeviceFormat = deviceFormat;
+                            }
+                        }
+                    }
+
+                    device.ActiveFormat = selectedDeviceFormat;
                 }
 
-                // TODO: Consider whether it would be useful to be able to let the user specify a framerate range.
-                device.ActiveVideoMinFrameDuration = frameDuration;
-                device.ActiveVideoMaxFrameDuration = frameDuration;
+                if (options.Framerate is FramerateRatio framerateRatio)
+                {
+                    double framerate = framerateRatio.Value;
+
+                    // Check framerate against supported ranges ourselves to avoid crashing.
+                    // See https://developer.apple.com/documentation/avfoundation/avcapturedevice/activevideominframeduration?language=objc
+                    //     https://developer.apple.com/documentation/avfoundation/avcapturedevice/activevideomaxframeduration?language=objc
+
+                    AVFrameRateRange[] frameRateRanges = device.ActiveFormat.VideoSupportedFrameRateRanges.ToTypedArray<AVFrameRateRange>(id => new(id));
+
+                    bool supported = false;
+                    foreach (AVFrameRateRange frameRateRange in frameRateRanges)
+                    {
+                        if (frameRateRange.MinFrameRate <= framerate && framerate <= frameRateRange.MaxFrameRate)
+                            supported = true;
+                    }
+
+                    if (!supported)
+                    {
+                        StringBuilder errorMessage = new StringBuilder();
+                        errorMessage.AppendLine($"This device does not support a framerate of {framerate:0.##} Hz.");
+                        errorMessage.Append("Supported framerate ranges: ");
+
+                        bool started = false;
+                        foreach (AVFrameRateRange frameRateRange in frameRateRanges)
+                        {
+                            if (started)
+                                errorMessage.Append(", ");
+                            else
+                                started = true;
+
+                            errorMessage.Append($"{frameRateRange.MinFrameRate:0.##}..{frameRateRange.MaxFrameRate:0.##}");
+                        }
+
+                        throw new Exception(errorMessage.ToString());
+                    }
+
+                    CMTime frameDuration = new()
+                    {
+                        Value = framerateRatio.Denominator,
+                        Timescale = (int)framerateRatio.Numerator,
+                        Flags = CMTimeFlags.HAS_BEEN_ROUNDED,
+                        Epoch = 0,
+                    };
+
+                    // TODO: Consider whether it would be useful to be able to let the user specify a framerate range.
+                    device.ActiveVideoMinFrameDuration = frameDuration;
+                    device.ActiveVideoMaxFrameDuration = frameDuration;
+                }
+            }
+            finally
+            {
+                device.UnlockForConfiguration();
             }
         }
-        device.UnlockForConfiguration();
 
         captureDevice = device;
         frameDataQueue = new FrameQueue(16);
@@ -70,25 +130,22 @@ public sealed class MacOSCameraDevice : CameraDevice
 
         session = new AVCaptureSession();
 
-        // // TODO: Consider setting a session preset if default video options are given.
-        // session.BeginConfiguration();
-        // {
-        //     Console.Error.WriteLine($"Can set PRESET_HIGH:           {session.CanSetSessionPreset(AVCaptureSession.AV_CAPTURE_SESSION_PRESET_HIGH)}");
-        //     Console.Error.WriteLine($"Can set PRESET_MEDIUM:         {session.CanSetSessionPreset(AVCaptureSession.AV_CAPTURE_SESSION_PRESET_MEDIUM)}");
-        //     Console.Error.WriteLine($"Can set PRESET_LOW:            {session.CanSetSessionPreset(AVCaptureSession.AV_CAPTURE_SESSION_PRESET_LOW)}");
-        //     Console.Error.WriteLine($"Can set PRESET_PHOTO:          {session.CanSetSessionPreset(AVCaptureSession.AV_CAPTURE_SESSION_PRESET_PHOTO)}");
-        //     Console.Error.WriteLine($"Can set PRESET_INPUT_PRIORITY: {session.CanSetSessionPreset(AVCaptureSession.AV_CAPTURE_SESSION_PRESET_INPUT_PRIORITY)}");
-        //     Console.Error.WriteLine($"Can set PRESET960X540:         {session.CanSetSessionPreset(AVCaptureSession.AV_CAPTURE_SESSION_PRESET960X540)}");
-        //     Console.Error.WriteLine($"Can set PRESET1280X720:        {session.CanSetSessionPreset(AVCaptureSession.AV_CAPTURE_SESSION_PRESET1280X720)}");
-        //     Console.Error.WriteLine($"Can set PRESET1920X1080:       {session.CanSetSessionPreset(AVCaptureSession.AV_CAPTURE_SESSION_PRESET1920X1080)}");
-        //     Console.Error.WriteLine($"Can set PRESET3840X2160:       {session.CanSetSessionPreset(AVCaptureSession.AV_CAPTURE_SESSION_PRESET3840X2160)}");
-        //     Console.Error.WriteLine($"Can set PRESET320X240:         {session.CanSetSessionPreset(AVCaptureSession.AV_CAPTURE_SESSION_PRESET320X240)}");
-        //     Console.Error.WriteLine($"Can set PRESET640X480:         {session.CanSetSessionPreset(AVCaptureSession.AV_CAPTURE_SESSION_PRESET640X480)}");
-        //     Console.Error.WriteLine($"Can set PRESETI_FRAME960X540:  {session.CanSetSessionPreset(AVCaptureSession.AV_CAPTURE_SESSION_PRESETI_FRAME960X540)}");
-        //     Console.Error.WriteLine($"Can set PRESETI_FRAME1280X720: {session.CanSetSessionPreset(AVCaptureSession.AV_CAPTURE_SESSION_PRESETI_FRAME1280X720)}");
-        // }
-        // session.SessionPreset = AVCaptureSession.AV_CAPTURE_SESSION_PRESET_MEDIUM;
-        // session.CommitConfiguration();
+        // Set a session preset if no video dimension options are given
+        if (options.VideoSize is null)
+        {
+            session.BeginConfiguration();
+            {
+                if (session.CanSetSessionPreset(AVCaptureSession.AV_CAPTURE_SESSION_PRESET_HIGH))
+                    session.SessionPreset = AVCaptureSession.AV_CAPTURE_SESSION_PRESET_HIGH;
+                else if (session.CanSetSessionPreset(AVCaptureSession.AV_CAPTURE_SESSION_PRESET_MEDIUM))
+                    session.SessionPreset = AVCaptureSession.AV_CAPTURE_SESSION_PRESET_MEDIUM;
+                else if (session.CanSetSessionPreset(AVCaptureSession.AV_CAPTURE_SESSION_PRESET_LOW))
+                    session.SessionPreset = AVCaptureSession.AV_CAPTURE_SESSION_PRESET_LOW;
+
+                // TODO: Is it worth considering any other presets?
+            }
+            session.CommitConfiguration();
+        }
 
         AVCaptureDeviceInput deviceInput = AVCaptureDeviceInput.DeviceInputWithDevice(captureDevice);
         if (session.CanAddInput(deviceInput))
@@ -97,17 +154,6 @@ public sealed class MacOSCameraDevice : CameraDevice
         AVCaptureVideoDataOutput deviceOutput = new();
         if (session.CanAddOutput(deviceOutput))
             session.AddOutput(deviceOutput);
-
-        // TODO: A camera supports several pixel formats for the same dimensions.
-        // Might need to do something more clever about enumerating the available video formats.
-
-        // TODO: Remove these console prints
-        Console.Error.WriteLine("Pixel format types available:");
-        foreach (nint obj in deviceOutput.AvailableVideoCVPixelFormatTypes.ToArray())
-        {
-            NSNumber number = new(obj);
-            Console.Error.WriteLine($"  {(CVPixelFormatType)number.UIntValue()}");
-        }
 
         // TODO: Think about how I should do logging
 
@@ -130,7 +176,7 @@ public sealed class MacOSCameraDevice : CameraDevice
             NSDictionary dict = deviceOutput.VideoSettings;
             CMTime maxFrameDuration = device.ActiveVideoMaxFrameDuration;
 
-            CMVideoDimensions maxDimension = new NSValue<CMVideoDimensions>(deviceFormat.SupportedMaxPhotoDimensions.ObjectAtIndex(0)).GetValue();
+            CMVideoDimensions maxDimension = new NSValue<CMVideoDimensions>(device.ActiveFormat.SupportedMaxPhotoDimensions.ObjectAtIndex(0)).GetValue();
 
             nint objWidth = dict.ObjectForKey("Width");
             nint objHeight = dict.ObjectForKey("Height");
@@ -244,13 +290,13 @@ internal class AVCaptureVideoDataOutputSampleBufferDelegate : IAVCaptureVideoDat
         CVPixelFormatType pixelFormat = CoreVideo.CVPixelBufferGetPixelFormatType(buffer);
 
         int sampleBitSize = CVPixelFormatTypeMethods.BitSize(pixelFormat);
-        Debug.Assert(sampleBitSize > 0, $"Unsupported pixel format ({pixelFormat}): untested, bit size unknown or non-trivial/non-raw format");
-        Debug.Assert(sampleBitSize % 8 == 0, $"Unsupported pixel format ({pixelFormat}): untested, bit size is not a multiple of 8");
+        assertFrame(sampleBitSize > 0, $"Unsupported pixel format ({pixelFormat}): untested, bit size unknown or non-trivial/non-raw format");
+        assertFrame(sampleBitSize % 8 == 0, $"Unsupported pixel format ({pixelFormat}): untested, bit size is not a multiple of 8");
 
         nuint expectedStride = width * (nuint)(sampleBitSize / 8);
         nuint bufferSize = CoreVideo.CVPixelBufferGetDataSize(buffer);
-        Debug.Assert(stride * height == bufferSize, "Pixel buffer size, stride and height are somehow inconsistent");
-        Debug.Assert(expectedStride <= stride, "Pixel buffer's actual stride is smaller than expected stride");
+        assertFrame(stride * height == bufferSize, "Pixel buffer size, stride and height are somehow inconsistent");
+        assertFrame(expectedStride <= stride, "Pixel buffer's actual stride is smaller than expected stride");
 
         byte[] pixelBuffer = new byte[expectedStride * height];
 
@@ -286,5 +332,11 @@ internal class AVCaptureVideoDataOutputSampleBufferDelegate : IAVCaptureVideoDat
 
     public void CaptureDiscardedSampleBuffer(IAVCaptureOutput output, CMSampleBufferRef sampleBuffer, nint connection)
     {
+    }
+
+    private static void assertFrame(bool condition, string message)
+    {
+        if (!condition)
+            throw new CameraDeviceInvalidFrameException(message);
     }
 }
