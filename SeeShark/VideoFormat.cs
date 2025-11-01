@@ -9,7 +9,7 @@ namespace SeeShark;
 /// We can indeed open a video input in different ways.
 /// For example, you might want to open your camera at a different resolution or framerate.
 /// </summary>
-public struct VideoFormat
+public readonly struct VideoFormat
 {
     /// <summary>
     /// The resolution of the video stream.
@@ -32,7 +32,7 @@ public struct VideoFormat
     /// The image format of the video stream.
     /// Can be a raw pixel format like <c>ARGB</c> of <c>YUV422</c>, or a compressed image format like <c>MJPEG</c> for instance.
     /// </summary>
-    internal ImageFormat ImageFormat { get; init; }
+    public ImageFormat ImageFormat { get; init; }
 
     /// <summary>
     /// Whether or not to draw the mouse cursor in display captures.

@@ -49,7 +49,6 @@ internal static class AVFoundation
             CVPixelFormatType[] pixelFormatTypes = deviceOutput.AvailableVideoCVPixelFormatTypes.ToTypedArray(id => (CVPixelFormatType)new NSNumber(id).UIntValue());
             AVCaptureDeviceFormat[] deviceFormats = device.Formats.ToTypedArray<AVCaptureDeviceFormat>(id => new(id));
 
-            Console.Error.WriteLine("[SeeShark] Device formats available:");
             foreach (AVCaptureDeviceFormat deviceFormat in deviceFormats)
             {
                 CMVideoDimensions[] maxDimensions = deviceFormat.SupportedMaxPhotoDimensions.ToTypedArray(id => new NSValue<CMVideoDimensions>(id).GetValue());
@@ -61,9 +60,8 @@ internal static class AVFoundation
                     {
                         foreach (CVPixelFormatType pixelFormatType in pixelFormatTypes)
                         {
-                            // Ignore pixel formats we don't support (for example planar ones)
-                            int bitSize = CVPixelFormatTypeMethods.BitSize(pixelFormatType);
-                            if (bitSize <= 0 || bitSize % 8 != 0)
+                            ImageFormat? maybeImageFormat = CVPixelFormatTypeIntoImageFormat(pixelFormatType);
+                            if (maybeImageFormat is not ImageFormat imageFormat)
                                 continue;
 
                             formats.Add(new VideoFormat
@@ -74,7 +72,7 @@ internal static class AVFoundation
                                     Numerator = (uint)frameRateRange.MaxFrameRate,
                                     Denominator = 1,
                                 },
-                                ImageFormat = new ImageFormat((uint)pixelFormatType),
+                                ImageFormat = imageFormat,
                             });
                         }
                     }
@@ -83,5 +81,53 @@ internal static class AVFoundation
         }
 
         return formats;
+    }
+
+    internal static ImageFormat? CVPixelFormatTypeIntoImageFormat(CVPixelFormatType pixelFormat)
+    {
+        return pixelFormat switch
+        {
+            CVPixelFormatType.k_32ARGB => ImageFormat.ARGB_32,
+            CVPixelFormatType.k_32BGRA => ImageFormat.BGRA_32,
+            CVPixelFormatType.k_32ABGR => ImageFormat.ABGR_32,
+            CVPixelFormatType.k_32RGBA => ImageFormat.RGBA_32,
+
+            CVPixelFormatType.k_422YpCbCr8 => ImageFormat.UYVY,
+
+            _ => null,
+        };
+    }
+
+    internal static CVPixelFormatType? ImageFormatIntoCVPixelFormatType(ImageFormat imageFormat)
+    {
+        return imageFormat switch
+        {
+            ImageFormat.ARGB_32 => CVPixelFormatType.k_32ARGB,
+            ImageFormat.BGRA_32 => CVPixelFormatType.k_32BGRA,
+            ImageFormat.ABGR_32 => CVPixelFormatType.k_32ABGR,
+            ImageFormat.RGBA_32 => CVPixelFormatType.k_32RGBA,
+
+            ImageFormat.UYVY => CVPixelFormatType.k_422YpCbCr8,
+
+            _ => null,
+        };
+    }
+
+    internal static ImageFormat CVPixelFormatTypeIntoImageFormat_OrThrowIfUnsupported(CVPixelFormatType pixelFormat)
+    {
+        ImageFormat? imageFormat = CVPixelFormatTypeIntoImageFormat(pixelFormat);
+        if (imageFormat is ImageFormat format)
+            return format;
+        else
+            throw new ImageFormatNotSupportedException($"SeeShark does not support MacOS pixel format {pixelFormat}");
+    }
+
+    internal static CVPixelFormatType ImageFormatIntoCVPixelFormatType_OrThrowIfUnsupported(ImageFormat imageFormat)
+    {
+        CVPixelFormatType? pixelFormat = ImageFormatIntoCVPixelFormatType(imageFormat);
+        if (pixelFormat is CVPixelFormatType format)
+            return format;
+        else
+            throw new ImageFormatNotSupportedException($"SeeShark does not have a MacOS counterpart for image format {imageFormat}");
     }
 }

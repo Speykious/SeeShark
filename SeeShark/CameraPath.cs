@@ -21,5 +21,5 @@ public struct CameraPath
     /// </summary>
     public string Path { get; init; }
 
-    public override string ToString() => Name == null ? Path : $"{Name} ({Path})";
+    public override readonly string ToString() => Name == null ? Path : $"{Name} ({Path})";
 }

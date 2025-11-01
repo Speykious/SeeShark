@@ -40,7 +40,7 @@ public class VideoFormatOptions
     /// <remarks>
     /// The underlying driver might fallback to a compatible image format.
     /// </remarks>
-    internal ImageFormat? ImageFormat { get; set; }
+    public ImageFormat? ImageFormat { get; set; }
 
     /// <summary>
     /// Whether or not to draw the mouse cursor in display captures.

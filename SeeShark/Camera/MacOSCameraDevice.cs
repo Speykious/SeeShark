@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
 using SeeShark.Interop.MacOS;
+using SeeShark.MacOS;
 
 namespace SeeShark.Camera;
 
@@ -195,7 +196,7 @@ public sealed class MacOSCameraDevice : CameraDevice
                     Numerator = (uint)maxFrameDuration.Timescale,
                     Denominator = (uint)maxFrameDuration.Value,
                 },
-                ImageFormat = new ImageFormat((uint)pixelFormat)
+                ImageFormat = AVFoundation.CVPixelFormatTypeIntoImageFormat_OrThrowIfUnsupported(pixelFormat),
             };
         }
 
@@ -253,7 +254,7 @@ public sealed class MacOSCameraDevice : CameraDevice
         if (options.ImageFormat is ImageFormat imageFormat)
         {
             keys[count] = CoreVideo.KCvPixelBufferPixelFormatTypeKey.ID;
-            objects[count++] = NSNumber.UInt(imageFormat.FourCC).ID;
+            objects[count++] = NSNumber.UInt((uint)AVFoundation.ImageFormatIntoCVPixelFormatType_OrThrowIfUnsupported(imageFormat)).ID;
         }
 
         if (options.VideoSize is (uint width, uint height))
@@ -320,7 +321,7 @@ internal class AVCaptureVideoDataOutputSampleBufferDelegate : IAVCaptureVideoDat
             Data = pixelBuffer,
             Width = (uint)width,
             Height = (uint)height,
-            ImageFormat = new ImageFormat((uint)pixelFormat),
+            ImageFormat = AVFoundation.CVPixelFormatTypeIntoImageFormat_OrThrowIfUnsupported(pixelFormat),
         };
 
         if (FrameDataQueueHandle.Target is FrameQueue frameDataQueue)

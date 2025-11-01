@@ -2,6 +2,7 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
+using System;
 using System.Runtime.InteropServices;
 
 namespace SeeShark.Interop.Linux.Libc;

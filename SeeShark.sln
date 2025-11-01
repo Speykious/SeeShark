@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # 
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeeShark", "SeeShark\SeeShark.csproj", "{C815DF30-FE77-4596-9098-968AB9329C59}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{408CEF76-C623-4ECC-8F4A-40970FBF3C71}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutputToFFmpeg", "Examples\OutputToFFmpeg\OutputToFFmpeg.csproj", "{231C9096-905D-4DB9-91E9-9CD9C3A957D6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,5 +29,20 @@ Global
 		{C815DF30-FE77-4596-9098-968AB9329C59}.Release|x64.Build.0 = Release|Any CPU
 		{C815DF30-FE77-4596-9098-968AB9329C59}.Release|x86.ActiveCfg = Release|Any CPU
 		{C815DF30-FE77-4596-9098-968AB9329C59}.Release|x86.Build.0 = Release|Any CPU
+		{231C9096-905D-4DB9-91E9-9CD9C3A957D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{231C9096-905D-4DB9-91E9-9CD9C3A957D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{231C9096-905D-4DB9-91E9-9CD9C3A957D6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{231C9096-905D-4DB9-91E9-9CD9C3A957D6}.Debug|x64.Build.0 = Debug|Any CPU
+		{231C9096-905D-4DB9-91E9-9CD9C3A957D6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{231C9096-905D-4DB9-91E9-9CD9C3A957D6}.Debug|x86.Build.0 = Debug|Any CPU
+		{231C9096-905D-4DB9-91E9-9CD9C3A957D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{231C9096-905D-4DB9-91E9-9CD9C3A957D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{231C9096-905D-4DB9-91E9-9CD9C3A957D6}.Release|x64.ActiveCfg = Release|Any CPU
+		{231C9096-905D-4DB9-91E9-9CD9C3A957D6}.Release|x64.Build.0 = Release|Any CPU
+		{231C9096-905D-4DB9-91E9-9CD9C3A957D6}.Release|x86.ActiveCfg = Release|Any CPU
+		{231C9096-905D-4DB9-91E9-9CD9C3A957D6}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{231C9096-905D-4DB9-91E9-9CD9C3A957D6} = {408CEF76-C623-4ECC-8F4A-40970FBF3C71}
 	EndGlobalSection
 EndGlobal
