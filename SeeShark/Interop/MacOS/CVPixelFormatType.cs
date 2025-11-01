@@ -301,7 +301,7 @@ internal static class CVPixelFormatTypeMethods
             case CVPixelFormatType.k_16Gray:                                       return 16;
             case CVPixelFormatType.k_30RGB:                                        return 32;
             case CVPixelFormatType.k_30RGB_r210:                                   return 32;
-            case CVPixelFormatType.k_422YpCbCr8:                                   return 8;
+            case CVPixelFormatType.k_422YpCbCr8:                                   return 16;
             case CVPixelFormatType.k_4444YpCbCrA8:                                 return 8;
             case CVPixelFormatType.k_4444YpCbCrA8R:                                return 8;
             case CVPixelFormatType.k_4444AYpCbCr8:                                 return 8;
@@ -320,8 +320,8 @@ internal static class CVPixelFormatTypeMethods
             case CVPixelFormatType.k_422YpCbCr8BiPlanarFullRange:                  return -1;
             case CVPixelFormatType.k_444YpCbCr8BiPlanarVideoRange:                 return -1;
             case CVPixelFormatType.k_444YpCbCr8BiPlanarFullRange:                  return -1;
-            case CVPixelFormatType.k_422YpCbCr8_yuvs:                              return 8;
-            case CVPixelFormatType.k_422YpCbCr8FullRange:                          return 8;
+            case CVPixelFormatType.k_422YpCbCr8_yuvs:                              return 16;
+            case CVPixelFormatType.k_422YpCbCr8FullRange:                          return 16;
             case CVPixelFormatType.k_OneComponent8:                                return 8;
             case CVPixelFormatType.k_TwoComponent8:                                return 8;
             case CVPixelFormatType.k_30RGBLEPackedWideGamut:                       return 30;
