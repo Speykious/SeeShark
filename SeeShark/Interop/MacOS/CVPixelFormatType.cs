@@ -2,11 +2,14 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
+using System.Runtime.Versioning;
+
 namespace SeeShark.Interop.MacOS;
 
 // All pixel format definitions can be found at the following path:
 // /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/CoreVideo.framework/Versions/A/Headers/CVPixelBuffer.h
 
+[SupportedOSPlatform("Macos")]
 internal enum CVPixelFormatType
 {
 #pragma warning disable format
@@ -154,6 +157,7 @@ internal enum CVPixelFormatType
 #pragma warning restore format
 }
 
+[SupportedOSPlatform("Macos")]
 internal static class CVPixelFormatTypeMethods
 {
     internal static string Describe(CVPixelFormatType pixelFormat)

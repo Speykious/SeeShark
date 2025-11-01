@@ -3,7 +3,6 @@
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
 using System;
-using System.Collections.Generic;
 using System.Runtime.Versioning;
 
 namespace SeeShark.Interop.MacOS;

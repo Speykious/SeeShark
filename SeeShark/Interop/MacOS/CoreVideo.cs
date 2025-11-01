@@ -50,6 +50,7 @@ internal static class CoreVideo
     internal static extern int CVPixelBufferUnlockBaseAddress(CVBufferRef pixelBuffer, CVPixelBufferLockFlags unlockFlags);
 }
 
+[SupportedOSPlatform("Macos")]
 [Flags]
 internal enum CVPixelBufferLockFlags : uint
 {
@@ -57,6 +58,7 @@ internal enum CVPixelBufferLockFlags : uint
     ReadOnly = 1,
 }
 
+[SupportedOSPlatform("Macos")]
 internal enum CVAttachmentMode : uint
 {
     /// <summary>

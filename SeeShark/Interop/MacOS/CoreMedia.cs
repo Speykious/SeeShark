@@ -38,6 +38,7 @@ internal struct CMSampleBufferRef : INSObject
 }
 
 // See /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/CoreMedia.framework/Versions/Current/Headers/CMTime.h
+[SupportedOSPlatform("Macos")]
 [StructLayout(LayoutKind.Sequential)]
 internal struct CMTime
 {
@@ -61,6 +62,7 @@ internal struct CMTime
     public long Epoch;
 }
 
+[SupportedOSPlatform("Macos")]
 [Flags]
 internal enum CMTimeFlags : uint
 {

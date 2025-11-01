@@ -75,6 +75,8 @@ internal struct AVCaptureSession : INSObject
     internal void StopRunning() => ObjC.objc_msgSend(id, sel_stopRunning);
 }
 
+[SupportedOSPlatform("Macos")]
 internal interface IAVCaptureInput : INSObject { }
 
+[SupportedOSPlatform("Macos")]
 internal interface IAVCaptureOutput : INSObject { }

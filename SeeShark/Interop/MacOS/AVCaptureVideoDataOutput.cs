@@ -141,6 +141,7 @@ internal struct AVCaptureVideoDataOutput : IAVCaptureOutput
     }
 }
 
+[SupportedOSPlatform("Macos")]
 internal interface IAVCaptureVideoDataOutputSampleBufferDelegate
 {
     /// <summary>

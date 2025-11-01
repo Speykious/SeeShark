@@ -220,12 +220,14 @@ internal static class ObjC
     #endregion
 }
 
+[SupportedOSPlatform("Macos")]
 internal interface INSObject
 {
     public nint ID { get; }
 }
 
 #pragma warning disable CS0169
+[SupportedOSPlatform("Macos")]
 internal struct Selector
 {
     private nint id;
@@ -233,6 +235,7 @@ internal struct Selector
 #pragma warning restore CS0169
 
 #pragma warning disable CS0649
+[SupportedOSPlatform("Macos")]
 internal struct OClass
 {
     internal nint ID;

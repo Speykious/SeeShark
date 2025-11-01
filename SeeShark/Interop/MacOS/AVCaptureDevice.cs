@@ -141,6 +141,7 @@ internal struct AVCaptureDevice : INSObject
     internal void UnlockForConfiguration() => ObjC.objc_msgSend(id, sel_unlockForConfiguration);
 }
 
+[SupportedOSPlatform("Macos")]
 internal enum AVAuthorizationStatus : int
 {
     NotDetermined = 0,
