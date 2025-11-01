@@ -7,8 +7,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using SeeShark.Interop.Libc;
-using static SeeShark.Interop.Libc.Libc;
+using SeeShark.Interop.Linux.Libc;
+using static SeeShark.Interop.Linux.Libc.Libc;
 using static SeeShark.Linux.V4l2;
 
 namespace SeeShark.Camera;

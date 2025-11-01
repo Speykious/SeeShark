@@ -4,7 +4,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace SeeShark.Interop.Libc;
+namespace SeeShark.Interop.Linux.Libc;
 
 #pragma warning disable IDE1006
 [StructLayout(LayoutKind.Sequential)]

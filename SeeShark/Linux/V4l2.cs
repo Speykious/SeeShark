@@ -10,8 +10,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using SeeShark.Camera;
-using SeeShark.Interop.Libc;
-using static SeeShark.Interop.Libc.Libc;
+using SeeShark.Interop.Linux.Libc;
+using static SeeShark.Interop.Linux.Libc.Libc;
 
 [SupportedOSPlatform("Linux")]
 internal static class V4l2

@@ -5,7 +5,7 @@
 using System;
 using System.Runtime.Versioning;
 
-namespace SeeShark.Interop.Libc;
+namespace SeeShark.Interop.Linux.Libc;
 
 [SupportedOSPlatform("Linux")]
 internal static class Ioctl

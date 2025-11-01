@@ -6,7 +6,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
-namespace SeeShark.Interop.Libc;
+namespace SeeShark.Interop.Linux.Libc;
 
 using __fd_mask = long;
 

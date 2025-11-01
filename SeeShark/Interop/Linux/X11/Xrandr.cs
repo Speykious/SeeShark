@@ -6,7 +6,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
-namespace SeeShark.Interop.X11;
+namespace SeeShark.Interop.Linux.X11;
 
 using Atom = Int64;
 using Display = nint;

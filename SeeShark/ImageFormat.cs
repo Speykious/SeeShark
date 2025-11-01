@@ -3,7 +3,7 @@
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
 using System;
-using SeeShark.Interop.Libc;
+using SeeShark.Interop.Linux.Libc;
 using SeeShark.Interop.MacOS;
 
 namespace SeeShark;
