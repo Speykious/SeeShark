@@ -70,7 +70,8 @@ public sealed class MacOSCameraDevice : CameraDevice
 
                 if (options.Framerate is FramerateRatio framerateRatio)
                 {
-                    double framerate = framerateRatio.Value;
+                    // NOTE: Round to 2 decimal points because some cameras out there have framerates of exactly 30.000030...
+                    double framerate = Math.Round(framerateRatio.Value, 2);
 
                     // Check framerate against supported ranges ourselves to avoid crashing.
                     // See https://developer.apple.com/documentation/avfoundation/avcapturedevice/activevideominframeduration?language=objc
@@ -78,14 +79,25 @@ public sealed class MacOSCameraDevice : CameraDevice
 
                     AVFrameRateRange[] frameRateRanges = device.ActiveFormat.VideoSupportedFrameRateRanges.ToTypedArray<AVFrameRateRange>(id => new(id));
 
-                    bool supported = false;
+                    AVFrameRateRange? maybeSupportedFrameRateRange = null;
                     foreach (AVFrameRateRange frameRateRange in frameRateRanges)
                     {
-                        if (frameRateRange.MinFrameRate <= framerate && framerate <= frameRateRange.MaxFrameRate)
-                            supported = true;
+                        if (Math.Round(frameRateRange.MinFrameRate, 2) <= framerate && framerate <= Math.Round(frameRateRange.MaxFrameRate, 2))
+                        {
+                            maybeSupportedFrameRateRange = frameRateRange;
+                            break;
+                        }
                     }
 
-                    if (!supported)
+                    if (maybeSupportedFrameRateRange is AVFrameRateRange supportedFrameRateRange)
+                    {
+                        CMTime frameDuration = supportedFrameRateRange.MaxFrameDuration;
+
+                        // TODO: Consider whether it would be useful to be able to let the user specify a framerate range.
+                        device.ActiveVideoMinFrameDuration = frameDuration;
+                        device.ActiveVideoMaxFrameDuration = frameDuration;
+                    }
+                    else
                     {
                         StringBuilder errorMessage = new StringBuilder();
                         errorMessage.AppendLine($"This device does not support a framerate of {framerate:0.##} Hz.");
@@ -104,18 +116,6 @@ public sealed class MacOSCameraDevice : CameraDevice
 
                         throw new Exception(errorMessage.ToString());
                     }
-
-                    CMTime frameDuration = new()
-                    {
-                        Value = framerateRatio.Denominator,
-                        Timescale = (int)framerateRatio.Numerator,
-                        Flags = CMTimeFlags.HAS_BEEN_ROUNDED,
-                        Epoch = 0,
-                    };
-
-                    // TODO: Consider whether it would be useful to be able to let the user specify a framerate range.
-                    device.ActiveVideoMinFrameDuration = frameDuration;
-                    device.ActiveVideoMaxFrameDuration = frameDuration;
                 }
             }
             finally
@@ -295,8 +295,8 @@ internal class AVCaptureVideoDataOutputSampleBufferDelegate : IAVCaptureVideoDat
 
         nuint expectedStride = width * (nuint)(sampleBitSize / 8);
         nuint bufferSize = CoreVideo.CVPixelBufferGetDataSize(buffer);
-        assertFrame(stride * height == bufferSize, "Pixel buffer size, stride and height are somehow inconsistent");
-        assertFrame(expectedStride <= stride, "Pixel buffer's actual stride is smaller than expected stride");
+        assertFrame(stride * height == bufferSize, $"Pixel buffer size is {bufferSize}, but stride * height = {stride * height}");
+        assertFrame(expectedStride <= stride, $"Pixel buffer's actual stride is smaller than expected stride ({stride} < {expectedStride})");
 
         byte[] pixelBuffer = new byte[expectedStride * height];
 

@@ -40,11 +40,15 @@ internal struct AVFrameRateRange : INSObject
 
     public nint ID => id;
 
-    private static Selector sel_maxFrameRate = ObjC.sel_registerName("maxFrameRate");
     private static Selector sel_minFrameRate = ObjC.sel_registerName("minFrameRate");
+    private static Selector sel_maxFrameRate = ObjC.sel_registerName("maxFrameRate");
+    private static Selector sel_minFrameDuration = ObjC.sel_registerName("minFrameDuration");
+    private static Selector sel_maxFrameDuration = ObjC.sel_registerName("maxFrameDuration");
 
-    internal readonly double MaxFrameRate => ObjC.objc_msgSend_double(id, sel_maxFrameRate);
     internal readonly double MinFrameRate => ObjC.objc_msgSend_double(id, sel_minFrameRate);
+    internal readonly double MaxFrameRate => ObjC.objc_msgSend_double(id, sel_maxFrameRate);
+    internal readonly CMTime MinFrameDuration => ObjC.objc_msgSend_cmTime(id, sel_minFrameDuration);
+    internal readonly CMTime MaxFrameDuration => ObjC.objc_msgSend_cmTime(id, sel_maxFrameDuration);
 }
 
 [SupportedOSPlatform("Macos")]

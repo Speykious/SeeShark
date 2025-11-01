@@ -2,6 +2,7 @@
 // This file is part of SeeShark.
 // SeeShark is licensed under the BSD 2-Clause License. See LICENSE for details.
 
+using System;
 using System.Collections.Generic;
 using System.Runtime.Versioning;
 using SeeShark.Interop.MacOS;
@@ -45,20 +46,26 @@ internal static class AVFoundation
             // Behold, a *quadruple* foreach...
 
             AVCaptureVideoDataOutput deviceOutput = new();
-            foreach (NSNumber number in deviceOutput.AvailableVideoCVPixelFormatTypes.ToTypedArray<NSNumber>(id => new(id)))
+            CVPixelFormatType[] pixelFormatTypes = deviceOutput.AvailableVideoCVPixelFormatTypes.ToTypedArray(id => (CVPixelFormatType)new NSNumber(id).UIntValue());
+            AVCaptureDeviceFormat[] deviceFormats = device.Formats.ToTypedArray<AVCaptureDeviceFormat>(id => new(id));
+
+            Console.Error.WriteLine("[SeeShark] Device formats available:");
+            foreach (AVCaptureDeviceFormat deviceFormat in deviceFormats)
             {
-                CVPixelFormatType pixelFormatType = (CVPixelFormatType)number.UIntValue();
+                CMVideoDimensions[] maxDimensions = deviceFormat.SupportedMaxPhotoDimensions.ToTypedArray(id => new NSValue<CMVideoDimensions>(id).GetValue());
+                AVFrameRateRange[] frameRateRanges = deviceFormat.VideoSupportedFrameRateRanges.ToTypedArray<AVFrameRateRange>(id => new(id));
 
-                nint[] deviceFormats = device.Formats.ToArray();
-                foreach (AVCaptureDeviceFormat deviceFormat in device.Formats.ToTypedArray<AVCaptureDeviceFormat>(id => new(id)))
+                foreach (CMVideoDimensions maxDimension in maxDimensions)
                 {
-                    CMVideoDimensions[] maxDimensions = deviceFormat.SupportedMaxPhotoDimensions.ToTypedArray(id => new NSValue<CMVideoDimensions>(id).GetValue());
-                    AVFrameRateRange[] frameRateRanges = deviceFormat.VideoSupportedFrameRateRanges.ToTypedArray<AVFrameRateRange>(id => new(id));
-
-                    foreach (CMVideoDimensions maxDimension in maxDimensions)
+                    foreach (AVFrameRateRange frameRateRange in frameRateRanges)
                     {
-                        foreach (AVFrameRateRange frameRateRange in frameRateRanges)
+                        foreach (CVPixelFormatType pixelFormatType in pixelFormatTypes)
                         {
+                            // Ignore pixel formats we don't support (for example planar ones)
+                            int bitSize = CVPixelFormatTypeMethods.BitSize(pixelFormatType);
+                            if (bitSize <= 0 || bitSize % 8 != 0)
+                                continue;
+
                             formats.Add(new VideoFormat
                             {
                                 VideoSize = ((uint)maxDimension.Width, (uint)maxDimension.Height),
