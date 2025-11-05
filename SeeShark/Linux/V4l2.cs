@@ -150,7 +150,7 @@ internal static class V4l2
             byte* ptr = (byte*)mmap(null, (int)vbuf.length, mmp, MmapFlags.MAP_SHARED, deviceFd, (int)vbuf.m.offset);
 
             if ((nint)ptr == -1)
-                throw new Exception($"Could not allocate request buffer");
+                throw new Exception("Cannot allocate request buffer");
 
             Ptr = ptr;
             Length = vbuf.length;
@@ -171,9 +171,9 @@ internal static class V4l2
     {
         int deviceFd = open(cameraInfo.Path, FileOpenFlags.O_RDWR);
         if (deviceFd < 0)
-            throw new IOException($"Cannot open camera {cameraInfo}");
+            throw new CameraDeviceIOException(cameraInfo, "Cannot open camera");
 
-        // get a suited pixel format
+        // Get a suited pixel format
         ImageFormat imageFormat;
         V4l2InputFormat pixelFormat;
 
@@ -184,14 +184,14 @@ internal static class V4l2
         }
         else
         {
-            // default to the first pixel format when not specified
+            // Default to the first SeeShark-supported pixel format when not specified
+
             v4l2_fmtdesc formatDesc = new v4l2_fmtdesc
             {
                 index = 0,
                 type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE
             };
 
-            // default to the first SeeShark-supported pixel format when not specified
             (ImageFormat, V4l2InputFormat)? maybeImageFormat = null;
             while (Xioctl(deviceFd, Ioctl.VidIOC.ENUM_FMT, &formatDesc))
             {
@@ -211,37 +211,37 @@ internal static class V4l2
             }
             else
             {
-                throw new CameraDeviceIOException(cameraInfo, $"Cannot find any supported image format");
+                throw new CameraDeviceIOException(cameraInfo, "Cannot find any supported image format");
             }
         }
 
         // set video format
         v4l2_format format = new v4l2_format
-        {
-            type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
-            fmt = new v4l2_format.fmt_union
             {
-                pix = new v4l2_pix_format
+                type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
+                fmt = new v4l2_format.fmt_union
                 {
+                    pix = new v4l2_pix_format
+                    {
                     width = 1280,
                     height = 720,
-                    pixelformat = pixelFormat,
-                    field = v4l2_field.V4L2_FIELD_NONE,
+                        pixelformat = pixelFormat,
+                        field = v4l2_field.V4L2_FIELD_NONE,
+                    }
                 }
-            }
-        };
+            };
 
-        if (Xioctl(deviceFd, Ioctl.VidIOC.S_FMT, &format) == false)
-            throw new IOException($"Cannot set video format for camera {cameraInfo}");
+            if (Xioctl(deviceFd, Ioctl.VidIOC.S_FMT, &format) == false)
+                throw new IOException($"Cannot set video format for camera {cameraInfo}");
 
-        // get a suited framerate
+        // Get a suited framerate
         FramerateRatio framerate;
 
         // Helpful documentation on G_PARM and S_PARM:
         // https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/vidioc-g-parm.html
         if (options.Framerate is FramerateRatio framerateOption)
         {
-            // set framerate
+            // Set framerate
             v4l2_streamparm parameter = new v4l2_streamparm
             {
                 type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
@@ -270,7 +270,7 @@ internal static class V4l2
         }
         else
         {
-            // get framerate
+            // Get framerate
             v4l2_streamparm parameter = new v4l2_streamparm
             {
                 type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
@@ -298,7 +298,7 @@ internal static class V4l2
             DrawMouse = false,
         };
 
-        // request buffers
+        // Request buffers
         v4l2_requestbuffers requestBuffers = new v4l2_requestbuffers
         {
             type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
@@ -307,10 +307,10 @@ internal static class V4l2
         };
 
         if (Xioctl(deviceFd, Ioctl.VidIOC.REQBUFS, &requestBuffers) == false)
-            throw new IOException($"Cannot request buffers for camera {cameraInfo}");
+            throw new CameraDeviceIOException(cameraInfo, "Cannot request buffers for camera");
 
         if (requestBuffers.count < 2)
-            throw new IOException($"Didn't get enough buffers");
+            throw new CameraDeviceIOException(cameraInfo, "Didn't get enough request buffers");
 
         ReqBuffer[] buffers = new ReqBuffer[requestBuffers.count];
         for (uint i = 0; i < requestBuffers.count; i++)
@@ -323,7 +323,7 @@ internal static class V4l2
             };
 
             if (Xioctl(deviceFd, Ioctl.VidIOC.QUERYBUF, &vbuf) == false)
-                throw new IOException($"Could not query buffer for camera {cameraInfo}");
+                throw new CameraDeviceIOException(cameraInfo, "Cannot query buffer");
 
             buffers[i] = new ReqBuffer(ref vbuf, deviceFd);
         }
