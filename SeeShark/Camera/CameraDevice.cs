@@ -35,7 +35,7 @@ public abstract class CameraDevice : IDisposable
     public static CameraDevice Open(CameraPath cameraInfo, VideoFormatOptions options)
     {
         if (OperatingSystem.IsLinux())
-            return V4l2.OpenCamera(cameraInfo, options);
+            return new LinuxCameraDevice(cameraInfo, options);
         else if (OperatingSystem.IsMacOS())
             return new MacOSCameraDevice(cameraInfo, options);
         else
