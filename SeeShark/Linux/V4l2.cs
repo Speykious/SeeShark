@@ -215,16 +215,53 @@ internal static class V4l2
             }
         }
 
-        // set video format
-        v4l2_format format = new v4l2_format
+        // Set video format
+        v4l2_format format;
+        {
+            uint width, height;
+            if (options.VideoSize is (uint w, uint h))
+            {
+                width = w;
+                height = h;
+            }
+            else
+            {
+                // Default to the first queried framesize's max value when not specified
+
+                v4l2_frmsizeenum frameSize = new v4l2_frmsizeenum
+                {
+                    index = 0,
+                    pixel_format = pixelFormat,
+                };
+
+                if (Xioctl(deviceFd, Ioctl.VidIOC.ENUM_FRAMESIZES, &frameSize))
+                {
+                    if (frameSize.type == v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_DISCRETE)
+                    {
+                        width = frameSize.frame_size.discrete.width;
+                        height = frameSize.frame_size.discrete.height;
+                    }
+                    else
+                    {
+                        width = frameSize.frame_size.stepwise.max_width;
+                        height = frameSize.frame_size.stepwise.max_height;
+                    }
+                }
+                else
+                {
+                    throw new CameraDeviceIOException(cameraInfo, "Cannot query any frame size");
+                }
+            }
+
+            format = new v4l2_format
             {
                 type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
                 fmt = new v4l2_format.fmt_union
                 {
                     pix = new v4l2_pix_format
                     {
-                    width = 1280,
-                    height = 720,
+                        width = width,
+                        height = height,
                         pixelformat = pixelFormat,
                         field = v4l2_field.V4L2_FIELD_NONE,
                     }
@@ -233,6 +270,7 @@ internal static class V4l2
 
             if (Xioctl(deviceFd, Ioctl.VidIOC.S_FMT, &format) == false)
                 throw new IOException($"Cannot set video format for camera {cameraInfo}");
+        }
 
         // Get a suited framerate
         FramerateRatio framerate;
