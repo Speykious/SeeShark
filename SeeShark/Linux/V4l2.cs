@@ -180,40 +180,46 @@ internal static class V4l2
 
     internal static ImageFormat? V4l2InputFormatIntoImageFormat(V4l2InputFormat inputFormat)
     {
-        return inputFormat switch
-        {
-            V4l2InputFormat.ARGB32 => ImageFormat.ARGB_32,
-            V4l2InputFormat.BGRA32 => ImageFormat.BGRA_32,
-            V4l2InputFormat.ABGR32 => ImageFormat.ABGR_32,
-            V4l2InputFormat.RGBA32 => ImageFormat.RGBA_32,
-
-            V4l2InputFormat.YUYV => ImageFormat.YUYV,
-            V4l2InputFormat.YVYU => ImageFormat.YVYU,
-            V4l2InputFormat.UYVY => ImageFormat.UYVY,
-            V4l2InputFormat.Y41P => ImageFormat.Y41P,
-            V4l2InputFormat.YUV444 => ImageFormat.YUV_444,
-
-            V4l2InputFormat.MJPEG => ImageFormat.MJPG,
-            _ => null,
-        };
+        return ImageFormatTag.FindRawPixelFormat((int)inputFormat);
     }
 
     internal static V4l2InputFormat? ImageFormatIntoV4l2InputFormat(ImageFormat imageFormat)
     {
         return imageFormat switch
         {
-            ImageFormat.ARGB_32 => V4l2InputFormat.ARGB32,
-            ImageFormat.BGRA_32 => V4l2InputFormat.BGRA32,
-            ImageFormat.ABGR_32 => V4l2InputFormat.ABGR32,
-            ImageFormat.RGBA_32 => V4l2InputFormat.RGBA32,
+#pragma warning disable format
+            // YUV planar
+            ImageFormat.Yuv420P       => V4l2InputFormat.YUV420,
+            ImageFormat.Yuv422P       => V4l2InputFormat.YUV422P,
+            ImageFormat.Yuv444P       => V4l2InputFormat.YUV444,
+            ImageFormat.Yuv410P       => V4l2InputFormat.YUV410,
+            ImageFormat.Yuv411P       => V4l2InputFormat.YUV411P,
 
-            ImageFormat.YUYV => V4l2InputFormat.YUYV,
-            ImageFormat.YVYU => V4l2InputFormat.YVYU,
-            ImageFormat.UYVY => V4l2InputFormat.UYVY,
-            ImageFormat.Y41P => V4l2InputFormat.Y41P,
-            ImageFormat.YUV_444 => V4l2InputFormat.YUV444,
+            // YUYV et. al.
+            ImageFormat.Yuyv422       => V4l2InputFormat.YUYV,
+            ImageFormat.Uyvy422       => V4l2InputFormat.UYVY,
+            ImageFormat.Yvyu422       => V4l2InputFormat.YVYU,
 
-            ImageFormat.MJPG => V4l2InputFormat.MJPEG,
+            // RGBA et. al.
+            ImageFormat.Gray8         => V4l2InputFormat.GREY,
+            ImageFormat.Pal8          => V4l2InputFormat.PAL8,
+
+            ImageFormat.Rgb24         => V4l2InputFormat.RGB24,
+            ImageFormat.Bgr24         => V4l2InputFormat.BGR24,
+
+            ImageFormat.Argb          => V4l2InputFormat.ARGB32,
+            ImageFormat.Rgba          => V4l2InputFormat.RGBA32,
+            ImageFormat.Abgr          => V4l2InputFormat.ABGR32,
+            ImageFormat.Bgra          => V4l2InputFormat.BGRA32,
+
+            ImageFormat.Xrgb          => V4l2InputFormat.XRGB32,
+            ImageFormat.Rgbx          => V4l2InputFormat.RGBX32,
+            ImageFormat.Xbgr          => V4l2InputFormat.XBGR32,
+            ImageFormat.Bgrx          => V4l2InputFormat.BGRX32,
+
+            // Compressed
+            ImageFormat.Mjpeg         => V4l2InputFormat.MJPEG,
+#pragma warning restore format
             _ => null,
         };
     }

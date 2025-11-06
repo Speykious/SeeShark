@@ -87,14 +87,10 @@ internal static class AVFoundation
     {
         return pixelFormat switch
         {
-            CVPixelFormatType.k_32ARGB => ImageFormat.ARGB_32,
-            CVPixelFormatType.k_32BGRA => ImageFormat.BGRA_32,
-            CVPixelFormatType.k_32ABGR => ImageFormat.ABGR_32,
-            CVPixelFormatType.k_32RGBA => ImageFormat.RGBA_32,
+            CVPixelFormatType.k_24RGB => ImageFormat.Rgb24,
+            CVPixelFormatType.k_32ARGB => ImageFormat.Argb,
 
-            CVPixelFormatType.k_422YpCbCr8 => ImageFormat.UYVY,
-
-            _ => null,
+            _ => ImageFormatTag.FindRawPixelFormat((int)pixelFormat),
         };
     }
 
@@ -102,12 +98,37 @@ internal static class AVFoundation
     {
         return imageFormat switch
         {
-            ImageFormat.ARGB_32 => CVPixelFormatType.k_32ARGB,
-            ImageFormat.BGRA_32 => CVPixelFormatType.k_32BGRA,
-            ImageFormat.ABGR_32 => CVPixelFormatType.k_32ABGR,
-            ImageFormat.RGBA_32 => CVPixelFormatType.k_32RGBA,
 
-            ImageFormat.UYVY => CVPixelFormatType.k_422YpCbCr8,
+#pragma warning disable format
+            // YUV planar
+            ImageFormat.Yuv420P       => CVPixelFormatType.k_420YpCbCr8Planar,
+            // ImageFormat.Yuv422P       => CVPixelFormatType.k_422YpCbCr8, // TODO: not accurate?
+            // ImageFormat.Yuv444P       => CVPixelFormatType.k_444YpCbCr8,
+            // ImageFormat.Yuv410P       => YUV410,
+            // ImageFormat.Yuv411P       => YUV411P,
+
+            // YUYV et. al.
+            // ImageFormat.Yuyv422       => YUYV,
+            ImageFormat.Uyvy422       => CVPixelFormatType.k_444YpCbCr8,
+            // ImageFormat.Yvyu422       => YVYU,
+
+            // RGBA et. al.
+            // ImageFormat.Gray8         => ,
+            ImageFormat.Pal8          => CVPixelFormatType.k_8Indexed,
+
+            ImageFormat.Rgb24         => CVPixelFormatType.k_24RGB,
+            ImageFormat.Bgr24         => CVPixelFormatType.k_24BGR,
+
+            ImageFormat.Argb          => CVPixelFormatType.k_32ARGB,
+            ImageFormat.Rgba          => CVPixelFormatType.k_32RGBA,
+            ImageFormat.Abgr          => CVPixelFormatType.k_32ABGR,
+            ImageFormat.Bgra          => CVPixelFormatType.k_32BGRA,
+
+            // ImageFormat.Xrgb          => CVPixelFormatType.k_32XRGB,
+            // ImageFormat.Rgbx          => CVPixelFormatType.k_32RGBX,
+            // ImageFormat.Xbgr          => CVPixelFormatType.k_32XBGR,
+            // ImageFormat.Bgrx          => CVPixelFormatType.k_32BGRX,
+#pragma warning restore format
 
             _ => null,
         };
