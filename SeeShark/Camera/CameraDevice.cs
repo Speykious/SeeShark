@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using SeeShark.Linux;
 using SeeShark.MacOS;
+using SeeShark.Windows;
 
 namespace SeeShark.Camera;
 
@@ -48,8 +49,10 @@ public abstract class CameraDevice : IDisposable
             return V4l2.AvailableCameras();
         else if (OperatingSystem.IsMacOS())
             return AVFoundation.AvailableCameras();
+        else if (OperatingSystem.IsWindows())
+            return DShow.AvailableCameras();
         else
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException();
     }
 
     public static List<VideoFormat> AvailableFormats(CameraPath device)

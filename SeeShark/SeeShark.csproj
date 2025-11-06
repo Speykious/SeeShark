@@ -24,7 +24,10 @@
   </PropertyGroup>
 
   <ItemGroup Label="Package References">
-    <!-- No third-party dependencies. B) -->
+    <PackageReference Include="DirectShowLib.Standard" Version="2.1.0"
+      Condition="$([MSBuild]::IsOsPlatform('Windows')) Or $(RuntimeIdentifier.StartsWith('win'))" />
+
+    <!-- No third-party dependencies on Linux and MacOS. B) -->
   </ItemGroup>
 
   <ItemGroup Label="Documents">
