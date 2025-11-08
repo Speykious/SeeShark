@@ -16,10 +16,10 @@ namespace SeeShark.Camera;
 [SupportedOSPlatform("Linux")]
 public sealed class LinuxCameraDevice : CameraDevice
 {
-    internal int DeviceFd { get; set; }
-    internal v4l2_requestbuffers RequestBuffers { get; init; }
+    private int deviceFd { get; set; }
+    private v4l2_requestbuffers requestBuffers { get; init; }
 
-    internal ReqBuffer[] Buffers { get; init; } = [];
+    private ReqBuffer[] buffers { get; init; } = [];
 
     internal LinuxCameraDevice(CameraPath cameraInfo, VideoFormatOptions options)
     {
@@ -240,16 +240,16 @@ public sealed class LinuxCameraDevice : CameraDevice
         }
 
         Path = cameraInfo;
-        DeviceFd = deviceFd;
+        this.deviceFd = deviceFd;
         CurrentFormat = videoFormat;
-        RequestBuffers = requestBuffers;
-        Buffers = buffers;
+        this.requestBuffers = requestBuffers;
+        this.buffers = buffers;
     }
 
     #region Capture
     public override void StartCapture()
     {
-        for (uint i = 0; i < Buffers.Length; i++)
+        for (uint i = 0; i < buffers.Length; i++)
         {
             v4l2_buffer vbuf = new v4l2_buffer
             {
@@ -260,7 +260,7 @@ public sealed class LinuxCameraDevice : CameraDevice
 
             unsafe
             {
-                if (Xioctl(DeviceFd, Ioctl.VidIOC.QBUF, &vbuf) == false)
+                if (Xioctl(deviceFd, Ioctl.VidIOC.QBUF, &vbuf) == false)
                     throw new IOException($"Could not enqueue buffer for camera {Path}");
             }
         }
@@ -269,7 +269,7 @@ public sealed class LinuxCameraDevice : CameraDevice
 
         unsafe
         {
-            if (Xioctl(DeviceFd, Ioctl.VidIOC.STREAMON, &type) == false)
+            if (Xioctl(deviceFd, Ioctl.VidIOC.STREAMON, &type) == false)
                 throw new IOException($"Could not enable data streaming for camera {Path}");
         }
     }
@@ -280,7 +280,7 @@ public sealed class LinuxCameraDevice : CameraDevice
 
         unsafe
         {
-            if (Xioctl(DeviceFd, Ioctl.VidIOC.STREAMOFF, &type) == false)
+            if (Xioctl(deviceFd, Ioctl.VidIOC.STREAMOFF, &type) == false)
                 throw new Exception($"Could not disable data streaming for camera {Path}");
         }
     }
@@ -289,7 +289,7 @@ public sealed class LinuxCameraDevice : CameraDevice
     {
         fd_set fds;
         FD_ZERO(ref fds);
-        FD_SET(DeviceFd, ref fds);
+        FD_SET(deviceFd, ref fds);
 
         timeval_t timeout = new timeval_t
         {
@@ -300,7 +300,7 @@ public sealed class LinuxCameraDevice : CameraDevice
         int res;
         unsafe
         {
-            res = select(DeviceFd + 1, &fds, null, null, &timeout);
+            res = select(deviceFd + 1, &fds, null, null, &timeout);
         }
 
         if (res == -1)
@@ -327,7 +327,7 @@ public sealed class LinuxCameraDevice : CameraDevice
         bool dqbuf;
         unsafe
         {
-            dqbuf = Xioctl(DeviceFd, Ioctl.VidIOC.DQBUF, &vbuf);
+            dqbuf = Xioctl(deviceFd, Ioctl.VidIOC.DQBUF, &vbuf);
         }
 
         if (dqbuf == false)
@@ -343,7 +343,7 @@ public sealed class LinuxCameraDevice : CameraDevice
             }
         }
 
-        Debug.Assert(vbuf.index < Buffers.Length);
+        Debug.Assert(vbuf.index < buffers.Length);
 
         // copy image to frame
         if (frame.Data.Length != vbuf.bytesused)
@@ -352,7 +352,7 @@ public sealed class LinuxCameraDevice : CameraDevice
         (frame.Width, frame.Height) = CurrentFormat.VideoSize;
         frame.ImageFormat = CurrentFormat.ImageFormat;
 
-        ReqBuffer reqBuffer = Buffers[vbuf.index];
+        ReqBuffer reqBuffer = buffers[vbuf.index];
         unsafe
         {
             Marshal.Copy((nint)reqBuffer.Ptr, frame.Data, 0, (int)vbuf.bytesused);
@@ -362,7 +362,7 @@ public sealed class LinuxCameraDevice : CameraDevice
         bool qbuf;
         unsafe
         {
-            qbuf = Xioctl(DeviceFd, Ioctl.VidIOC.QBUF, &vbuf);
+            qbuf = Xioctl(deviceFd, Ioctl.VidIOC.QBUF, &vbuf);
         }
 
         if (qbuf == false)
@@ -374,13 +374,13 @@ public sealed class LinuxCameraDevice : CameraDevice
 
     protected override void DisposeUnmanagedResources()
     {
-        if (DeviceFd != -1)
+        if (deviceFd != -1)
         {
-            foreach (ReqBuffer buffer in Buffers)
+            foreach (ReqBuffer buffer in buffers)
                 buffer.Free();
 
-            close(DeviceFd);
-            DeviceFd = -1;
+            close(deviceFd);
+            deviceFd = -1;
         }
     }
 }
