@@ -291,13 +291,13 @@ internal class AVCaptureVideoDataOutputSampleBufferDelegate : IAVCaptureVideoDat
         CVPixelFormatType pixelFormat = CoreVideo.CVPixelBufferGetPixelFormatType(buffer);
 
         int sampleBitSize = CVPixelFormatTypeMethods.BitSize(pixelFormat);
-        assertFrame(sampleBitSize > 0, $"Unsupported pixel format ({pixelFormat}): untested, bit size unknown or non-trivial/non-raw format");
-        assertFrame(sampleBitSize % 8 == 0, $"Unsupported pixel format ({pixelFormat}): untested, bit size is not a multiple of 8");
+        CameraDevice.AssertFrame(sampleBitSize > 0, $"Unsupported pixel format ({pixelFormat}): untested, bit size unknown or non-trivial/non-raw format");
+        CameraDevice.AssertFrame(sampleBitSize % 8 == 0, $"Unsupported pixel format ({pixelFormat}): untested, bit size is not a multiple of 8");
 
         nuint expectedStride = width * (nuint)(sampleBitSize / 8);
         nuint bufferSize = CoreVideo.CVPixelBufferGetDataSize(buffer);
-        assertFrame(stride * height == bufferSize, $"Pixel buffer size is {bufferSize}, but stride * height = {stride * height}");
-        assertFrame(expectedStride <= stride, $"Pixel buffer's actual stride is smaller than expected stride ({stride} < {expectedStride})");
+        CameraDevice.AssertFrame(stride * height == bufferSize, $"Pixel buffer size is {bufferSize}, but stride * height = {stride * height}");
+        CameraDevice.AssertFrame(expectedStride <= stride, $"Pixel buffer's actual stride is smaller than expected stride ({stride} < {expectedStride})");
 
         byte[] pixelBuffer = new byte[expectedStride * height];
 
@@ -333,11 +333,5 @@ internal class AVCaptureVideoDataOutputSampleBufferDelegate : IAVCaptureVideoDat
 
     public void CaptureDiscardedSampleBuffer(IAVCaptureOutput output, CMSampleBufferRef sampleBuffer, nint connection)
     {
-    }
-
-    private static void assertFrame(bool condition, string message)
-    {
-        if (!condition)
-            throw new CameraDeviceInvalidFrameException(message);
     }
 }

@@ -11,7 +11,7 @@ List<CameraPath> availableCameras = CameraDevice.Available();
 foreach (CameraPath availableCamera in availableCameras)
     Console.WriteLine($"- {availableCamera}");
 
-CameraPath cameraPath = availableCameras[1];
+CameraPath cameraPath = availableCameras[0];
 
 Console.WriteLine($"\nAvailable video formats for {cameraPath}:");
 List<VideoFormat> availableFormats = CameraDevice.AvailableFormats(cameraPath);
@@ -22,7 +22,7 @@ Console.WriteLine($"\nOpening {cameraPath}");
 CameraDevice camera = CameraDevice.Open(cameraPath, new VideoFormatOptions
 {
     VideoSize = (1280, 720),
-    ImageFormat = ImageFormat.Mjpeg,
+    ImageFormat = ImageFormat.Argb,
     Framerate = new FramerateRatio
     {
         Numerator = 30,

@@ -39,8 +39,10 @@ public abstract class CameraDevice : IDisposable
             return new LinuxCameraDevice(cameraInfo, options);
         else if (OperatingSystem.IsMacOS())
             return new MacOSCameraDevice(cameraInfo, options);
+        else if (OperatingSystem.IsWindows())
+            return new WindowsCameraDevice(cameraInfo, options);
         else
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException();
     }
 
     public static List<CameraPath> Available()
@@ -61,11 +63,13 @@ public abstract class CameraDevice : IDisposable
             return V4l2.AvailableFormats(device);
         else if (OperatingSystem.IsMacOS())
             return AVFoundation.AvailableFormats(device);
+        else if (OperatingSystem.IsWindows())
+            return DShow.AvailableFormats(device);
         else
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException();
     }
 
-    public List<VideoFormat> AvailableFormats()
+    public virtual List<VideoFormat> AvailableFormats()
     {
         return AvailableFormats(Path);
     }
@@ -87,4 +91,10 @@ public abstract class CameraDevice : IDisposable
     }
 
     public abstract bool TryReadFrame(ref Frame frame);
+
+    internal static void AssertFrame(bool condition, string message)
+    {
+        if (!condition)
+            throw new CameraDeviceInvalidFrameException(message);
+    }
 }
