@@ -4,9 +4,22 @@
 
 ***
 
+<table>
+  <tr>
+    <td>
+
 > [!IMPORTANT]
 > SeeShark is currently being [rewritten from scratch](https://github.com/Speykious/SeeShark/pull/51) without using FFmpeg.
 > It will become a library with zero third-party dependencies and rely solely on ones readily available on your OS.
+
+> [!NOTE]
+> SeeShark now has a [Discord server](https://discord.gg/Ev4ezRuq74) so that I can provide more direct support to the best of my availability.
+    </td>
+    <td>
+      <iframe src="https://discord.com/widget?id=1437394395069419562&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+    </td>
+  </tr>
+</table>
 
 ***
 
