@@ -85,7 +85,12 @@ public class VideoDevice : Disposable
 
         // (RIP big brain move to avoid overloading the CPU...)
         if (status == DecodeStatus.NoFrameAvailable)
-            Thread.Sleep(1000 * decoder.Framerate.den / (decoder.Framerate.num * 4));
+        {
+            // Some cameras report 0 as the framerate, so we need to avoid division by 0.
+            (int num, int den) = (decoder.Framerate.num, decoder.Framerate.den);
+            int millis = num == 0 ? 1 : 1000 * den / (num * 4);
+            Thread.Sleep(millis);
+        }
 
         return status;
     }
