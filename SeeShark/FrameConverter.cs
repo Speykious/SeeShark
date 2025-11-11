@@ -5,6 +5,7 @@
 using System;
 using System.Runtime.InteropServices;
 using FFmpeg.AutoGen;
+using SeeShark.FFmpeg;
 
 namespace SeeShark;
 
@@ -75,7 +76,7 @@ public sealed unsafe class FrameConverter : Disposable
             null, null, null);
 
         if (convertContext == null)
-            throw new Exception("Could not initialize the conversion context.");
+            throw new FFmpegException("Could not initialize the conversion context.");
 
         var convertedFrameBufferSize = ffmpeg.av_image_get_buffer_size(dstPF, dstWidth, dstHeight, 1);
         convertedFrameBufferPtr = Marshal.AllocHGlobal(convertedFrameBufferSize);
