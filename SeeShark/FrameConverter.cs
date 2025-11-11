@@ -75,7 +75,7 @@ public sealed unsafe class FrameConverter : Disposable
             null, null, null);
 
         if (convertContext == null)
-            throw new ApplicationException("Could not initialize the conversion context.");
+            throw new Exception("Could not initialize the conversion context.");
 
         var convertedFrameBufferSize = ffmpeg.av_image_get_buffer_size(dstPF, dstWidth, dstHeight, 1);
         convertedFrameBufferPtr = Marshal.AllocHGlobal(convertedFrameBufferSize);
