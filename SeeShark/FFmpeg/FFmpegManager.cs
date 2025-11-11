@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using FFmpeg.AutoGen;
 using LF = SeeShark.FFmpeg.LibraryFlags;
 using LibraryLoader = FFmpeg.AutoGen.Native.LibraryLoader;
@@ -112,8 +113,58 @@ public static class FFmpegManager
             TrySetRootPath(requiredLibs, AppDomain.CurrentDomain.BaseDirectory);
         else
             TrySetRootPath(requiredLibs, paths);
+
         SetupFFmpegLogging(logLevel, logColor, ffmpegLog);
-        ffmpeg.avdevice_register_all();
+
+        try
+        {
+            ffmpeg.avdevice_register_all();
+        }
+        catch (DllNotFoundException e)
+        {
+            // The error message given by FFmpeg.AutoGen is confusing. It says "the specified module was not found",
+            // which is systematically interpreted as the libav DLL itself somehow not being there even though
+            // it found it previously, when in reality it's a dependency of the libav* DLL that is missing.
+            // So we break the message apart to make it better.
+
+            string dllLoadMessageStart = "Unable to load DLL '";
+            string dllLoadMessageEnd = "': The specified module could not be found.";
+            if (e.Message.StartsWith(dllLoadMessageStart) && e.Message.EndsWith(dllLoadMessageEnd))
+            {
+                string dllPath = e.Message[dllLoadMessageStart.Length..(e.Message.Length - dllLoadMessageEnd.Length)];
+
+                string dllDir, dllFileName;
+                {
+                    string under = " under ";
+                    int underIndex = dllPath.IndexOf(under);
+
+                    string dllName = dllPath[..underIndex];
+                    int dllNameSep = dllName.IndexOf('.');
+                    string nativeDllName = dllName[..dllNameSep];
+                    int nativeDllVersion = int.Parse(dllName[(dllNameSep + 1)..]);
+                    dllFileName = LibraryLoader.GetNativeLibraryName(nativeDllName, nativeDllVersion);
+
+                    dllDir = dllPath[(underIndex + under.Length)..];
+                    if (dllDir.EndsWith('/') || dllDir.EndsWith('\\'))
+                        dllDir = dllDir[..(dllDir.Length - 1)];
+                }
+
+                string command = OperatingSystem.IsLinux() ? "ldd"
+                    : OperatingSystem.IsMacOS() ? "otools -L"
+                    : OperatingSystem.IsWindows() ? "dumpbin /dependents"
+                    : throw new PlatformNotSupportedException();
+
+                StringBuilder messageBuilder = new();
+                messageBuilder.Append("Unable to load DLL '").Append(dllPath).Append("':\n");
+                messageBuilder.Append("        A dependency might be missing.\n");
+                messageBuilder.Append("        Try running the following command to figure out which one:\n\n");
+                messageBuilder.Append("            ").Append(command).Append(' ').Append(dllDir).Append('/').Append(dllFileName).Append('\n');
+
+                throw new DllNotFoundException(messageBuilder.ToString());
+            }
+
+            throw;
+        }
 
         IsFFmpegSetup = true;
     }

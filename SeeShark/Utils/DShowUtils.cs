@@ -128,12 +128,12 @@ internal static class DShowUtils
                             || mediaTypes[0].subType.Equals(MediaSubType.Video.avc1))
                         {
                             vio.InputFormat = "h264";
-                            vio.IsRaw = true;
+                            vio.IsRaw = false;
                         }
                         else if (Equals(mediaTypes[0].subType, MediaSubType.MJPG))
                         {
                             vio.InputFormat = "mjpeg";
-                            vio.IsRaw = true;
+                            vio.IsRaw = false;
                         }
                         else
                         {

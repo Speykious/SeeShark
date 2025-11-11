@@ -95,7 +95,6 @@ public unsafe class VideoStreamDecoder : Disposable
             if (error < 0)
             {
                 nextFrame = Frame;
-                GC.Collect();
 
                 // We only wait longer once to make sure we catch the frame on time.
                 return error == eagain
@@ -120,7 +119,6 @@ public unsafe class VideoStreamDecoder : Disposable
         error.ThrowExceptionIfError();
 
         nextFrame = Frame;
-        GC.Collect();
         return DecodeStatus.NewFrame;
     }
 
