@@ -24,7 +24,7 @@ internal static class V4l2Utils
     /// Get available video input options of a V4l2 device.
     /// Inspired from https://github.com/ZhangGaoxing/v4l2.net
     /// </summary>
-    private unsafe static List<VideoInputOptions> getAvailableOptions(CameraInfo device)
+    private static unsafe List<VideoInputOptions> getAvailableOptions(CameraInfo device)
     {
         List<VideoInputOptions> options = new List<VideoInputOptions>();
 

@@ -52,7 +52,7 @@ internal static class DShowUtils
     /// Get available video input options of a DirectShow device.
     /// Inspired from https://github.com/eldhosekpaul18/WebCam-Capture-Opencvsharp/blob/master/Camera%20Configuration/Camera.cs
     /// </summary>
-    private unsafe static List<VideoInputOptions> getAvailableOptions(DsDevice dsDevice)
+    private static unsafe List<VideoInputOptions> getAvailableOptions(DsDevice dsDevice)
     {
         List<VideoInputOptions> options = new List<VideoInputOptions>();
 
