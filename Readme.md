@@ -33,11 +33,7 @@ Features **don't** include:
 
 > (Coming Soon™.)
 
-## Vignette
-
-This library was previously hosted on https://github.com/vignetteapp/SeeShark. It was first made to be used in Vignette's vtuber application. Now, it is its own self-contained library!
-
 ## License
 
-This library is licensed under the BSD 3-Clause License.
+This library is licensed under the BSD 2-Clause License.
 See [LICENSE](LICENSE) for details.
