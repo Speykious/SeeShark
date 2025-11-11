@@ -4,10 +4,12 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using SeeShark.Decode;
 using SeeShark.Device;
+using SeeShark.FFmpeg;
 using static SeeShark.FFmpeg.FFmpegManager;
 
 namespace SeeShark.Example.Ascii;
@@ -17,6 +19,16 @@ class Program
     static Camera? karen;
     static CameraManager? manager;
     static FrameConverter? converter;
+
+    static readonly StreamWriter logFile = new StreamWriter("ffmpeg.log");
+
+    /// <summary>
+    /// A custom FFmpeg logging callback. There is already a default one baked in which just writes to the console, so you don't need to specify one.
+    /// </summary>
+    static void ffmpegLog(FFmpegLogLevel logLevel, ConsoleColor _logColor, string? message)
+    {
+        logFile.Write($"[{logLevel}] {message}");
+    }
 
     static void Main(string[] args)
     {
@@ -32,8 +44,9 @@ class Program
 
         // You can add your own path for FFmpeg libraries here!
         SetupFFmpeg(
-            FFmpeg.FFmpegLogLevel.Info,
+            FFmpegLogLevel.Debug,
             ConsoleColor.Yellow,
+            ffmpegLog,
             AppDomain.CurrentDomain.BaseDirectory,
             "/usr/lib",
             "/usr/lib64"
