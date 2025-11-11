@@ -37,6 +37,27 @@ SeeShark has been confirmed to work on Linux and Windows.
 
 Unfortunately, it doesn't work on MacOS. Long story short, FFmpeg 5 doesn't implement device enumeration for MacOS, and SeeShark doesn't implement a custom function to do that.
 
+## FFmpeg
+
+SeeShark 4 depends on FFmpeg 5. You can get binaries here:
+- Windows: [ffmpeg 5.1.2 builds](https://github.com/GyanD/codexffmpeg/releases/tag/5.1.2) (`ffmpeg-5.1.2-full_build-shared.zip`)
+- Linux: *last time I tried, it was a disaster and I had to download several dependencies of `libav*` myself. Let me know if you can find an easy solution.*
+
+The important elements are the `libav*` DLLs/shared libraries:
+|          | Windows           | Linux               |
+| -------- | ----------------- | ------------------- |
+| avcodec  | `avcodec-59.dll`  | `libavcodec.so.59`  |
+| avdevice | `avdevice-59.dll` | `libavdevice.so.59` |
+| avformat | `avformat-59.dll` | `libavformat.so.59` |
+| swscale  | `swscale-6.dll`   | `libswscale.so.6`   |
+
+You can ignore executables like `ffmpeg` or `ffplay` as they are not used by SeeShark.
+
+If you get an error message about a module's dependency potentially missing, you might need to specify a `LD_LIBRARY_PATH` environment variable:
+```sh
+LD_LIBRARY_PATH=/path/to/libs:$LD_LIBRARY_PATH
+```
+
 ***
 
 ## Example code
