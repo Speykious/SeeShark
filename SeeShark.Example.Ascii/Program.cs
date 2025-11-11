@@ -20,10 +20,10 @@ class Program
     static CameraManager? manager;
     static FrameConverter? converter;
 
-    static StreamWriter logFile = new StreamWriter("ffmpeg.log");
+    static readonly StreamWriter logFile = new StreamWriter("ffmpeg.log");
 
     /// <summary>
-    /// A custom FFmpeg logging callback. There is already a default one baked in which just writes to the console, so you don't need to make one yourself if that's what you want.
+    /// A custom FFmpeg logging callback. There is already a default one baked in which just writes to the console, so you don't need to specify one.
     /// </summary>
     static void ffmpegLog(FFmpegLogLevel logLevel, ConsoleColor _logColor, string? message)
     {
