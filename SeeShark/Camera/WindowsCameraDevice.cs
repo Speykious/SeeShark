@@ -45,7 +45,7 @@ public sealed class WindowsCameraDevice : CameraDevice, ISampleGrabberCB
         };
         CurrentFormat = new VideoFormat
         {
-            ImageFormat = ImageFormat.Argb,
+            ImageFormat = ImageFormat.Bgra,
             VideoSize = (1920, 1080),
         };
 
@@ -127,12 +127,14 @@ public sealed class WindowsCameraDevice : CameraDevice, ISampleGrabberCB
         byte[] pixelBuffer = new byte[bufferLength];
         Marshal.Copy(bufferPtr, pixelBuffer, 0, pixelBuffer.Length);
 
+        ImageFormat imageFormat = DShow.DShowImageFormat(vih.BmiHeader.Compression, (uint)vih.BmiHeader.BitCount) ?? throw new CameraDeviceInvalidFrameException("Unsupported image format");
+
         Frame frame = new Frame()
         {
             Data = pixelBuffer,
             Width = (uint)vih.BmiHeader.Width,
             Height = (uint)vih.BmiHeader.Height,
-            ImageFormat = ImageFormat.Argb, // TODO: infer
+            ImageFormat = imageFormat,
         };
 
         lock (frameDataQueue)

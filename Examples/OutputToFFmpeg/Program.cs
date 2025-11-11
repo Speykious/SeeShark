@@ -22,7 +22,7 @@ Console.WriteLine($"\nOpening {cameraPath}");
 CameraDevice camera = CameraDevice.Open(cameraPath, new VideoFormatOptions
 {
     VideoSize = (1280, 720),
-    ImageFormat = ImageFormat.Argb,
+    ImageFormat = ImageFormat.Bgra,
     Framerate = new FramerateRatio
     {
         Numerator = 30,
