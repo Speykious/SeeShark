@@ -12,20 +12,22 @@
 
   <PropertyGroup Label="Nuget">
     <PackageId>SeeShark</PackageId>
-    <Version>4.1.0</Version>
+    <Version>5.0.0</Version>
     <Authors>Speykious</Authors>
-    <PackageTags>FFmpeg;Camera;Webcam;Stream;</PackageTags>
+    <PackageTags>Camera;Webcam;Stream;</PackageTags>
     <Title>SeeShark</Title>
     <Description>Simple Camera library</Description>
-    <Copyright>2022 Speykious</Copyright>
-    <PackageProjectUrl>https://github.com/vignetteapp/SeeShark</PackageProjectUrl>
+    <Copyright>2024 Speykious</Copyright>
+    <PackageProjectUrl>https://github.com/Speykious/SeeShark</PackageProjectUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup Label="Package References">
-    <PackageReference Include="DirectShowLib.Standard" Version="2.1.0" />
-    <PackageReference Include="FFmpeg.AutoGen" Version="5.0.0" />
+    <PackageReference Include="DirectShowLib.Standard" Version="2.1.0"
+      Condition="$([MSBuild]::IsOsPlatform('Windows')) Or $(RuntimeIdentifier.StartsWith('win'))" />
+
+    <!-- No third-party dependencies on Linux and MacOS. B) -->
   </ItemGroup>
 
   <ItemGroup Label="Documents">

@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/SeeShark.Example.Ascii/SeeShark.Example.Ascii.csproj",
+                "${workspaceFolder}/SeeShark/SeeShark.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/SeeShark.Example.Ascii/SeeShark.Example.Ascii.csproj",
+                "${workspaceFolder}/SeeShark/SeeShark.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -32,7 +32,7 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/SeeShark.Example.Ascii/SeeShark.Example.Ascii.csproj",
+                "${workspaceFolder}/SeeShark/SeeShark.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
