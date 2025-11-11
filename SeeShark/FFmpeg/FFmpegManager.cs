@@ -59,6 +59,7 @@ public static class FFmpegManager
     }
 
     private static av_log_set_callback_callback? logCallback;
+    private static readonly byte[] logLineBuffer = new byte[1024];
 
     /// <summary>
     /// Setup FFmpeg: root path and logging.
@@ -140,15 +141,15 @@ public static class FFmpegManager
             if (level > ffmpeg.av_log_get_level())
                 return;
 
-            int lineSize = 1024;
-            byte* lineBuffer = stackalloc byte[lineSize];
             int printPrefix = 1;
 
-            ffmpeg.av_log_format_line(p0, level, format, vl, lineBuffer, lineSize, &printPrefix);
-            string? message = Marshal.PtrToStringAnsi((IntPtr)lineBuffer);
+            fixed (byte* lineBuffer = logLineBuffer)
+            {
+                ffmpeg.av_log_format_line(p0, level, format, vl, lineBuffer, logLineBuffer.Length, &printPrefix);
+                string? message = Marshal.PtrToStringAnsi((IntPtr)lineBuffer);
 
-            // TODO: maybe make it possible to log this in any stream?
-            ffmpegLog(logLevel, logColor, message);
+                ffmpegLog(logLevel, logColor, message);
+            }
         };
 
         ffmpeg.av_log_set_callback(logCallback);
