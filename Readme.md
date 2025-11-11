@@ -41,7 +41,7 @@ Unfortunately, it doesn't work on MacOS. Long story short, FFmpeg 5 doesn't impl
 
 SeeShark 4 depends on FFmpeg 5. You can get binaries here:
 - Windows: [ffmpeg 5.1.2 builds](https://github.com/GyanD/codexffmpeg/releases/tag/5.1.2) (`ffmpeg-5.1.2-full_build-shared.zip`)
-- Linux: *last time I tried, it was a disaster and I had to download several dependencies of `libav*` myself. Let me know if you can find an easy solution.*
+- Linux: [in the release of SeeShark 4.1.0](https://github.com/Speykious/SeeShark/releases/tag/v4.1.0), I left an archive containing a bundle of all libav shared libraries from FFmpeg 5.1.2 along with some of their transitive dependencies, obtained by manually sifting through the [Arch Linux Archives](https://archive.archlinux.org/). No guarantee that it'll work, but at least it might save you some trouble if it does.
 
 The important elements are the `libav*` DLLs/shared libraries:
 |          | Windows           | Linux               |
